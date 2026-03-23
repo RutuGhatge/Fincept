@@ -6,7 +6,7 @@ import logging
 
 from app.config.settings import settings
 from app.db.database import db
-from app.routers import portfolio, analysis, news, jargon, recommendations, tasks
+import importlib
 from app.agents.orchestrator import AgentOrchestrator
 
 # Configure logging
@@ -53,13 +53,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(portfolio.router, prefix="/api/v1/portfolio", tags=["portfolio"])
-app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])
-app.include_router(news.router, prefix="/api/v1/news", tags=["news"])
-app.include_router(jargon.router, prefix="/api/v1/jargon", tags=["jargon"])
-app.include_router(recommendations.router, prefix="/api/v1/recommendations", tags=["recommendations"])
-app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["background-tasks"])
+# Include routers robustly
+ROUTERS = [
+    ("app.routers.portfolio", "/api/v1/portfolio", ["portfolio"]),
+    ("app.routers.analysis", "/api/v1/analysis", ["analysis"]),
+    ("app.routers.news", "/api/v1/news", ["news"]),
+    ("app.routers.jargon", "/api/v1/jargon", ["jargon"]),
+    ("app.routers.recommendations", "/api/v1/recommendations", ["recommendations"]),
+    ("app.routers.tasks", "/api/v1/tasks", ["background-tasks"]),
+]
+
+for module_name, prefix, tags in ROUTERS:
+    try:
+        module = importlib.import_module(module_name)
+        if hasattr(module, "router"):
+            app.include_router(module.router, prefix=prefix, tags=tags)
+            logger.info(f"Successfully loaded router: {module_name}")
+        else:
+            logger.warning(f"Module {module_name} has no 'router' attribute")
+    except Exception as e:
+        logger.warning(f"Failed to load router {module_name}: {e}")
 
 
 @app.get("/")

@@ -5,10 +5,7 @@ from datetime import datetime
 import uuid
 
 from app.agents.base_agent import BaseAgent, AgentInput, AgentOutput
-from app.agents.portfolio_agent import PortfolioAgent
-from app.agents.analysis_agent import AnalysisAgent
-from app.agents.news_agent import NewsAgent
-from app.agents.jargon_agent import JargonAgent
+# Agent imports moved to initialization for robustness
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +19,32 @@ class AgentOrchestrator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         
-        # Initialize all agents
-        self.agents = {
-            "portfolio": PortfolioAgent(),
-            "analysis": AnalysisAgent(),
-            "news": NewsAgent(),
-            "jargon": JargonAgent()
-        }
+        # Initialize agents robustly
+        self.agents = {}
+        
+        try:
+            from app.agents.portfolio_agent import PortfolioAgent
+            self.agents["portfolio"] = PortfolioAgent()
+        except Exception as e:
+            self.logger.warning(f"Failed to load PortfolioAgent: {e}")
+            
+        try:
+            from app.agents.analysis_agent import AnalysisAgent
+            self.agents["analysis"] = AnalysisAgent()
+        except Exception as e:
+            self.logger.warning(f"Failed to load AnalysisAgent: {e}")
+            
+        try:
+            from app.agents.news_agent import NewsAgent
+            self.agents["news"] = NewsAgent()
+        except Exception as e:
+            self.logger.warning(f"Failed to load NewsAgent: {e}")
+            
+        try:
+            from app.agents.jargon_agent import JargonAgent
+            self.agents["jargon"] = JargonAgent()
+        except Exception as e:
+            self.logger.warning(f"Failed to load JargonAgent: {e}")
         
         # Agent capabilities mapping
         self.agent_capabilities = {
