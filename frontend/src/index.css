@@ -1,205 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-/* Custom CSS Variables */
-:root {
-  --color-primary: #3b82f6;
-  --color-primary-dark: #1d4ed8;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-dark: #1f2937;
-  --color-light: #f9fafb;
+@layer base {
+  body {
+    @apply bg-background text-text font-sans antialiased overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-heading font-bold tracking-tight;
+  }
 }
 
-/* Base styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
-  color: var(--color-dark);
-  background-color: var(--color-light);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Custom component styles */
 @layer components {
-  .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  .stripe-button {
+    @apply px-4 py-1.5 rounded-full font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-sm;
   }
   
-  .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  .stripe-button-primary {
+    @apply stripe-button bg-stripe-dark text-white hover:bg-stripe-slate;
   }
   
-  .btn-secondary {
-    @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
+  .stripe-button-secondary {
+    @apply stripe-button bg-white text-stripe-dark shadow-stripe hover:shadow-stripe-hover;
   }
-  
-  .btn-success {
-    @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
+
+  .nav-item {
+    @apply text-stripe-slate hover:text-stripe-dark font-medium transition-colors duration-200 cursor-pointer text-[15px];
   }
-  
-  .btn-outline {
-    @apply bg-transparent border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary-500;
-  }
-  
-  .btn-sm {
-    @apply px-3 py-1.5 text-xs;
-  }
-  
-  .btn-lg {
-    @apply px-6 py-3 text-base;
-  }
-  
-  .card {
-    @apply bg-white rounded-xl shadow-soft border border-gray-100 p-6;
-  }
-  
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-medium hover:-translate-y-1;
-  }
-  
-  .input {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm;
-  }
-  
-  .input-error {
-    @apply border-danger-300 focus:ring-danger-500 focus:border-danger-500;
-  }
-  
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  
-  .badge-primary {
-    @apply bg-primary-100 text-primary-800;
-  }
-  
-  .badge-success {
-    @apply bg-success-100 text-success-800;
-  }
-  
-  .badge-warning {
-    @apply bg-warning-100 text-warning-800;
-  }
-  
-  .badge-danger {
-    @apply bg-danger-100 text-danger-800;
-  }
-  
-  .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
-  }
-  
-  .skeleton-text {
-    @apply h-4 bg-gray-200 rounded animate-pulse;
-  }
-  
-  .skeleton-avatar {
-    @apply h-10 w-10 bg-gray-200 rounded-full animate-pulse;
+
+  .stripe-card {
+    @apply bg-white rounded-lg shadow-stripe p-8 transition-all duration-300 hover:shadow-stripe-hover hover:-translate-y-1;
   }
 }
 
-/* Custom utility classes */
-@layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent;
-  }
-  
-  .bg-gradient-primary {
-    @apply bg-gradient-to-r from-primary-500 to-primary-700;
-  }
-  
-  .bg-gradient-success {
-    @apply bg-gradient-to-r from-success-500 to-success-700;
-  }
-  
-  .bg-gradient-warning {
-    @apply bg-gradient-to-r from-warning-500 to-warning-700;
-  }
-  
-  .bg-gradient-danger {
-    @apply bg-gradient-to-r from-danger-500 to-danger-700;
-  }
-  
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .glass-effect {
-    @apply bg-white/80 backdrop-blur-lg border border-white/20;
-  }
-  
-  .chart-container {
-    @apply relative w-full h-64 md:h-80;
-  }
+.gradient-bg {
+  background: radial-gradient(circle at 100% 100%, #ffffff 0, #ffffff 100%), linear-gradient(120deg, #635bff 0, #00d4ff 100%);
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
 }
 
-/* Loading spinner */
-.spinner {
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid var(--color-primary);
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  animation: spin 1s linear infinite;
+.stripe-gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-stripe-blue to-stripe-cyan;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Custom Marquee Styles */
+.marquee-container {
+  @apply flex overflow-hidden select-none gap-4 py-4;
+  --gap: 1rem;
+  --duration: 40s;
 }
 
-/* Chart styles */
-.recharts-wrapper {
-  font-family: 'Inter', system-ui, sans-serif !important;
+.marquee-content {
+  @apply flex shrink-0 justify-around min-w-full gap-4 animate-marquee;
 }
 
-.recharts-tooltip-wrapper {
-  border-radius: 8px !important;
-  box-shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid #e5e7eb !important;
+.marquee-content-reverse {
+  @apply flex shrink-0 justify-around min-w-full gap-4 animate-marquee-reverse;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .card {
-    @apply p-4;
-  }
-  
-  .btn {
-    @apply px-3 py-2 text-xs;
-  }
-}
-
-/* Dark mode support (if needed in future) */
-@media (prefers-color-scheme: dark) {
-  /* Dark mode styles can be added here */
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
+.marquee-item {
+  @apply shrink-0;
 }

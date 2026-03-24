@@ -1,44 +1,27 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
-import os
-
 
 class Settings(BaseSettings):
-    # App Settings
-    APP_NAME: str = "Investment Intelligence API"
-    APP_VERSION: str = "1.0.0"
-    DEBUG: bool = False
+    PROJECT_NAME: str = "Investment Intelligence"
+    VERSION: str = "1.0.0"
+    API_V1_STR: str = "/api/v1"
     
-    # Database Settings
+    # MongoDB
     MONGODB_URL: str = "mongodb://localhost:27017"
     DATABASE_NAME: str = "investment_intelligence"
     
-    # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    # AI Keys
+    OPENAI_API_KEY: Optional[str] = None
+    GOOGLE_API_KEY: Optional[str] = None
     
-    # Gemini AI Settings
-    GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-pro"
-    
-    # Simple in-memory caching for MVP
-    # For production, consider Redis or dedicated caching solution
-    CACHE_TTL_SECONDS: int = 300  # 5 minutes default cache
-    
-    # External APIs
+    # Financial Data APIs
     ALPHA_VANTAGE_API_KEY: Optional[str] = None
     NEWS_API_KEY: Optional[str] = None
     
-    # CORS Settings
-    ALLOWED_ORIGINS: list = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    # Cache
+    CACHE_ENABLED: bool = True
+    CACHE_EXPIRATION: int = 3600  # 1 hour
     
-    # Logging
-    LOG_LEVEL: str = "INFO"
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
