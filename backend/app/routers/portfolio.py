@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from typing import List, Optional
 import logging
 
@@ -10,6 +10,7 @@ from app.schemas.portfolio import (
 from app.services.portfolio_service import PortfolioService
 from app.agents.orchestrator import AgentOrchestrator
 from app.db.database import get_db
+from app.services.portfolio_parser import PortfolioParser
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,45 @@ async def create_portfolio(
             detail=str(e)
         )
 
+@router.post("/upload", response_model=PortfolioResponse)
+async def upload_portfolio(
+    file: UploadFile = File(...),
+    portfolio_name: str = Form("Imported Portfolio"),
+    user_id: str = Form(...),
+    db=Depends(get_db)
+):
+    """Upload a CSV or Excel file to create/import a portfolio"""
+    try:
+        contents = await file.read()
+        holdings_create = PortfolioParser.parse_file(contents, file.filename)
+        
+        # Add fetching live prices logic here in future steps
+        # Currently just loading parsed holdings directly
+        
+        portfolio_service = PortfolioService()
+        result = await portfolio_service.create_portfolio(
+            user_id=user_id,
+            name=portfolio_name,
+            holdings=[h.dict() for h in holdings_create],
+            currency="INR"
+        )
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create portfolio from upload"
+            )
+            
+        return result
+        
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Error processing portfolio upload: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 @router.get("/", response_model=List[PortfolioSummary])
 async def get_user_portfolios(
