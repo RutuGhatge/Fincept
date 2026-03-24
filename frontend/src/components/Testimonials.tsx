@@ -16,11 +16,11 @@ const testimonials = [
 ];
 
 const TestimonialCard = ({ item }: { item: any }) => (
-  <div className="shrink-0 w-80 bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[2rem] hover:bg-white/10 transition-colors cursor-default">
-    <p className="text-gray-300 text-base leading-relaxed mb-6 italic">"{item.text}"</p>
+  <div className="shrink-0 w-80 bg-slate-50 border border-slate-100 p-8 rounded-[2rem] hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all cursor-default">
+    <p className="text-stripe-slate text-base leading-relaxed mb-6 italic">"{item.text}"</p>
     <div>
-      <p className="text-white font-black text-sm uppercase tracking-wider">{item.name}</p>
-      <p className="text-stripe-cyan text-[10px] font-bold uppercase tracking-widest mt-1 opacity-60">{item.location}</p>
+      <p className="text-stripe-dark font-black text-sm uppercase tracking-wider">{item.name}</p>
+      <p className="text-stripe-blue text-[10px] font-bold uppercase tracking-widest mt-1 opacity-80">{item.location}</p>
     </div>
   </div>
 );
@@ -30,10 +30,10 @@ const Testimonials = () => {
   const row2 = testimonials.slice(6);
 
   return (
-    <section className="py-24 bg-stripe-dark overflow-hidden">
+    <section className="py-24 bg-white overflow-hidden border-t border-slate-100">
       <div className="mb-16 text-center px-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-stripe-cyan mb-4">Testimonials</h2>
-        <h3 className="text-4xl font-extrabold text-white font-display">Loved by thousands of Indian investors.</h3>
+        <h2 className="text-sm font-bold uppercase tracking-widest text-stripe-blue mb-4">Testimonials</h2>
+        <h3 className="text-4xl font-extrabold text-stripe-dark font-display">Loved by thousands of Indian investors.</h3>
       </div>
 
       <div className="space-y-8">
