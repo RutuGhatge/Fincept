@@ -25,7 +25,7 @@ const QNA: React.FC = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-slate-50 relative overflow-hidden">
+    <section className="py-24 bg-white relative overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="flex flex-col lg:flex-row gap-20">
           {/* Left Side: Branding & Tagline */}

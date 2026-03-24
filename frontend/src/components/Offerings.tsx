@@ -63,11 +63,11 @@ const Offerings: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-24 bg-white relative overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="mb-20">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-stripe-cyan mb-4">Feature Products</h2>
-          <h3 className="text-4xl md:text-6xl font-black text-white max-w-2xl leading-tight">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-stripe-blue mb-4">Feature Products</h2>
+          <h3 className="text-4xl md:text-6xl font-black text-stripe-dark max-w-2xl leading-tight">
             The backbone of your <br />
             <span className="cool-gradient-text">financial journey.</span>
           </h3>
@@ -77,32 +77,27 @@ const Offerings: React.FC = () => {
           {offerings.map((offering, index) => (
             <motion.div
               key={offering.id}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.6 }}
-              className="group relative glass-card p-12 flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden"
+              className="group relative bg-slate-50 border border-slate-100 p-12 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden hover:bg-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500"
             >
-              {/* Subtle Background Pattern */}
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                {offering.icon}
-              </div>
-
               <div className="flex-1 space-y-6 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-2xl ${offering.color} backdrop-blur-md`}>
+                  <div className={`p-4 rounded-2xl ${offering.color}`}>
                     {offering.icon}
                   </div>
-                  <span className="px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-bold uppercase tracking-wider shadow-sm border border-white/20">
+                  <span className="px-4 py-1.5 rounded-full bg-stripe-blue/10 text-stripe-blue text-xs font-bold uppercase tracking-wider shadow-sm border border-stripe-blue/20">
                     {offering.tag}
                   </span>
                 </div>
                 
                 <div>
-                  <h4 className="text-3xl font-black text-white mb-4 group-hover:cool-gradient-text transition-all">
+                  <h4 className="text-3xl font-black text-stripe-dark mb-4 group-hover:cool-gradient-text transition-all">
                     {offering.title}
                   </h4>
-                  <p className="text-xl text-white/70 leading-relaxed max-w-xl group-hover:text-white transition-colors">
+                  <p className="text-xl text-stripe-slate leading-relaxed max-w-xl group-hover:text-stripe-dark transition-colors">
                     {offering.description}
                   </p>
                 </div>
@@ -113,7 +108,7 @@ const Offerings: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate(offering.path)}
-                  className="px-10 py-5 bg-white text-stripe-dark rounded-full font-black text-xl hover:bg-stripe-light transition-all shadow-2xl flex items-center gap-4"
+                  className="px-10 py-5 bg-stripe-dark text-white rounded-full font-black text-xl hover:bg-stripe-slate transition-all shadow-xl flex items-center gap-4"
                 >
                   Start Now <ArrowRight className="w-6 h-6" />
                 </motion.button>

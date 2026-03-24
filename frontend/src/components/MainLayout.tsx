@@ -1,7 +1,6 @@
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import RainbowBackground from './RainbowBackground';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -9,8 +8,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <RainbowBackground />
+    <div className="min-h-screen flex flex-col relative bg-white">
       <Header />
       <main className="flex-1 pt-16">
         {children}
