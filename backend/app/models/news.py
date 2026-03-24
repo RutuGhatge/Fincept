@@ -6,20 +6,7 @@ from bson import ObjectId
 from enum import Enum
 
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+from app.models.base import PyObjectId
 
 
 class NewsCategory(str, Enum):
@@ -77,10 +64,10 @@ class NewsArticle(BaseModel):
     is_summarized: bool = Field(default=False, description="Whether article has been summarized")
     processing_error: Optional[str] = Field(None, description="Error during processing")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 class UserNewsFeed(BaseModel):
@@ -102,10 +89,10 @@ class UserNewsFeed(BaseModel):
     added_at: datetime = Field(default_factory=datetime.utcnow, description="When added to feed")
     read_at: Optional[datetime] = Field(None, description="When user read the article")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 # MongoDB indexes for News collections

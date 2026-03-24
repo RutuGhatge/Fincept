@@ -7,7 +7,7 @@ from app.schemas.portfolio import (
     AddHoldingRequest, RemoveHoldingRequest, UpdateHoldingRequest,
     PortfolioAnalytics
 )
-from app.services.portfolio_service import PortfolioService
+from app.agents.portfolio_agent import PortfolioAgent
 from app.agents.orchestrator import AgentOrchestrator
 from app.db.database import get_db
 

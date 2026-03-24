@@ -6,20 +6,7 @@ from bson import ObjectId
 from enum import Enum
 
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+from app.models.base import PyObjectId
 
 
 class AssetType(str, Enum):
@@ -59,10 +46,10 @@ class Portfolio(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow, description="Last update timestamp")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional portfolio metadata")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 class PortfolioHistory(BaseModel):
@@ -74,10 +61,10 @@ class PortfolioHistory(BaseModel):
     daily_return: Optional[float] = Field(None, description="Daily return percentage")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional history metadata")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 # MongoDB indexes for Portfolio collections

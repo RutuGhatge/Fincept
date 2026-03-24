@@ -6,20 +6,7 @@ from bson import ObjectId
 from enum import Enum
 
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+from app.models.base import PyObjectId
 
 
 class AssetType(str, Enum):
@@ -51,10 +38,10 @@ class MarketData(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional market data")
     last_updated: datetime = Field(default_factory=datetime.utcnow, description="Last update timestamp")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 class PriceHistory(BaseModel):
@@ -68,10 +55,10 @@ class PriceHistory(BaseModel):
     volume: Optional[int] = Field(None, description="Trading volume")
     adjusted_close: Optional[float] = Field(None, description="Adjusted closing price")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 class MutualFundNAV(BaseModel):
@@ -88,10 +75,10 @@ class MutualFundNAV(BaseModel):
     risk_level: Optional[str] = Field(None, description="Risk level")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional fund metadata")
     
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True,
+    }
 
 
 # MongoDB indexes for Market Data collections
