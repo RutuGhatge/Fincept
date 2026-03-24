@@ -16,17 +16,15 @@ class PortfolioParser:
             elif filename.endswith('.xlsx') or filename.endswith('.xls'):
                 # Read all sheets concurrently into a dictionary of DataFrames
                 df_dict = pd.read_excel(BytesIO(contents), header=None, sheet_name=None)
-                
-                # Avoid duplication: if a 'Combined' sheet exists, use ONLY that sheet
-                combined_key = None
-                for k in df_dict.keys():
-                    if str(k).strip().lower() == 'combined':
-                        combined_key = k
-                        break
-                if combined_key:
-                    df_dict = {combined_key: df_dict[combined_key]}
-            else:
-                raise ValueError("Unsupported file format. Please upload a CSV or Excel file.")
+            
+            # Avoid duplication: if a 'Combined' sheet exists, use ONLY that sheet
+            combined_key = None
+            for k in df_dict.keys():
+                if str(k).strip().lower() == 'combined':
+                    combined_key = k
+                    break
+            if combined_key:
+                df_dict = {combined_key: df_dict[combined_key]}
 
             holdings = []
             
@@ -38,11 +36,10 @@ class PortfolioParser:
                 header_row_idx = None
                 for idx, row in df.iterrows():
                     row_strs = [str(x).lower().strip() for x in row.values]
-                    if any(k in row_strs for k in ["instrument", "symbol", "scrip", "stock name"]):
+                    if any(k in row_strs for k in ["instrument", "symbol", "scrip", "stock name", "scheme name"]):
                         header_row_idx = idx
                         break
                         
-                # If no header row is found containing the required keys, skip the sheet
                 if header_row_idx is None:
                     continue
                         
@@ -56,17 +53,30 @@ class PortfolioParser:
                     row_dict = row.to_dict()
                     
                     # Match common column names dynamically across brokers
-                    symbol = PortfolioParser._find_val(["instrument", "symbol", "scrip", "stock name", "stock", "company", "company name"], row_dict)
-                    quantity = PortfolioParser._find_val(["qty", "qty.", "quantity", "quantity available", "holdings", "shares", "total qty", "net qty", "available qty"], row_dict)
+                    symbol = PortfolioParser._find_val(["instrument", "symbol", "scrip", "stock name", "stock", "company", "company name", "scheme name"], row_dict)
+                    quantity = PortfolioParser._find_val(["qty", "qty.", "quantity", "quantity available", "holdings", "shares", "total qty", "net qty", "available qty", "units"], row_dict)
                     average_cost = PortfolioParser._find_val(["avg. cost", "average price", "avg price", "avg. price", "average cost", "avgcost", "purchase price", "buy price"], row_dict)
-                    current_price = PortfolioParser._find_val(["previous closing", "ltp", "close", "current price", "cmp", "prev closing", "last price", "market price"], row_dict)
+                    current_price = PortfolioParser._find_val(["previous closing price", "previous closing", "ltp", "close", "current price", "cmp", "prev closing", "last price", "market price"], row_dict)
                     
+                    # Fallback for Mutual Fund Statements (e.g. Groww) where Average Cost isn't a column
+                    if (average_cost is None or pd.isna(average_cost)) and quantity is not None and not pd.isna(quantity):
+                        invested = PortfolioParser._find_val(["invested value", "invested amt", "invested"], row_dict)
+                        if invested is not None and not pd.isna(invested) and float(quantity) > 0:
+                            average_cost = float(invested) / float(quantity)
+
+                    # Dynamic Asset Type
+                    asset_type = AssetType.STOCK
+                    if "scheme name" in row_dict and symbol == row_dict["scheme name"]:
+                        asset_type = AssetType.MUTUAL_FUND
+                    elif "isin" in row_dict and str(row_dict["isin"]).startswith("INF"):
+                        asset_type = AssetType.MUTUAL_FUND
+
                     # Validation
                     if not symbol or pd.isna(symbol):
                         continue
-                    if pd.isna(quantity) or quantity <= 0:
+                    if pd.isna(quantity) or float(quantity) <= 0:
                         continue
-                    if pd.isna(average_cost) or average_cost <= 0:
+                    if average_cost is None or pd.isna(average_cost) or float(average_cost) <= 0:
                         continue
                     
                     metadata = {}
@@ -78,11 +88,11 @@ class PortfolioParser:
 
                     holdings.append(HoldingCreate(
                         symbol=str(symbol).strip().upper(),
-                        name=str(symbol).strip().upper(), # Fallback to symbol
-                        asset_type=AssetType.STOCK,
+                        name=str(symbol).strip(),
+                        asset_type=asset_type,
                         quantity=float(quantity),
                         average_cost=float(average_cost),
-                        currency="INR", # Typically Indian brokers for these specific names
+                        currency="INR",
                         metadata=metadata
                     ))
             
