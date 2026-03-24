@@ -60,13 +60,14 @@ const Advantages: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              whileHover={{ y: -10, transition: { duration: 0.3 } }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white/10 backdrop-blur-2xl border border-white/20 p-10 rounded-[2.5rem] hover:bg-white/20 transition-all group shadow-2xl"
+              className="glass-card p-10 group"
             >
               <div className={`mb-8 p-5 ${adv.color} rounded-2xl w-fit group-hover:scale-110 transition-transform shadow-inner`}>
                 {adv.icon}
               </div>
-              <h4 className="text-2xl font-black mb-4 text-white group-hover:text-stripe-cyan transition-colors">{adv.title}</h4>
+              <h4 className="text-2xl font-black mb-4 text-white group-hover:cool-gradient-text transition-all">{adv.title}</h4>
               <p className="text-slate-200 leading-relaxed font-medium">
                 {adv.description}
               </p>
