@@ -101,19 +101,30 @@ Investment_Intelligence/
 
 ### Backend Setup
 
-1. **Install dependencies**
+1. **Using the Quick Start Script (Recommended)**
+Open your terminal in the `backend` directory, activate your virtual environment, and run the Python script:
 ```bash
 cd backend
+python run_backend.py
+```
+This script will automatically install missing dependencies (`pip install -r requirements.txt`) and start the FastAPI server.
+
+2. **Manual Setup**
+
+**Install dependencies**
+```bash
+cd backend
+# Activate your virtual environment first
 pip install -r requirements.txt
 ```
 
-2. **Set up environment variables**
+3. **Set up environment variables**
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-3. **Start MongoDB**
+4. **Start MongoDB**
 ```bash
 # For local MongoDB
 mongod
@@ -121,7 +132,7 @@ mongod
 # Or use MongoDB Atlas (update .env with connection string)
 ```
 
-4. **Run the backend**
+5. **Run the backend manually**
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```

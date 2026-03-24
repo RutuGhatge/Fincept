@@ -5,7 +5,7 @@ from app.models.portfolio import AssetType
 
 
 class HoldingCreate(BaseModel):
-    symbol: str = Field(..., min_length=1, max_length=20, description="Asset symbol")
+    symbol: str = Field(..., min_length=1, max_length=100, description="Asset symbol")
     name: str = Field(..., min_length=1, max_length=200, description="Full asset name")
     asset_type: AssetType = Field(..., description="Type of asset")
     quantity: float = Field(..., gt=0, description="Number of units/shares")

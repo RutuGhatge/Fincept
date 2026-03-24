@@ -1,0 +1,38 @@
+Holdings Count: 6
+
+Symbol: AXIS LARGE & MID CAP FUND - DIRECT PLAN
+ - Asset Type: stock
+ - Avg Cost: 36.576
+ - Curr Price: 36.576
+ - Market Value: 2399.861088
+
+Symbol: HDFC BANKING AND PSU DEBT FUND - DIRECT PLAN
+ - Asset Type: stock
+ - Avg Cost: 24.6135
+ - Curr Price: 24.6135
+ - Market Value: 1599.9513404999998
+
+Symbol: HDFC FLEXI CAP FUND - DIRECT PLAN
+ - Asset Type: stock
+ - Avg Cost: 2250.942
+ - Curr Price: 2250.942
+ - Market Value: 4198.00683
+
+Symbol: ICICI PRUDENTIAL GOLD ETF FOF - DIRECT PLAN
+ - Asset Type: stock
+ - Avg Cost: 38.7839
+ - Curr Price: 38.7839
+ - Market Value: 1249.9663131
+
+Symbol: ICICI PRUDENTIAL NIFTY 50 INDEX FUND - DIRECT PLAN
+ - Asset Type: stock
+ - Avg Cost: 266.5537
+ - Curr Price: 266.5537
+ - Market Value: 5899.633042099999
+
+Symbol: ICICI PRUDENTIAL SILVER ETF FOF - DIRECT PLAN
+ - Asset Type: stock
+ - Avg Cost: 24.6114
+ - Curr Price: 24.6114
+ - Market Value: 799.993557
+
