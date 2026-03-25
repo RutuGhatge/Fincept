@@ -12,6 +12,29 @@ import {
 
 const PortfolioPage: React.FC = () => {
   const [method, setMethod] = useState<'api' | 'manual' | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      simulateUpload();
+    }
+  };
+
+  const simulateUpload = () => {
+    setIsUploading(true);
+    setUploadSuccess(false);
+    setTimeout(() => {
+      setIsUploading(false);
+      setUploadSuccess(true);
+    }, 2000);
+  };
+
 
   return (
     <div className="pt-32 pb-24 bg-white min-h-screen">
@@ -82,24 +105,52 @@ const PortfolioPage: React.FC = () => {
             </div>
             <h3 className="text-3xl font-black text-stripe-dark mb-4">Upload Manual Data</h3>
             <p className="text-lg text-stripe-slate leading-relaxed mb-8">
-              Upload your portfolio in CSV, PDF, or DOCX formats. Our AI agent will parse the data and generate comprehensive insights.
+              Upload your portfolio in CSV, Excel (XLSX), PDF, or DOCX formats. Our AI agent will parse the data and generate comprehensive insights.
             </p>
+
             {method === 'manual' && (
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 className="space-y-6 pt-6 border-t border-stripe-purple/20"
               >
-                <div className="border-2 border-dashed border-stripe-purple/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 bg-white/50">
-                  <FileText className="w-12 h-12 text-stripe-purple/50" />
+                <div 
+                  onClick={handleUploadClick}
+                  className="border-2 border-dashed border-stripe-purple/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 bg-white/50 hover:bg-stripe-purple/5 transition-all group/upload"
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="hidden" 
+                    accept=".csv,.xlsx,.xls,.pdf,.docx"
+                  />
+                  <FileText className={`w-12 h-12 transition-colors ${isUploading ? 'text-stripe-purple animate-bounce' : 'text-stripe-purple/50 group-hover/upload:text-stripe-purple'}`} />
                   <div>
-                    <p className="font-bold text-stripe-dark">Click to upload or drag & drop</p>
-                    <p className="text-sm text-slate-400">CSV, PDF, or DOCX (Max 10MB)</p>
+                    <p className="font-bold text-stripe-dark">
+                      {isUploading ? 'Analyzing your assets...' : 'Click to upload or drag & drop'}
+                    </p>
+                    <p className="text-sm text-slate-400">CSV, Excel, PDF, or DOCX (Max 10MB)</p>
                   </div>
                 </div>
-                <button className="w-full py-4 bg-stripe-purple text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all">
-                  Analyze Portfolio <ArrowRight className="w-5 h-5" />
+
+                <button 
+                  disabled={isUploading}
+                  className="w-full py-4 bg-stripe-purple text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all disabled:opacity-50"
+                >
+                  {isUploading ? 'Processing...' : 'Analyze Portfolio'} <ArrowRight className="w-5 h-5" />
                 </button>
+                {uploadSuccess && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-2 text-sm text-emerald-600 font-bold justify-center bg-emerald-50 py-2 rounded-lg"
+                  >
+                    <CheckCircle2 className="w-5 h-5" />
+                    Portfolio parsed successfully!
+                  </motion.div>
+                )}
+
                 <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   AI Agent ready for parsing.

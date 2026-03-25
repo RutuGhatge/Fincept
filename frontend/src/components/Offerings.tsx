@@ -6,10 +6,12 @@ import {
   ShieldCheck, 
   Newspaper, 
   BookOpen, 
-  Terminal as TerminalIcon,
+  Settings2,
   ArrowRight,
   ChevronRight
 } from 'lucide-react';
+
+
 
 const offerings = [
   {
@@ -49,14 +51,15 @@ const offerings = [
     path: "/jargon"
   },
   {
-    id: 'terminal',
-    title: "Terminal",
-    description: "Pro-level market terminal with live price updates and deep portfolio valuation across all asset classes.",
-    icon: <TerminalIcon className="w-8 h-8 text-emerald-500" />,
+    id: 'allocate',
+    title: "Allocate",
+    description: "Smart allocation suggests exactly where to invest your next money by analyzing your linked portfolio holdings and risk profiles.",
+    icon: <Settings2 className="w-8 h-8 text-emerald-500" />,
     color: "bg-emerald-500/10",
-    tag: "Execution Ready",
-    path: "/market-data"
+    tag: "Capital Optimizer",
+    path: "/allocate"
   }
+
 ];
 
 const Offerings: React.FC = () => {
