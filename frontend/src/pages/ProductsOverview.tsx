@@ -71,7 +71,7 @@ const ProductsOverview: React.FC = () => {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-start gap-16`}
+              className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-start gap-16 group`}
             >
               <div className="flex-1 space-y-8">
                 <div className="p-5 bg-slate-50 rounded-3xl w-20 h-20 flex items-center justify-center">
@@ -93,7 +93,12 @@ const ProductsOverview: React.FC = () => {
               </div>
               <div className="flex-1 w-full aspect-video bg-slate-50 rounded-[3rem] border border-slate-100 shadow-inner flex items-center justify-center p-12 overflow-hidden relative">
                 <div className="absolute inset-0 opacity-10 blur-3xl bg-gradient-to-br from-stripe-blue to-stripe-cyan" />
-                <div className="relative z-10 text-6xl opacity-20 transform rotate-[-5deg]">
+                <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none px-4">
+                  <h3 className="text-4xl md:text-6xl font-black text-slate-200 uppercase tracking-tighter text-center leading-none opacity-40 transform -rotate-3">
+                    {product.title}
+                  </h3>
+                </div>
+                <div className="relative z-10 text-6xl opacity-20 transform rotate-[-5deg] group-hover:scale-110 transition-transform duration-500">
                   {product.icon}
                 </div>
               </div>

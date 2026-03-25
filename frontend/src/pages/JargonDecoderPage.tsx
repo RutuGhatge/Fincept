@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { 
-  Search, 
-  ChevronRight, 
+import {
+  Search,
+  ChevronRight,
   X,
   Lightbulb,
   ArrowLeft,
@@ -22,12 +22,12 @@ const JargonDecoderPage: React.FC = () => {
   const [notFinanceMsg, setNotFinanceMsg] = useState('');
   const limit = 12;
 
-  const fetchGlossary = async (isLoadMore = false) => {
+  const fetchGlossary = useCallback(async (isLoadMore = false) => {
     if (!isLoadMore) setLoading(true);
     try {
       const currentSkip = isLoadMore ? skip + limit : 0;
       const response = await jargonService.getGlossary(currentSkip, limit);
-      
+
       if (response && response.glossary) {
         if (isLoadMore) {
           setJargons(prev => [...prev, ...response.glossary]);
@@ -36,7 +36,7 @@ const JargonDecoderPage: React.FC = () => {
           setJargons(response.glossary);
           setSkip(0);
         }
-        
+
         if (response.glossary.length < limit) {
           setHasMore(false);
         } else {
@@ -48,11 +48,11 @@ const JargonDecoderPage: React.FC = () => {
     } finally {
       if (!isLoadMore) setLoading(false);
     }
-  };
+  }, [skip, limit]);
 
   useEffect(() => {
     fetchGlossary();
-  }, []);
+  }, [fetchGlossary]);
 
   const handleSearchAI = async () => {
     if (!search.trim()) return;
@@ -83,7 +83,11 @@ const JargonDecoderPage: React.FC = () => {
     }
   };
 
-  const filteredJargons = jargons.filter(j => 
+  const handleSelectJargon = (j: any) => {
+    setSelectedJargon(j);
+  };
+
+  const filteredJargons = jargons.filter(j =>
     j.term.toLowerCase().includes(search.toLowerCase()) ||
     (j.category && j.category.toLowerCase().includes(search.toLowerCase()))
   );
@@ -111,7 +115,7 @@ const JargonDecoderPage: React.FC = () => {
               exit={{ opacity: 0 }}
             >
               <div className="max-w-4xl mb-16">
-                <motion.h1 
+                <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-5xl md:text-7xl font-black text-stripe-dark mb-8 tracking-tight"
@@ -126,8 +130,8 @@ const JargonDecoderPage: React.FC = () => {
                 {/* Search with AI Fallback */}
                 <div className="relative max-w-2xl mb-12">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Search terms (e.g. EBITDA, P/E Ratio)..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -142,7 +146,7 @@ const JargonDecoderPage: React.FC = () => {
                 </div>
 
                 {search && filteredJargons.length === 0 && !notFinanceMsg && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="p-8 bg-orange-50 rounded-[2rem] border border-orange-100 flex flex-col md:flex-row items-center justify-between gap-6"
@@ -155,7 +159,7 @@ const JargonDecoderPage: React.FC = () => {
                         Term not in library. Let the Jargon Agent find it?
                       </p>
                     </div>
-                    <button 
+                    <button
                       onClick={handleSearchAI}
                       disabled={searchingAI}
                       className="px-8 py-3 bg-orange-500 text-white rounded-xl font-black hover:bg-orange-600 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
@@ -189,7 +193,7 @@ const JargonDecoderPage: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05 }}
-                    onClick={() => setSelectedJargon(j)}
+                    onClick={() => handleSelectJargon(j)}
                     className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] hover:bg-white hover:shadow-2xl hover:shadow-orange-500/5 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -212,7 +216,7 @@ const JargonDecoderPage: React.FC = () => {
 
               {hasMore && !search && (
                 <div className="flex justify-center">
-                  <button 
+                  <button
                     onClick={() => fetchGlossary(true)}
                     className="px-12 py-5 bg-stripe-dark text-white rounded-2xl font-black text-xl hover:opacity-90 transition-all shadow-xl"
                   >
@@ -229,7 +233,7 @@ const JargonDecoderPage: React.FC = () => {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-4xl mx-auto"
             >
-              <button 
+              <button
                 onClick={() => setSelectedJargon(null)}
                 className="flex items-center gap-2 text-stripe-slate font-bold mb-12 hover:text-stripe-dark group"
               >
@@ -239,7 +243,7 @@ const JargonDecoderPage: React.FC = () => {
               <div className="space-y-12">
                 <div className="space-y-6">
                   <span className="px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black uppercase tracking-widest">
-                    {selectedJargon.category}
+                    {selectedJargon.category || "General"}
                   </span>
                   <h1 className="text-6xl font-black text-stripe-dark tracking-tight">{selectedJargon.term}</h1>
                   {selectedJargon.full_form && selectedJargon.full_form !== selectedJargon.term && (
@@ -253,10 +257,10 @@ const JargonDecoderPage: React.FC = () => {
                 <div className="prose prose-orange prose-xl max-w-none text-stripe-slate leading-relaxed">
                   <ReactMarkdown
                     components={{
-                      p: ({children}) => <p className="text-xl font-medium mb-4 leading-relaxed">{children}</p>,
-                      strong: ({children}) => <strong className="font-black text-stripe-dark">{children}</strong>,
-                      ul: ({children}) => <ul className="list-disc pl-6 space-y-2 my-4">{children}</ul>,
-                      li: ({children}) => <li className="text-xl font-medium text-stripe-slate">{children}</li>,
+                      p: ({ children }) => <p className="text-xl font-medium mb-4 leading-relaxed">{children}</p>,
+                      strong: ({ children }) => <strong className="font-black text-stripe-dark">{children}</strong>,
+                      ul: ({ children }) => <ul className="list-disc pl-6 space-y-2 my-4">{children}</ul>,
+                      li: ({ children }) => <li className="text-xl font-medium text-stripe-slate">{children}</li>,
                     }}
                   >
                     {selectedJargon.long || selectedJargon.definition || ''}

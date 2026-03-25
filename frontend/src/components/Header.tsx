@@ -9,13 +9,23 @@ import {
   Terminal as AllocateIcon,
   ChevronDown,
   Code,
+<<<<<<< HEAD
   Info
+=======
+  Info,
+  Building2,
+  UserCircle,
+  LogOut,
+  User
+>>>>>>> 74309ae (feat: implement user profiles and personalized investment dashboard)
 } from 'lucide-react';
+import { authService } from '../services/apiService';
 
 
 const Header: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<{ name: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +35,30 @@ const Header: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('access_token');
+      if (token && !user) {
+        try {
+          const profile = await authService.getProfile();
+          setUser(profile);
+        } catch (error) {
+          console.error("Failed to fetch user profile", error);
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_id');
+        }
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
+    setUser(null);
+    navigate('/');
+  };
 
   const products = [
     { title: "Portfolio Management", icon: <BarChart3 className="w-5 h-5" />, path: "/portfolio" },
@@ -146,18 +180,77 @@ const Header: React.FC = () => {
 
         {/* CTAs */}
         <div className="flex items-center gap-6">
-          <button 
-            onClick={() => navigate('/auth/signin')}
-            className="hidden sm:block text-[15px] font-black text-stripe-dark hover:text-stripe-blue transition-colors hover:scale-105"
-          >
-            Sign in
-          </button>
-          <button 
-            onClick={() => navigate('/products-overview')}
-            className="px-8 py-2.5 rounded-full font-black text-[15px] bg-stripe-dark text-white hover:bg-stripe-slate transition-all shadow-lg hover:shadow-xl active:scale-95"
-          >
-            Get started
-          </button>
+          {user ? (
+            <div 
+              className="relative group"
+              onMouseEnter={() => setActiveMenu('user')}
+              onMouseLeave={() => setActiveMenu(null)}
+            >
+              <button 
+                onClick={() => navigate('/account')}
+                className="flex items-center gap-2 group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-stripe-blue/10 flex items-center justify-center text-stripe-blue group-hover:bg-stripe-blue group-hover:text-white transition-all">
+                  <UserCircle className="w-6 h-6" />
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-xs font-bold text-stripe-slate uppercase tracking-widest">Welcome</p>
+                  <p className="text-sm font-black text-stripe-dark">@{user.name.split(' ')[0]}</p>
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {activeMenu === 'user' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl p-4 border border-slate-100"
+                  >
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => navigate('/account')}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                      >
+                        <User className="w-5 h-5 text-stripe-blue" />
+                        <span className="font-bold text-stripe-dark text-sm">Account Settings</span>
+                      </button>
+                      <button
+                        onClick={() => navigate('/my-portfolio')}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                      >
+                        <BarChart3 className="w-5 h-5 text-stripe-purple" />
+                        <span className="font-bold text-stripe-dark text-sm">My Portfolio</span>
+                      </button>
+                      <div className="h-[1px] bg-slate-100 my-2" />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition-colors text-left group"
+                      >
+                        <LogOut className="w-5 h-5 text-slate-400 group-hover:text-red-500" />
+                        <span className="font-bold text-stripe-dark text-sm group-hover:text-red-600">Sign Out</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <>
+              <button 
+                onClick={() => navigate('/auth/signin')}
+                className="hidden sm:block text-[15px] font-black text-stripe-dark hover:text-stripe-blue transition-colors hover:scale-105"
+              >
+                Sign in
+              </button>
+              <button 
+                onClick={() => navigate('/products-overview')}
+                className="px-8 py-2.5 rounded-full font-black text-[15px] bg-stripe-dark text-white hover:bg-stripe-slate transition-all shadow-lg hover:shadow-xl active:scale-95"
+              >
+                Get started
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
