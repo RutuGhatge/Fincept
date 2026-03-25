@@ -9,14 +9,23 @@ import {
   Loader2,
   Newspaper
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { newsService, portfolioService } from '../services/apiService';
+import AuthModal from '../components/AuthModal';
 
 const MarketPulsePage: React.FC = () => {
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All News');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasPortfolio, setHasPortfolio] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    setIsAuthenticated(!!token);
+
     const fetchNews = async () => {
       setLoading(true);
       try {
@@ -27,6 +36,7 @@ const MarketPulsePage: React.FC = () => {
           const portfolios = await portfolioService.getUserPortfolios(userId);
           if (portfolios && portfolios.length > 0) {
             portfolio = portfolios[0];
+            setHasPortfolio(true);
           }
         }
 
@@ -63,6 +73,27 @@ const MarketPulsePage: React.FC = () => {
 
     fetchNews();
   }, []);
+
+  const handlePersonalizedAction = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return false;
+    }
+    return true;
+  };
+
+  const handlePortfolioNews = () => {
+    if (!handlePersonalizedAction()) return;
+    
+    if (!hasPortfolio) {
+      navigate('/portfolio');
+    } else {
+      console.log("Showing news for your specific holdings...");
+      // In a real app, this would trigger a refetch with portfolio context
+    }
+  };
+
   return (
     <div className="pt-32 pb-24 bg-white min-h-screen">
       <div className="container mx-auto px-6">
@@ -87,14 +118,32 @@ const MarketPulsePage: React.FC = () => {
               <h3 className="font-bold text-stripe-dark mb-6 flex items-center gap-2">
                 <Filter className="w-5 h-5 text-stripe-cyan" /> Filters
               </h3>
-              <div className="space-y-4">
-                {['All News', 'My Portfolio', 'Watchlist', 'Institutional', 'Regulatory'].map((f) => (
+              <div className="space-y-4 mb-8">
+                {['All News', 'Watchlist', 'Institutional', 'Regulatory'].map((f) => (
                   <label key={f} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-stripe-cyan focus:ring-stripe-cyan" checked={f === 'All News'} />
+                    <input 
+                      type="checkbox" 
+                      className="w-5 h-5 rounded border-slate-300 text-stripe-cyan focus:ring-stripe-cyan" 
+                      checked={f === filter} 
+                      onChange={() => {
+                        if (f !== 'All News') {
+                          if (handlePersonalizedAction()) setFilter(f);
+                        } else {
+                          setFilter(f);
+                        }
+                      }}
+                    />
                     <span className="text-stripe-slate font-medium group-hover:text-stripe-dark transition-colors">{f}</span>
                   </label>
                 ))}
               </div>
+              
+              <button 
+                onClick={handlePortfolioNews}
+                className="w-full py-4 bg-stripe-cyan text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-dark transition-all shadow-lg"
+              >
+                <TrendingUp className="w-5 h-5" /> My Portfolio News
+              </button>
             </div>
             
             <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
@@ -172,7 +221,10 @@ const MarketPulsePage: React.FC = () => {
                         <button className="flex items-center gap-2 text-stripe-cyan font-bold hover:text-stripe-dark transition-all">
                           Read more <ExternalLink className="w-4 h-4" />
                         </button>
-                        <button className="flex items-center gap-2 text-slate-400 font-bold hover:text-stripe-dark transition-all">
+                        <button 
+                          onClick={() => handlePersonalizedAction()}
+                          className="flex items-center gap-2 text-slate-400 font-bold hover:text-stripe-dark transition-all"
+                        >
                           Show impact on my portfolio <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -187,6 +239,7 @@ const MarketPulsePage: React.FC = () => {
             </AnimatePresence>
           </div>
         </div>
+
         {/* External News Sources Section */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -232,8 +285,13 @@ const MarketPulsePage: React.FC = () => {
           </div>
         </motion.div>
       </div>
-    </div>
 
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        featureName="Personalized Market Intelligence"
+      />
+    </div>
   );
 };
 

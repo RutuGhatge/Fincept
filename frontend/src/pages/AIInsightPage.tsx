@@ -13,29 +13,35 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../services/apiService';
+import AuthModal from '../components/AuthModal';
 
 const AIInsightPage: React.FC = () => {
   const [portfolio, setPortfolio] = useState<any>(null);
   const [insights, setInsights] = useState<any>(null);
   const [performance, setPerformance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAIContent = async () => {
-      const userId = localStorage.getItem('user_id');
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
+    const token = localStorage.getItem('access_token');
+    const userId = localStorage.getItem('user_id');
+    setIsAuthenticated(!!token);
 
+    if (!token) {
+      setLoading(false);
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    const fetchAIContent = async () => {
       try {
-        const portfolios = await portfolioService.getUserPortfolios(userId);
+        const portfolios = await portfolioService.getUserPortfolios(userId!);
         if (portfolios && portfolios.length > 0) {
           const p = portfolios[0];
           setPortfolio(p);
           
-          // Fetch performance and insights in parallel
           const [perfData, insightData] = await Promise.all([
             portfolioService.trackPortfolio(p.id),
             portfolioService.getInsights(p.id)
@@ -55,8 +61,32 @@ const AIInsightPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="pt-32 pb-24 bg-[#f8fafc] min-h-screen">
-      <div className="container mx-auto px-6">
+    <div className="pt-32 pb-24 bg-[#f8fafc] min-h-screen relative">
+      {!isAuthenticated && (
+        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/30 flex items-center justify-center p-6">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 text-center max-w-lg"
+          >
+            <div className="w-20 h-20 bg-stripe-purple/10 rounded-3xl flex items-center justify-center text-stripe-purple mx-auto mb-8">
+              <Lock className="w-10 h-10" />
+            </div>
+            <h2 className="text-3xl font-black text-stripe-dark mb-4">Insights Locked</h2>
+            <p className="text-stripe-slate font-medium mb-10 leading-relaxed">
+              Our AI analysis engine requires an active session to process your private portfolio data and generate institutional-grade insights.
+            </p>
+            <button 
+              onClick={() => navigate('/auth/signin')}
+              className="w-full py-5 bg-stripe-purple text-white rounded-[2rem] font-black text-lg hover:bg-stripe-dark hover:scale-105 transition-all shadow-xl"
+            >
+              Sign In to Unlock
+            </button>
+          </motion.div>
+        </div>
+      )}
+
+      <div className={`container mx-auto px-6 ${!isAuthenticated ? 'grayscale opacity-50 blur-sm pointer-events-none' : ''}`}>
         <div className="max-w-4xl mb-20">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -207,6 +237,12 @@ const AIInsightPage: React.FC = () => {
           Note: These insights are generated using your connected portfolio data. Active analysis is currently running.
         </div>
       </div>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        featureName="AI Portfolio Insights"
+      />
     </div>
   );
 };

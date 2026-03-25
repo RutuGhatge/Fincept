@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { 
@@ -21,7 +21,7 @@ const JargonDecoderPage: React.FC = () => {
   const [searchingAI, setSearchingAI] = useState(false);
   const limit = 12;
 
-  const fetchGlossary = async (isLoadMore = false) => {
+  const fetchGlossary = useCallback(async (isLoadMore = false) => {
     if (!isLoadMore) setLoading(true);
     try {
       const currentSkip = isLoadMore ? skip + limit : 0;
@@ -47,11 +47,11 @@ const JargonDecoderPage: React.FC = () => {
     } finally {
       if (!isLoadMore) setLoading(false);
     }
-  };
+  }, [skip, limit]);
 
   useEffect(() => {
     fetchGlossary();
-  }, []);
+  }, [fetchGlossary]);
 
   const handleSearchAI = async () => {
     if (!search.trim()) return;
@@ -59,7 +59,6 @@ const JargonDecoderPage: React.FC = () => {
     try {
       const result = await jargonService.explainTerm(search);
       if (result && !result.error) {
-        // Add new term to the list if not already there
         const newJargon = {
           term: result.term,
           short: result.short,
@@ -76,6 +75,10 @@ const JargonDecoderPage: React.FC = () => {
     } finally {
       setSearchingAI(false);
     }
+  };
+
+  const handleSelectJargon = (j: any) => {
+    setSelectedJargon(j);
   };
 
   const filteredJargons = jargons.filter(j => 
@@ -169,7 +172,7 @@ const JargonDecoderPage: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05 }}
-                    onClick={() => setSelectedJargon(j)}
+                    onClick={() => handleSelectJargon(j)}
                     className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] hover:bg-white hover:shadow-2xl hover:shadow-orange-500/5 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -219,7 +222,7 @@ const JargonDecoderPage: React.FC = () => {
               <div className="space-y-12">
                 <div className="space-y-6">
                   <span className="px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black uppercase tracking-widest">
-                    {selectedJargon.category}
+                    {selectedJargon.category || "General"}
                   </span>
                   <h1 className="text-6xl font-black text-stripe-dark tracking-tight">{selectedJargon.term}</h1>
                   <p className="text-3xl text-orange-500 font-bold leading-tight">
@@ -230,10 +233,10 @@ const JargonDecoderPage: React.FC = () => {
                 <div className="prose prose-orange prose-xl max-w-none text-stripe-slate leading-relaxed">
                   <ReactMarkdown
                     components={{
-                      p: ({children}) => <p className="text-xl font-medium mb-4 leading-relaxed">{children}</p>,
-                      strong: ({children}) => <strong className="font-black text-stripe-dark">{children}</strong>,
-                      ul: ({children}) => <ul className="list-disc pl-6 space-y-2 my-4">{children}</ul>,
-                      li: ({children}) => <li className="text-xl font-medium text-stripe-slate">{children}</li>,
+                      p: ({children}: any) => <p className="text-xl font-medium mb-4 leading-relaxed">{children}</p>,
+                      strong: ({children}: any) => <strong className="font-black text-stripe-dark">{children}</strong>,
+                      ul: ({children}: any) => <ul className="list-disc pl-6 space-y-2 my-4">{children}</ul>,
+                      li: ({children}: any) => <li className="text-xl font-medium text-stripe-slate">{children}</li>,
                     }}
                   >
                     {selectedJargon.long || selectedJargon.definition || ''}

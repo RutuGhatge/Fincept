@@ -7,6 +7,8 @@ import ScrollToTop from "./components/ScrollToTop";
 
 import Home from "./pages/Home";
 import PortfolioPage from "./pages/PortfolioPage";
+import MyPortfolioPage from "./pages/MyPortfolioPage";
+import AccountPage from "./pages/AccountPage";
 import AIInsightPage from "./pages/AIInsightPage";
 import MarketPulsePage from "./pages/MarketPulsePage";
 import JargonDecoderPage from "./pages/JargonDecoderPage";
@@ -20,6 +22,7 @@ import PricingPage from "./pages/PricingPage";
 import { PrivacyPolicy, TermsOfService, Cookies } from "./pages/LegalPages";
 
 import AuthPage from "./pages/AuthPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
 
 
 const App: React.FC = () => {
@@ -34,7 +37,10 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/my-portfolio" element={<MyPortfolioPage />} />
+          <Route path="/account" element={<AccountPage />} />
           <Route path="/analysis" element={<AIInsightPage />} />
+          <Route path="/coming-soon" element={<ComingSoonPage />} />
           <Route path="/news" element={<MarketPulsePage />} />
           <Route path="/jargon" element={<JargonDecoderPage />} />
           <Route path="/allocate" element={<AllocatePage />} />

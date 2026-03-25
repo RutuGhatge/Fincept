@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { UserCircle, Building2, Users, ArrowRight, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PricingTier: React.FC<{
   title: string;
@@ -143,9 +144,12 @@ const PricingPage: React.FC = () => {
             <h3 className="text-3xl font-black text-stripe-dark mb-4">Need a custom plan?</h3>
             <p className="text-stripe-slate text-lg font-medium">We offer high-volume custom solutions for large institutions.</p>
           </div>
-          <button className="px-10 py-5 bg-white text-stripe-dark border border-slate-200 rounded-2xl font-black text-xl hover:bg-slate-50 transition-all shadow-sm">
+          <Link 
+            to="/coming-soon"
+            className="px-10 py-5 bg-white text-stripe-dark border border-slate-200 rounded-2xl font-black text-xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center whitespace-nowrap"
+          >
             Contact Sales
-          </button>
+          </Link>
         </div>
       </div>
     </div>
