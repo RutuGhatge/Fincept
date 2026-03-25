@@ -1,82 +1,177 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings2, Cpu, Zap, PieChart, ArrowRight, Lock, Loader2, AlertCircle, LogIn } from 'lucide-react';
+import { 
+  Settings2, Cpu, Zap, PieChart, ArrowRight, Lock, 
+  Loader2, AlertCircle, LogIn, TrendingUp,
+  Download, MessageSquare, User, Target, Calendar,
+  ChevronRight, RefreshCcw, FileText
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../services/apiService';
 import AuthModal from '../components/AuthModal';
 
+interface Holding {
+  symbol: string;
+  name: string;
+  asset_type: string;
+  quantity: number;
+  average_cost: number;
+  current_price: number | null;
+  market_value: number | null;
+}
+
+interface Portfolio {
+  id: string;
+  name: string;
+  total_value: number;
+  total_invested: number;
+  holdings: Holding[];
+}
+
 const AllocatePage: React.FC = () => {
   const [budget, setBudget] = useState('50000');
+  const [mode, setMode] = useState<'manual' | 'nlp'>('manual');
+  
+  // Manual inputs
+  const [age, setAge] = useState('25');
+  const [retirementAge, setRetirementAge] = useState('60');
+  const [goal, setGoal] = useState('Buying a House');
+  const [expectedReturn, setExpectedReturn] = useState('12');
+  
+  // NLP input
+  const [prompt, setPrompt] = useState('');
+
   const [allocation, setAllocation] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState('');
-  const [portfolio, setPortfolio] = useState<any>(null);
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
+  const reportRef = useRef<HTMLDivElement>(null);
 
-  const fetchInitialData = useCallback(async () => {
+  useEffect(() => {
     const token = localStorage.getItem('access_token');
     const userId = localStorage.getItem('user_id');
     setIsAuthenticated(!!token);
 
-    if (!token) {
-      setLoading(false);
+    if (!token || !userId) {
+      setInitialLoading(false);
       return;
     }
 
-    setLoading(true);
-    try {
-      if (userId) {
-        const portfolios = await portfolioService.getUserPortfolios(userId);
-        if (portfolios && portfolios.length > 0) {
-          const firstPortfolio = portfolios[0];
-          setPortfolio(firstPortfolio);
-          
-          const allocData = await portfolioService.allocateBudget(firstPortfolio.id, {
-            budget: parseInt(budget),
-            goal: "Growth",
-            age: 30,
-            profession: "Professional"
-          });
-          setAllocation(allocData);
+    const fetchPortfolio = async () => {
+      try {
+        const p = await portfolioService.getMyPortfolio(userId);
+        if (p && p.id) {
+          setPortfolio(p);
         }
+      } catch (err: any) {
+        if (err.response?.status !== 404) {
+          console.error("Error fetching portfolio:", err);
+        }
+      } finally {
+        setInitialLoading(false);
       }
-    } catch (err: any) {
-      console.error("Error fetching initial data:", err);
-      setError("Failed to fetch initial allocation suggestions.");
-    } finally {
-      setLoading(false);
-    }
-  }, [budget]);
+    };
 
-  useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
+    fetchPortfolio();
+  }, []);
 
-  const handleGetAllocation = async () => {
+  const handleAIAllocation = async () => {
     if (!portfolio) return;
     setLoading(true);
     setError('');
+    
+    const payload = mode === 'manual' ? {
+      budget: parseInt(budget),
+      mode: 'manual',
+      age: parseInt(age),
+      retirement_age: parseInt(retirementAge),
+      goal,
+      expected_return: parseInt(expectedReturn)
+    } : {
+      budget: parseInt(budget),
+      mode: 'nlp',
+      prompt
+    };
+
     try {
-      const data = await portfolioService.allocateBudget(portfolio.id, {
-        budget: parseInt(budget),
-        goal: "Growth",
-        age: 30,
-        profession: "Professional"
-      });
-      setAllocation(data);
+      const response = await portfolioService.allocateWithGemini(portfolio.id, payload);
+      if (response.success) {
+        setAllocation(response.data);
+      } else {
+        setError(response.detail || "Failed to generate AI allocation.");
+      }
     } catch (err: any) {
-      console.error("Allocation failed:", err);
-      setError("Failed to generate allocation. Please try again.");
+      console.error("AI Allocation failed:", err);
+      setError("AI engine encountered an error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDownloadPDF = () => {
+    if (!allocation || !reportRef.current) return;
+    
+    const content = reportRef.current.innerHTML;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Investment Strategy - Fincept AI</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+            .header { border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
+            .title { font-size: 24px; font-weight: 800; color: #4338ca; }
+            .meta { font-size: 14px; color: #64748b; margin-top: 5px; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; border-left: 4px solid #6366f1; padding-left: 10px; }
+            .suggestion-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: #f8fafc; }
+            .fund-name { font-size: 16px; font-weight: 700; color: #1e293b; }
+            .fund-amount { color: #6366f1; font-weight: 800; }
+            .reason { font-size: 14px; color: #475569; margin-top: 10px; }
+            .rationale { background: #f1f5f9; padding: 20px; border-radius: 12px; font-style: italic; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">Fincept AI Investment Strategy</div>
+            <div class="meta">Personalized for ${portfolio?.name || 'User'} | Generated on ${new Date().toLocaleDateString()}</div>
+          </div>
+          ${content}
+          <div class="footer">
+            Generated by Fincept Investment Intelligence. Not financial advice.
+          </div>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="pt-40 pb-24 bg-[#f8fafc] min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto" />
+          <p className="text-xl font-bold text-stripe-slate">Initializing AI Engine...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-32 pb-24 bg-[#f8fafc] min-h-screen relative">
-      {/* Auth Gating Overlay */}
       {!isAuthenticated && (
         <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/10 flex items-center justify-center p-6">
           <motion.div 
@@ -89,7 +184,7 @@ const AllocatePage: React.FC = () => {
             </div>
             <h2 className="text-3xl font-black text-stripe-dark mb-4">Allocate is Locked</h2>
             <p className="text-stripe-slate font-medium mb-10 leading-relaxed">
-              To provide personalized fund suggestions, our AI needs access to your risk profile. Sign in to unlock this feature.
+              Our AI needs your portfolio data to suggest optimal splits. Sign in to unlock this feature.
             </p>
             <button 
               onClick={() => navigate('/auth/signin')}
@@ -101,65 +196,126 @@ const AllocatePage: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content */}
       <div className={`container mx-auto px-6 ${!isAuthenticated ? 'grayscale opacity-40 blur-sm pointer-events-none' : ''}`}>
-        <div className="max-w-4xl mb-20">
+        <div className="max-w-4xl mb-12">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-8"
           >
-            <Cpu className="w-4 h-4" /> Multi-Agent Allocation Engine
+            <Cpu className="w-4 h-4" /> Gemini-Powered Investment Strategy
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-5xl md:text-8xl font-black text-stripe-dark mb-8 tracking-tighter"
           >
-            Smart <br />
-            <span className="text-emerald-500">Allocate.</span>
+            AI <span className="text-emerald-500">Allocate.</span>
           </motion.h1>
           <p className="text-2xl text-stripe-slate leading-relaxed font-medium">
-            Enter your investable surplus and let our AI agents distribute it across the most optimal funds based on your current portfolio architecture.
+            Personalized fund suggestions based on your age, goals, and current portfolio architecture.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Controls */}
-          <div className="lg:col-span-1 space-y-8">
-            <div className="p-10 bg-white rounded-[3.5rem] shadow-sm border border-slate-100">
-              <h3 className="text-2xl font-black text-stripe-dark mb-8 flex items-center gap-3">
-                <Settings2 className="w-6 h-6 text-emerald-500" /> Parameters
-              </h3>
-              
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Controls - 5 columns */}
+          <div className="lg:col-span-5 space-y-8">
+            <div className="p-8 bg-white rounded-[3rem] shadow-sm border border-slate-100">
+              <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
+                <button 
+                  onClick={() => setMode('manual')}
+                  className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${mode === 'manual' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <Settings2 className="w-4 h-4" /> Manual
+                </button>
+                <button 
+                  onClick={() => setMode('nlp')}
+                  className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${mode === 'nlp' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <MessageSquare className="w-4 h-4" /> AI Prompt
+                </button>
+              </div>
+
               <div className="space-y-6">
-                <div className="space-y-2">
+                <div>
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Amount to Invest (₹)</label>
                   <input 
                     type="number" 
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
-                    className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl text-xl font-bold focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+                    className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xl font-bold focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
                     placeholder="e.g. 50000"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Risk Profile</label>
-                  <select className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl text-lg font-bold outline-none">
-                    <option>Aggressive Growth</option>
-                    <option>Balanced</option>
-                    <option>Conservative</option>
-                  </select>
-                </div>
+                {mode === 'manual' ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Current Age</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="number"
+                          value={age}
+                          onChange={(e) => setAge(e.target.value)}
+                          className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Retirement Age</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="number"
+                          value={retirementAge}
+                          onChange={(e) => setRetirementAge(e.target.value)}
+                          className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Investment Goal</label>
+                      <div className="relative">
+                        <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="text"
+                          value={goal}
+                          onChange={(e) => setGoal(e.target.value)}
+                          className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                          placeholder="e.g. Buying a House"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Expected Return (%)</label>
+                      <input 
+                        type="number"
+                        value={expectedReturn}
+                        onChange={(e) => setExpectedReturn(e.target.value)}
+                        className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Describe your goals</label>
+                    <textarea 
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-medium min-h-[220px] outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      placeholder="I am 22 years old. I am planning to buy a house in 10 years. I want to earn at least 15% return. What should be my strategy?"
+                    />
+                  </div>
+                )}
 
                 <button 
-                  onClick={handleGetAllocation}
+                  onClick={handleAIAllocation}
                   disabled={loading || !portfolio}
-                  className="w-full py-5 bg-stripe-dark text-white rounded-2xl font-black text-lg hover:bg-emerald-500 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
+                  className="w-full py-5 bg-stripe-dark text-white rounded-2xl font-black text-lg hover:bg-emerald-500 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Zap className="w-6 h-6 fill-white" />}
-                  Run AI Optimizer
+                  Generate AI Strategy
                 </button>
               </div>
             </div>
@@ -170,7 +326,7 @@ const AllocatePage: React.FC = () => {
                   <AlertCircle className="w-6 h-6" /> Portfolio Missing
                 </div>
                 <p className="text-red-700/70 font-medium text-sm leading-relaxed">
-                  We need to see your current holdings to avoid overlap and optimize tax-efficiency.
+                  We need your current holdings to prevent overlap and optimize allocation.
                 </p>
                 <button 
                   onClick={() => navigate('/portfolio')}
@@ -182,18 +338,22 @@ const AllocatePage: React.FC = () => {
             )}
           </div>
 
-          {/* Results Area */}
-          <div className="lg:col-span-2">
+          {/* Results - 7 columns */}
+          <div className="lg:col-span-7">
             <AnimatePresence mode="wait">
               {loading ? (
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-full flex flex-col items-center justify-center py-40 border-2 border-dashed border-slate-200 rounded-[4rem] space-y-4"
+                  className="h-full min-h-[600px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[3.5rem] bg-white/50"
                 >
-                  <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
-                  <p className="text-xl font-bold text-stripe-slate">Agents are negotiating fund splits...</p>
+                  <div className="relative">
+                    <Cpu className="w-20 h-20 text-emerald-500/20 animate-pulse" />
+                    <Loader2 className="absolute inset-0 w-20 h-20 text-emerald-500 animate-spin" />
+                  </div>
+                  <p className="mt-8 text-2xl font-black text-stripe-dark">Gemini is crunching numbers...</p>
+                  <p className="text-stripe-slate font-medium">Analyzing holdings, risks, and goals...</p>
                 </motion.div>
               ) : allocation ? (
                 <motion.div 
@@ -201,57 +361,97 @@ const AllocatePage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-8"
                 >
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {allocation.suggestions?.map((item: any, i: number) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all group"
-                      >
-                        <div className="flex justify-between items-start mb-6">
-                          <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-emerald-50 transition-colors">
-                            <PieChart className="w-6 h-6 text-emerald-500" />
-                          </div>
-                          <span className="text-3xl font-black text-stripe-dark">₹{item.amount.toLocaleString()}</span>
-                        </div>
-                        <h4 className="text-xl font-black text-stripe-dark mb-2">{item.fund_name}</h4>
-                        <p className="text-stripe-slate font-medium text-sm mb-6 leading-relaxed">
-                          {item.reason}
-                        </p>
-                        <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.category}</span>
-                          <button className="text-emerald-500 font-bold flex items-center gap-2 text-sm">
-                            Invest <ArrowRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))}
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-2xl font-black text-stripe-dark flex items-center gap-3">
+                      <PieChart className="w-6 h-6 text-emerald-500" /> Suggested Allocation
+                    </h3>
+                    <button 
+                      onClick={handleDownloadPDF}
+                      className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-stripe-slate hover:text-emerald-600 hover:border-emerald-200 transition-all shadow-sm"
+                    >
+                      <Download className="w-4 h-4" /> Download Strategy
+                    </button>
                   </div>
 
-                  {allocation.rationale && (
-                    <div className="p-10 bg-stripe-dark text-white rounded-[4rem] shadow-2xl relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-12 opacity-10 translate-x-1/4">
-                        <Cpu className="w-64 h-64" />
-                      </div>
-                      <h3 className="text-2xl font-black mb-6 relative z-10">Strategy Rationale</h3>
-                      <p className="text-xl text-slate-400 leading-relaxed font-medium relative z-10">
-                        {allocation.rationale}
-                      </p>
+                  <div ref={reportRef} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {allocation.suggestions?.map((item: any, i: number) => (
+                        <div
+                          key={i}
+                          className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <span className="text-2xl font-black text-emerald-600">₹{item.amount.toLocaleString()}</span>
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.category}</span>
+                          </div>
+                          <h4 className="text-lg font-black text-stripe-dark mb-3 leading-tight">{item.fund_name}</h4>
+                          <div className="h-0.5 bg-slate-50 w-full mb-4" />
+                          <p className="text-sm text-stripe-slate font-medium leading-relaxed">
+                            {item.reason}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  )}
+
+                    {allocation.overall_strategy && (
+                      <div className="p-10 bg-stripe-dark text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-12 opacity-10 translate-x-1/4">
+                          <Cpu className="w-64 h-64" />
+                        </div>
+                        <h3 className="text-xl font-black mb-4 relative z-10 flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-emerald-400" /> Overall Rationale
+                        </h3>
+                        <p className="text-lg text-slate-400 leading-relaxed font-medium relative z-10 italic">
+                          "{allocation.overall_strategy}"
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="hidden">
+                      <div className="section">
+                        <div className="section-title">Allocation Suggestions</div>
+                        {allocation.suggestions?.map((item: any, i: number) => (
+                          <div key={i} className="suggestion-card">
+                            <div className="fund-name">{item.fund_name}</div>
+                            <div className="fund-amount">Investment: INR {item.amount.toLocaleString()}</div>
+                            <div className="meta">Category: {item.category}</div>
+                            <div className="reason">{item.reason}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="section">
+                        <div className="section-title">Strategy Rationale</div>
+                        <div className="rationale">
+                          {allocation.overall_strategy}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center py-40 border-2 border-dashed border-slate-200 rounded-[4rem] space-y-6 text-center px-10">
-                  <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
+                <div className="h-full min-h-[600px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[4rem] text-center px-10">
+                  <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
                     <Zap className="w-10 h-10 text-slate-200" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-300">Ready for Optimization</h3>
-                    <p className="text-stripe-slate font-medium max-w-sm mx-auto">
-                      Adjust your investment budget and click run to see where your money should go.
+                    <h3 className="text-2xl font-black text-slate-300">Strategy Awaiting Input</h3>
+                    <p className="text-stripe-slate font-medium max-w-sm mx-auto mt-2">
+                      Adjust your params or write a goal prompt, then let Gemini craft your personalized path.
                     </p>
+                  </div>
+                  <div className="mt-12 flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 mb-2" />
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Age-Aware</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 mb-2" />
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Goal-Oriented</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 mb-2" />
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Portfolio-Linked</span>
+                    </div>
                   </div>
                 </div>
               )}

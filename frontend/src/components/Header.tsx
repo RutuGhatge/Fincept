@@ -35,7 +35,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem('access_token');
-      if (token && !user) {
+      if (token) {
         try {
           const profile = await authService.getProfile();
           setUser(profile);
@@ -43,10 +43,23 @@ const Header: React.FC = () => {
           console.error("Failed to fetch user profile", error);
           localStorage.removeItem('access_token');
           localStorage.removeItem('user_id');
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
     };
+
+    // Run on mount
     fetchUser();
+
+    // Re-run whenever auth state changes (after login/logout)
+    window.addEventListener('auth-change', fetchUser);
+    window.addEventListener('storage', fetchUser);
+    return () => {
+      window.removeEventListener('auth-change', fetchUser);
+      window.removeEventListener('storage', fetchUser);
+    };
   }, []);
 
   const handleLogout = () => {

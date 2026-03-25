@@ -25,11 +25,13 @@ const AuthPage: React.FC = () => {
         localStorage.setItem('user_id', data.user_id);
       } else {
         await authService.register({ name, email, password });
-        // After register, automatically log them in or ask to sign in
+        // After register, automatically log them in
         const loginData = await authService.login({ email, password });
         localStorage.setItem('access_token', loginData.access_token);
         localStorage.setItem('user_id', loginData.user_id);
       }
+      // Notify the Header (already mounted) that auth state changed
+      window.dispatchEvent(new Event('auth-change'));
       navigate('/portfolio');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Authentication failed. Please try again.');

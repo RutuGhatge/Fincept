@@ -44,8 +44,8 @@ export const portfolioService = {
     const response = await api.post('/portfolio/recommend', data);
     return response.data;
   },
-  trackPortfolio: async (id: string) => {
-    const response = await api.get(`/portfolio/${id}/track`);
+  trackPortfolio: async (id: string, userId?: string) => {
+    const response = await api.get(`/portfolio/${id}/track`, { params: { user_id: userId || localStorage.getItem('user_id') } });
     return response.data;
   },
   uploadPortfolio: async (formData: FormData) => {
@@ -60,8 +60,20 @@ export const portfolioService = {
     const response = await api.post(`/portfolio/${id}/allocate`, data);
     return response.data;
   },
-  getInsights: async (id: string) => {
-    const response = await api.get(`/portfolio/${id}/insights`);
+  allocateWithGemini: async (id: string, data: any) => {
+    const response = await api.post(`/portfolio/${id}/allocate-ai`, data, { params: { user_id: localStorage.getItem('user_id') } });
+    return response.data;
+  },
+  getInsights: async (id: string, userId?: string) => {
+    const response = await api.get(`/portfolio/${id}/insights`, { params: { user_id: userId || localStorage.getItem('user_id') } });
+    return response.data;
+  },
+  getMyPortfolio: async (userId: string) => {
+    const response = await api.get('/portfolio/me', { params: { user_id: userId } });
+    return response.data;
+  },
+  getPortfolioById: async (portfolioId: string, userId: string) => {
+    const response = await api.get(`/portfolio/${portfolioId}`, { params: { user_id: userId } });
     return response.data;
   },
   getUserPortfolios: async (userId: string) => {
@@ -83,8 +95,17 @@ export const analysisService = {
 
 export const newsService = {
   getNews: async (portfolio?: any) => {
-    // Pass portfolio context if available to get categorized news
     const response = await api.post('/news/categorize', { portfolio });
+    return response.data;
+  },
+  getEtNews: async (userId?: string, symbols?: string, forceRefresh?: boolean) => {
+    const response = await api.get('/news/et-rss', { 
+      params: { 
+        user_id: userId || localStorage.getItem('user_id'),
+        symbols,
+        force_refresh: forceRefresh
+      } 
+    });
     return response.data;
   },
 };

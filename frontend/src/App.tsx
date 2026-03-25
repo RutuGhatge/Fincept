@@ -10,6 +10,7 @@ import PortfolioPage from "./pages/PortfolioPage";
 import MyPortfolioPage from "./pages/MyPortfolioPage";
 import AccountPage from "./pages/AccountPage";
 import AIInsightPage from "./pages/AIInsightPage";
+import PortfolioAuditPage from "./pages/PortfolioAuditPage";
 import MarketPulsePage from "./pages/MarketPulsePage";
 import JargonDecoderPage from "./pages/JargonDecoderPage";
 import AllocatePage from "./pages/AllocatePage";
@@ -40,6 +41,7 @@ const App: React.FC = () => {
           <Route path="/my-portfolio" element={<MyPortfolioPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/analysis" element={<AIInsightPage />} />
+          <Route path="/analysis/audit" element={<PortfolioAuditPage />} />
           <Route path="/coming-soon" element={<ComingSoonPage />} />
           <Route path="/news" element={<MarketPulsePage />} />
           <Route path="/jargon" element={<JargonDecoderPage />} />

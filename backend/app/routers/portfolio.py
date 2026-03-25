@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from typing import List, Optional
+import os
+import json
 import logging
+from typing import List, Optional, Dict, Any
+import google.generativeai as genai
 
 from app.schemas.portfolio import (
     PortfolioCreate, PortfolioUpdate, PortfolioResponse, PortfolioSummary,
@@ -17,6 +20,12 @@ logger = logging.getLogger(__name__)
 from app.schemas.allocation import AllocationRequest, AllocationResponse
 
 router = APIRouter()
+
+# Configure Gemini
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 @router.post("/{portfolio_id}/allocate", response_model=AllocationResponse)
 async def allocate_budget(
@@ -181,7 +190,7 @@ async def upload_portfolio(
             detail=str(e)
         )
 
-@router.get("/", response_model=List[PortfolioSummary])
+@router.get("/")
 async def get_user_portfolios(
     user_id: str,
     skip: int = 0,
@@ -196,15 +205,64 @@ async def get_user_portfolios(
             skip=skip,
             limit=limit
         )
-        
+        # Ensure ObjectId is serialized to string
+        for p in portfolios:
+            p["id"] = str(p.get("_id", p.get("id", "")))
+            p.pop("_id", None)
+            p.setdefault("daily_change", None)
+            p.setdefault("daily_change_percent", None)
+            p.setdefault("total_return_percent", None)
+            p.setdefault("last_updated", None)
         return portfolios
-        
+
     except Exception as e:
-        logger.error(f"Error getting user portfolios: {e}")
+        logger.error(f"Error getting user portfolios: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+
+
+@router.get("/me")
+async def get_my_portfolio(
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Get the current user's portfolio (their first/only portfolio), with full holdings"""
+    try:
+        portfolio_service = PortfolioService()
+
+        # Step 1: list to find the portfolio ID
+        summaries = await portfolio_service.get_user_portfolios(user_id=user_id, limit=1)
+        if not summaries:
+            raise HTTPException(status_code=404, detail="No portfolio found")
+
+        portfolio_id = str(summaries[0].get("_id") or summaries[0].get("id"))
+
+        # Step 2: fetch the full document (includes all holdings with prices)
+        full = await portfolio_service.get_portfolio(portfolio_id=portfolio_id, user_id=user_id)
+        if not full:
+            raise HTTPException(status_code=404, detail="No portfolio found")
+
+        # Convert ObjectId fields to strings for JSON serialisation
+        full["id"] = str(full.get("_id", portfolio_id))
+        full.pop("_id", None)
+        # Ensure required fields have defaults
+        full.setdefault("is_active", True)
+        full.setdefault("metadata", {})
+        full.setdefault("description", None)
+        full.setdefault("total_return", None)
+        full.setdefault("total_return_percent", None)
+        full.setdefault("daily_change", None)
+        full.setdefault("daily_change_percent", None)
+
+        return full
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting user portfolio /me: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{portfolio_id}", response_model=PortfolioResponse)
@@ -522,6 +580,83 @@ async def rebalance_portfolio(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+
+@router.post("/{portfolio_id}/allocate-ai")
+async def allocate_budget_ai(
+    portfolio_id: str,
+    payload: Dict[str, Any],
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Use Gemini to generate a personalized allocation strategy based on portfolio and user goals"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.get_portfolio(portfolio_id, user_id)
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+
+        # Prepare context for Gemini
+        holdings = portfolio.get("holdings", [])
+        budget = payload.get("budget", 50000)
+        mode = payload.get("mode", "manual") # manual or nlp
+        
+        context_str = f"Budget: INR {budget}\n"
+        if mode == "manual":
+            context_str += f"Age: {payload.get('age')}\nRetirement Age: {payload.get('retirement_age')}\nGoal: {payload.get('goal')}\nExpected Return: {payload.get('expected_return')}%\n"
+        else:
+            context_str += f"User Prompt: {payload.get('prompt')}\n"
+
+        holdings_str = "\n".join([f"- {h['symbol']}: {h['name']} (Type: {h.get('asset_type', 'unknown')}, Value: INR {h.get('market_value', 0)})" for h in holdings])
+
+        prompt = f"""You are a senior investment advisor. Based on the user's current portfolio and investment goals, provide a specific allocation strategy for a new investment.
+
+Current Portfolio:
+{holdings_str}
+
+User Context:
+{context_str}
+
+Rules:
+1. Suggest specific mutual fund names or stock names available in India (e.g., 'Parag Parikh Flexi Cap Fund', 'HDFC Index S&P BSE Sensex Fund', 'ICICI Prudential Bluechip Fund').
+2. Allocate the entire budget among 2-4 funds.
+3. If the current portfolio is well-diversified, prefer adding to existing holdings.
+4. If the portfolio lacks diversification (e.g., too much concentration in one sector), suggest new specific funds.
+5. For each fund, provide the exact amount to invest and a clear reason 'why'.
+
+Output strictly in JSON format:
+{{
+  "suggestions": [
+    {{
+      "fund_name": "Exact Fund Name",
+      "amount": numeric_amount,
+      "category": "Category",
+      "reason": "Detailed reason why this fits the strategy"
+    }}
+  ],
+  "overall_strategy": "A 2-3 sentence summary of the strategy rationale."
+}}
+"""
+
+        if not os.environ.get("GEMINI_API_KEY"):
+             # Fallback logic if no API key
+             return {"success": False, "detail": "Gemini API key not configured"}
+
+        model = genai.GenerativeModel(GEMINI_MODEL)
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        
+        if text.startswith("```"):
+            text = "\n".join(text.split("\n")[1:])
+            if text.endswith("```"):
+                text = text[:-3].strip()
+        
+        result = json.loads(text)
+        return {"success": True, "data": result}
+
+    except Exception as e:
+        logger.error(f"Error in allocate-ai: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/{portfolio_id}/track")
 async def track_portfolio(portfolio_id: str):
