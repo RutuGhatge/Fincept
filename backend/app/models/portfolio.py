@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
+from enum import Enum
+
+class AssetType(str, Enum):
+    STOCK = "stock"
+    MUTUAL_FUND = "mutual_fund"
+
 
 class Asset(BaseModel):
     symbol: str

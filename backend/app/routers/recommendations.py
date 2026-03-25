@@ -5,7 +5,7 @@ import logging
 from app.schemas.recommendations import (
     RecommendationRequest, RecommendationResponse
 )
-from app.agents.orchestrator import AgentOrchestrator
+from app.agents.orchestrator import orchestrator
 from app.db.database import get_db
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ async def get_portfolio_recommendations(
 ):
     """Get AI-powered portfolio recommendations"""
     try:
-        orchestrator = AgentOrchestrator()
+        # result = await orchestrator.process_request(...)
         
         request_data = {
             "intent": "comprehensive",
@@ -78,7 +78,7 @@ async def get_quick_recommendations(
 ):
     """Get quick portfolio recommendations without detailed analysis"""
     try:
-        orchestrator = AgentOrchestrator()
+        # result = await orchestrator.process_request(...)
         
         request_data = {
             "intent": "analysis",
@@ -122,7 +122,7 @@ async def get_rebalancing_recommendations(
 ):
     """Get portfolio rebalancing recommendations"""
     try:
-        orchestrator = AgentOrchestrator()
+        # result = await orchestrator.process_request(...)
         
         request_data = {
             "intent": "analysis",
@@ -195,7 +195,7 @@ async def get_risk_adjustment_recommendations(
 ):
     """Get recommendations to adjust portfolio risk"""
     try:
-        orchestrator = AgentOrchestrator()
+        # result = await orchestrator.process_request(...)
         
         request_data = {
             "intent": "analysis",
@@ -286,7 +286,7 @@ async def get_goal_based_recommendations(
 ):
     """Get recommendations based on financial goals"""
     try:
-        orchestrator = AgentOrchestrator()
+        # result = await orchestrator.process_request(...)
         
         request_data = {
             "intent": "comprehensive",
@@ -403,11 +403,11 @@ async def get_market_opportunities(
         ]
         
         # Filter by sector if specified
-        if sector:
+        if sector and isinstance(sector, str):
             opportunities = [opp for opp in opportunities if opp["sector"].lower() == sector.lower()]
         
         # Filter by risk level if specified
-        if risk_level:
+        if risk_level and isinstance(risk_level, str):
             opportunities = [opp for opp in opportunities if opp["risk_level"].lower() == risk_level.lower()]
         
         return {

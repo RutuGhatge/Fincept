@@ -1,46 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  BarChart3, 
-  Upload, 
-  Key, 
-  ArrowRight, 
-  FileText, 
+import {
+  BarChart3,
+  Upload,
+  Key,
+  ArrowRight,
+  FileText,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Loader
 } from 'lucide-react';
+import { portfolioService } from '../services/apiService';
 
 const PortfolioPage: React.FC = () => {
   const [method, setMethod] = useState<'api' | 'manual' | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      simulateUpload();
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setError('');
+      setSuccess(false);
     }
   };
 
-  const simulateUpload = () => {
-    setIsUploading(true);
-    setUploadSuccess(false);
-    setTimeout(() => {
-      setIsUploading(false);
-      setUploadSuccess(true);
-    }, 2000);
-  };
+  const handleUpload = async () => {
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    setSuccess(false);
 
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('portfolio_name', 'Manual Import');
+      formData.append('user_id', localStorage.getItem('user_id') || '');
+
+      await portfolioService.uploadPortfolio(formData);
+      setSuccess(true);
+      setFile(null); // Clear after upload
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Upload failed. Please check the file format (Excel/CSV).');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="pt-32 pb-24 bg-white min-h-screen">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mb-20">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-black text-stripe-dark mb-8 tracking-tight"
@@ -58,9 +72,8 @@ const PortfolioPage: React.FC = () => {
           <motion.div
             whileHover={{ scale: 1.02 }}
             onClick={() => setMethod('api')}
-            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${
-              method === 'api' ? 'border-stripe-blue bg-stripe-blue/5 shadow-2xl' : 'border-slate-100 bg-slate-50 hover:border-slate-200'
-            }`}
+            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${method === 'api' ? 'border-stripe-blue bg-stripe-blue/5 shadow-2xl' : 'border-slate-100 bg-slate-50 hover:border-slate-200'
+              }`}
           >
             <div className="p-4 bg-stripe-blue/10 rounded-2xl w-fit mb-8">
               <Key className="w-10 h-10 text-stripe-blue" />
@@ -70,7 +83,7 @@ const PortfolioPage: React.FC = () => {
               Connect directly to Zerodha, Groww, Upstox, and 15+ other brokers. Secure, real-time synchronization of your holdings.
             </p>
             {method === 'api' && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 className="space-y-6 pt-6 border-t border-stripe-blue/20"
@@ -96,9 +109,8 @@ const PortfolioPage: React.FC = () => {
           <motion.div
             whileHover={{ scale: 1.02 }}
             onClick={() => setMethod('manual')}
-            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${
-              method === 'manual' ? 'border-stripe-purple bg-stripe-purple/5 shadow-2xl' : 'border-slate-100 bg-slate-50 hover:border-slate-200'
-            }`}
+            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${method === 'manual' ? 'border-stripe-purple bg-stripe-purple/5 shadow-2xl' : 'border-slate-100 bg-slate-50 hover:border-slate-200'
+              }`}
           >
             <div className="p-4 bg-stripe-purple/10 rounded-2xl w-fit mb-8">
               <Upload className="w-10 h-10 text-stripe-purple" />
@@ -109,47 +121,52 @@ const PortfolioPage: React.FC = () => {
             </p>
 
             {method === 'manual' && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 className="space-y-6 pt-6 border-t border-stripe-purple/20"
               >
-                <div 
-                  onClick={handleUploadClick}
-                  className="border-2 border-dashed border-stripe-purple/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 bg-white/50 hover:bg-stripe-purple/5 transition-all group/upload"
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  accept=".csv,.xlsx,.xls"
+                />
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-stripe-purple/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 bg-white/50 hover:bg-white transition-all cursor-pointer"
                 >
-                  <input 
-                    type="file" 
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden" 
-                    accept=".csv,.xlsx,.xls,.pdf,.docx"
-                  />
-                  <FileText className={`w-12 h-12 transition-colors ${isUploading ? 'text-stripe-purple animate-bounce' : 'text-stripe-purple/50 group-hover/upload:text-stripe-purple'}`} />
+                  <FileText className="w-12 h-12 text-stripe-purple/50" />
                   <div>
                     <p className="font-bold text-stripe-dark">
-                      {isUploading ? 'Analyzing your assets...' : 'Click to upload or drag & drop'}
+                      {file ? file.name : 'Click to upload or drag & drop'}
                     </p>
-                    <p className="text-sm text-slate-400">CSV, Excel, PDF, or DOCX (Max 10MB)</p>
+                    <p className="text-sm text-slate-400">CSV, XLS, XLSX (Max 10MB)</p>
                   </div>
                 </div>
 
-                <button 
-                  disabled={isUploading}
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-medium">
+                    {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-sm font-medium flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> Portfolio uploaded and merged successfully!
+                  </div>
+                )}
+
+                <button
+                  onClick={handleUpload}
+                  disabled={!file || uploading}
                   className="w-full py-4 bg-stripe-purple text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all disabled:opacity-50"
                 >
-                  {isUploading ? 'Processing...' : 'Analyze Portfolio'} <ArrowRight className="w-5 h-5" />
+                  {uploading ? <Loader className="w-5 h-5 animate-spin" /> : 'Analyze Portfolio'}{' '}
+                  {!uploading && <ArrowRight className="w-5 h-5" />}
                 </button>
-                {uploadSuccess && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-2 text-sm text-emerald-600 font-bold justify-center bg-emerald-50 py-2 rounded-lg"
-                  >
-                    <CheckCircle2 className="w-5 h-5" />
-                    Portfolio parsed successfully!
-                  </motion.div>
-                )}
 
                 <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />

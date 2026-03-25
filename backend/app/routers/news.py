@@ -1,16 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from app.agents.orchestrator import orchestrator
-from app.agents.news_agent import NewsAgent
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 router = APIRouter()
 
-# Register agent
-news_agent = NewsAgent()
-orchestrator.register_agent(news_agent)
-
 @router.get("/")
-async def get_news(symbol: str = None):
+async def get_news(symbol: Optional[str] = None):
     task = {"type": "fetch_news", "data": {"symbol": symbol}}
     result = await orchestrator.distribute_task("NewsAgent", task)
     return result

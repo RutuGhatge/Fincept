@@ -8,7 +8,7 @@ from app.schemas.portfolio import (
     PortfolioAnalytics
 )
 from app.services.portfolio_service import PortfolioService
-from app.agents.orchestrator import AgentOrchestrator
+from app.agents.orchestrator import orchestrator
 from app.db.database import get_db
 from app.services.portfolio_parser import PortfolioParser
 
@@ -322,7 +322,6 @@ async def get_portfolio_value(
     """Get current portfolio value with live prices"""
     try:
         # Use orchestrator to get portfolio value
-        orchestrator = AgentOrchestrator()
         
         request_data = {
             "intent": "portfolio_management",
@@ -364,7 +363,6 @@ async def get_portfolio_analytics(
     """Get comprehensive portfolio analytics"""
     try:
         # Use orchestrator to get portfolio analytics
-        orchestrator = AgentOrchestrator()
         
         request_data = {
             "intent": "portfolio_management",
@@ -429,3 +427,15 @@ async def rebalance_portfolio(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+
+@router.get("/{portfolio_id}/track")
+async def track_portfolio(portfolio_id: str):
+    """Bridge for frontend's trackPortfolio call"""
+    task = {"type": "analyze_performance", "data": {"portfolio_id": portfolio_id}}
+    return await orchestrator.distribute_task("AnalysisAgent", task)
+
+@router.post("/recommend")
+async def get_general_recommendations(data: dict):
+    """Bridge for frontend's getRecommendation call"""
+    task = {"type": "provide_recommendations", "data": data}
+    return await orchestrator.distribute_task("AnalysisAgent", task)

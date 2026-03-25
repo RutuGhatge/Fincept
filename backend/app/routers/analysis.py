@@ -1,13 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from app.agents.orchestrator import orchestrator
-from app.agents.analysis_agent import AnalysisAgent
 from typing import Dict, Any
 
 router = APIRouter()
-
-# Register agent
-analysis_agent = AnalysisAgent()
-orchestrator.register_agent(analysis_agent)
 
 @router.post("/analyze")
 async def analyze_portfolio(data: Dict[str, Any]):

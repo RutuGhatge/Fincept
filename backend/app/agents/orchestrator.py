@@ -22,4 +22,32 @@ class Orchestrator:
             logging.error(f"Error distributing task to {task_type}: {e}")
             return {"error": str(e)}
 
+    async def process_request(self, user_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a high-level request from a user"""
+        intent = request.get("intent")
+        data = request.get("data", {})
+        data["user_id"] = user_id
+        
+        # In a real scenario, this would use an LLM or rule-based system to 
+        # determine which agent to call. For now, we map intent to agent names.
+        intent_to_agent = {
+            "portfolio_management": "PortfolioAgent",
+            "market_analysis": "AnalysisAgent",
+            "financial_jargon": "JargonAgent",
+            "financial_news": "NewsAgent"
+        }
+        
+        if not isinstance(intent, str):
+            return {"success": False, "error": "Invalid or missing intent"}
+            
+        agent_name = intent_to_agent.get(intent)
+        if not agent_name:
+            return {"success": False, "error": f"Unsupported intent: {intent}"}
+            
+        result = await self.distribute_task(agent_name, data)
+        if "error" in result:
+            return {"success": False, "error": result["error"]}
+            
+        return {"success": True, "data": result}
+
 orchestrator = Orchestrator()

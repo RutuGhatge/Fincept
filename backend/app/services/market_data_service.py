@@ -74,4 +74,3 @@ class MarketDataService:
         except Exception as mf_err:
             logger.warning(f"MF API fetch failed for {symbol}: {mf_err}")
         return None
-        return None

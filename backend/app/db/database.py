@@ -52,3 +52,7 @@ async def close_mongo_connection():
 
 def get_database():
     return db.db
+
+def get_db():
+    return db.get_database()
+

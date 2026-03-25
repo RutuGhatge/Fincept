@@ -101,7 +101,6 @@ class PortfolioService:
             existing["created_at"] = existing.get("created_at", datetime.utcnow())
             existing["metadata"] = existing.get("metadata", {})
             existing["id"] = str(existing["_id"])
-            existing["_id"] = str(existing["_id"])
             return existing
         else:
             portfolio_doc = {
@@ -128,7 +127,6 @@ class PortfolioService:
         results = []
         async for p in cursor:
             p["id"] = str(p["_id"])
-            p["_id"] = str(p["_id"])
             p["holdings_count"] = len(p.get("holdings", []))
             results.append(p)
         return results
@@ -138,5 +136,4 @@ class PortfolioService:
         p = await database["portfolios"].find_one({"_id": ObjectId(portfolio_id), "user_id": user_id})
         if p:
             p["id"] = str(p["_id"])
-            p["_id"] = str(p["_id"])
         return p
