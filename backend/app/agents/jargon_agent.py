@@ -37,21 +37,32 @@ class JargonAgent(BaseAgent):
             
             if existing:
                 return {
-                    "term": existing["term"], 
-                    "explanation": existing["definition"],
+                    "term": existing["term"],
+                    "full_form": existing.get("full_form", existing["term"]),
+                    "short": existing.get("short", existing.get("definition", "")[:100]),
+                    "long": existing.get("long", existing.get("definition", "")),
+                    "example": existing.get("example", ""),
+                    "category": existing.get("category", "General Finance"),
                     "source": "database"
                 }
             
             # 2. Fallback to Gemini
             prompt = f"""
-You are a financial educator. Explain the financial term '{term}' as a valid JSON object with these exact keys:
+You are a financial educator AI assistant called the Jargon Agent. Your ONLY job is to explain financial and investment terms.
 
-- "short": One clear sentence (30–50 words). No markdown.
-- "long": A detailed explanation (150–200 words). Use **bold** for key concepts, bullet points where helpful.
-- "example": A real-world example (50–75 words). Use plain prose.
-- "category": The financial category (e.g. Valuation, Banking, Macro, Trading, Derivatives).
+First, determine if '{term}' is a finance, investing, economics, or business term.
 
-Respond with ONLY the JSON object, no extra text, no code fences.
+If it is NOT a finance term, respond with ONLY this exact JSON:
+{{"not_finance": true, "message": "I'm only here to explain finance and investment terms. Please search for a financial jargon!"}}
+
+If it IS a finance term, respond with ONLY this JSON object (no extra text, no code fences):
+{{
+  "full_form": "Full expanded form if acronym, else write the term itself",
+  "short": "One clear sentence, 30-50 words, plain text only",
+  "long": "Detailed explanation 150-200 words. Use **bold** for key concepts, use bullet points with - for key takeaways.",
+  "example": "A real-world investing example, 50-75 words, plain prose",
+  "category": "Pick one: General Finance, Valuation, Banking, Macro, Trading, Derivatives, Mutual Funds, Fixed Income"
+}}
 """
             try:
                 raw_response = await self.get_response(prompt)
@@ -73,34 +84,42 @@ Respond with ONLY the JSON object, no extra text, no code fences.
             try:
                 ai_data = json.loads(json_str)
             except:
-                # Fallback if AI doesn't return JSON
                 ai_data = {
+                    "full_form": term,
                     "short": raw_response[:100] + "...",
                     "long": raw_response,
                     "example": "N/A",
-                    "category": "General"
+                    "category": "General Finance"
                 }
-            
-            # 3. Save to DB for future use - ONLY if not an error message
-            if "Error:" not in ai_data.get("long", ""):
-                new_entry = {
+
+            # If Gemini says it's not a finance term, return refusal without saving
+            if ai_data.get("not_finance"):
+                return {
                     "term": term,
-                    "short": ai_data.get("short", ""),
-                    "long": ai_data.get("long", ""),
-                    "definition": ai_data.get("long", ""), # Keep for legacy
-                    "example": ai_data.get("example", ""),
-                    "category": ai_data.get("category", "General"),
-                    "source": "gemini",
-                    "created_at": None 
+                    "not_finance": True,
+                    "message": ai_data.get("message", "I'm only here to explain finance and investment terms. Please search for a financial jargon!"),
+                    "source": "jargon_agent"
                 }
-                await collection.insert_one(new_entry)
             
-            return {
-                "term": term, 
+            # Save to DB matching the exact schema
+            new_entry = {
+                "term": term,
+                "full_form": ai_data.get("full_form", term),
                 "short": ai_data.get("short", ""),
                 "long": ai_data.get("long", ""),
-                "category": ai_data.get("category", "General"),
                 "example": ai_data.get("example", ""),
+                "category": ai_data.get("category", "General Finance"),
+                "source": "gemini",
+            }
+            await collection.insert_one(new_entry)
+            
+            return {
+                "term": term,
+                "full_form": new_entry["full_form"],
+                "short": new_entry["short"],
+                "long": new_entry["long"],
+                "example": new_entry["example"],
+                "category": new_entry["category"],
                 "source": "gemini_saved"
             }
             

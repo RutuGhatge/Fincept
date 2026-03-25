@@ -19,6 +19,7 @@ const JargonDecoderPage: React.FC = () => {
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [searchingAI, setSearchingAI] = useState(false);
+  const [notFinanceMsg, setNotFinanceMsg] = useState('');
   const limit = 12;
 
   const fetchGlossary = async (isLoadMore = false) => {
@@ -56,12 +57,16 @@ const JargonDecoderPage: React.FC = () => {
   const handleSearchAI = async () => {
     if (!search.trim()) return;
     setSearchingAI(true);
+    setNotFinanceMsg('');
     try {
       const result = await jargonService.explainTerm(search);
-      if (result && !result.error) {
+      if (result && result.not_finance) {
+        setNotFinanceMsg(result.message || "I'm only here to explain finance and investment terms!");
+      } else if (result && !result.error) {
         // Add new term to the list if not already there
         const newJargon = {
           term: result.term,
+          full_form: result.full_form,
           short: result.short,
           long: result.long,
           category: result.category,
@@ -136,7 +141,7 @@ const JargonDecoderPage: React.FC = () => {
                   )}
                 </div>
 
-                {search && filteredJargons.length === 0 && (
+                {search && filteredJargons.length === 0 && !notFinanceMsg && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -147,7 +152,7 @@ const JargonDecoderPage: React.FC = () => {
                         <Lightbulb className="w-6 h-6 text-orange-500" />
                       </div>
                       <p className="text-lg font-bold text-stripe-dark">
-                        Term not in library. Search with Gemini AI?
+                        Term not in library. Let the Jargon Agent find it?
                       </p>
                     </div>
                     <button 
@@ -155,9 +160,24 @@ const JargonDecoderPage: React.FC = () => {
                       disabled={searchingAI}
                       className="px-8 py-3 bg-orange-500 text-white rounded-xl font-black hover:bg-orange-600 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
                     >
-                      {searchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
-                      Explain "{search}"
+                      {searchingAI ? <><Loader2 className="w-5 h-5 animate-spin" /> Jargon Agent is fetching...</> : <><Search className="w-5 h-5" /> Ask Jargon Agent</>}
                     </button>
+                  </motion.div>
+                )}
+
+                {notFinanceMsg && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-8 bg-slate-50 rounded-[2rem] border border-slate-200 flex items-center gap-4"
+                  >
+                    <div className="p-3 bg-white rounded-2xl shadow-sm">
+                      <X className="w-6 h-6 text-slate-400" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-black text-stripe-dark">Jargon Agent says:</p>
+                      <p className="text-stripe-slate font-medium">{notFinanceMsg}</p>
+                    </div>
                   </motion.div>
                 )}
               </div>
@@ -222,6 +242,9 @@ const JargonDecoderPage: React.FC = () => {
                     {selectedJargon.category}
                   </span>
                   <h1 className="text-6xl font-black text-stripe-dark tracking-tight">{selectedJargon.term}</h1>
+                  {selectedJargon.full_form && selectedJargon.full_form !== selectedJargon.term && (
+                    <p className="text-xl text-slate-400 font-semibold tracking-wide">{selectedJargon.full_form}</p>
+                  )}
                   <p className="text-3xl text-orange-500 font-bold leading-tight">
                     {selectedJargon.short}
                   </p>
