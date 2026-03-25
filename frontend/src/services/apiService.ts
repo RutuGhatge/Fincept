@@ -59,6 +59,10 @@ export const portfolioService = {
   getInsights: async (id: string) => {
     const response = await api.get(`/portfolio/${id}/insights`);
     return response.data;
+  },
+  getUserPortfolios: async (userId: string) => {
+    const response = await api.get('/portfolio/', { params: { user_id: userId } });
+    return response.data;
   }
 };
 
@@ -83,11 +87,11 @@ export const newsService = {
 
 export const jargonService = {
   explainTerm: async (term: string) => {
-    const response = await api.get(`/jargon/explain/${term}`);
+    const response = await api.get(`/jargon/${term}`);
     return response.data;
   },
-  getGlossary: async () => {
-    const response = await api.get('/jargon/glossary');
+  getGlossary: async (skip: number = 0, limit: number = 20) => {
+    const response = await api.get(`/jargon/glossary?skip=${skip}&limit=${limit}`);
     return response.data;
   }
 };

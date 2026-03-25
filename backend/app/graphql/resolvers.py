@@ -1,7 +1,8 @@
 import strawberry
-from typing import List
+from typing import List, Any, Optional
 from app.db.database import db
-from app.graphql.types import PortfolioType, HoldingType
+from app.graphql.types import PortfolioType, HoldingType, NewsItemType, GlossaryItemType, AnalysisResultType
+from app.agents.orchestrator import orchestrator
 
 @strawberry.type
 class Query:
@@ -76,6 +77,56 @@ class Query:
             created_at=p.get("created_at").isoformat() if p.get("created_at") else None
         )
 
+    @strawberry.field
+    async def get_news(self, symbol: Optional[str] = None) -> List[NewsItemType]:
+        task = {"type": "fetch_news", "data": {"symbol": symbol}}
+        result = await orchestrator.distribute_task("NewsAgent", task)
+        news_items = []
+        if isinstance(result, list):
+            for item in result:
+                news_items.append(NewsItemType(
+                    category=item.get("category", "General"),
+                    title=item.get("title", ""),
+                    summary=item.get("summary", ""),
+                    sentiment=item.get("sentiment", "Neutral"),
+                    time=item.get("time", "recent")
+                ))
+        return news_items
+
+    @strawberry.field
+    async def get_glossary(self, skip: int = 0, limit: int = 20) -> List[GlossaryItemType]:
+        from app.db.database import db as database_helper
+        database = database_helper.get_database()
+        collection = database["jargon"]
+        cursor = collection.find({}).sort("term", 1).skip(skip).limit(limit)
+        glossary = await cursor.to_list(length=limit)
+        
+        result = []
+        for item in glossary:
+            result.append(GlossaryItemType(
+                id=str(item["_id"]),
+                term=item.get("term", ""),
+                short=item.get("short", item.get("definition", "")[:100] + "..."),
+                long=item.get("long", item.get("definition", "")),
+                category=item.get("category", "General"),
+                example=item.get("example")
+            ))
+        return result
+
+    @strawberry.field
+    async def explain_term(self, term: str) -> GlossaryItemType:
+        task = {"type": "explain_term", "data": {"term": term}}
+        result = await orchestrator.distribute_task("JargonAgent", task)
+        if not result:
+            raise Exception("Term not found")
+        return GlossaryItemType(
+            term=result.get("term", term),
+            short=result.get("short", result.get("explanation", "")[:100] + "..."),
+            long=result.get("long", result.get("explanation", "")),
+            category=result.get("category", "General"),
+            example=result.get("example")
+        )
+
 @strawberry.type
 class AuthPayload:
     access_token: str
@@ -117,4 +168,55 @@ class Mutation:
             data={"sub": user["email"], "user_id": str(user["_id"])}
         )
         return AuthPayload(access_token=access_token, user_id=str(user["_id"]), message="Login Successful")
+
+    @strawberry.mutation
+    async def analyze_portfolio(self, data: strawberry.scalars.JSON) -> AnalysisResultType:
+        task = {"type": "analyze_performance", "data": data}
+        result = await orchestrator.distribute_task("AnalysisAgent", task)
+        return AnalysisResultType(
+            success=result.get("success", False),
+            summary=result.get("summary"),
+            data=result.get("data"),
+            metadata=result.get("metadata")
+        )
+
+    @strawberry.mutation
+    async def assess_risk(self, data: strawberry.scalars.JSON) -> AnalysisResultType:
+        task = {"type": "assess_risk", "data": data}
+        result = await orchestrator.distribute_task("AnalysisAgent", task)
+        return AnalysisResultType(
+            success=result.get("success", False),
+            summary=result.get("summary"),
+            data=result.get("data"),
+            metadata=result.get("metadata")
+        )
+
+    @strawberry.mutation
+    async def get_recommendations(
+        self, 
+        portfolio_id: str, 
+        user_id: str,
+        recommendation_type: str = "comprehensive",
+        risk_tolerance: str = "medium",
+        investment_horizon: str = "medium-term"
+    ) -> AnalysisResultType:
+        request_data = {
+            "intent": "comprehensive",
+            "data": {
+                "portfolio_id": portfolio_id,
+                "recommendation_type": recommendation_type,
+                "risk_tolerance": risk_tolerance,
+                "investment_horizon": investment_horizon
+            }
+        }
+        result = await orchestrator.process_request(
+            user_id=user_id,
+            request=request_data
+        )
+        return AnalysisResultType(
+            success=result.get("success", False),
+            summary=result.get("summary"),
+            data=result.get("data"),
+            metadata=result.get("metadata")
+        )
 

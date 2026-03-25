@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # We'll allow both or map one to the other.
     GOOGLE_API_KEY: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_MODEL: str = "gemini-pro"
     
     # Financial Data APIs
     ALPHA_VANTAGE_API_KEY: Optional[str] = None

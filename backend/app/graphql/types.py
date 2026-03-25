@@ -26,3 +26,34 @@ class PortfolioType:
     is_active: bool = True
     updated_at: Optional[str] = None
     created_at: Optional[str] = None
+
+@strawberry.type
+class NewsItemType:
+    category: str
+    title: str
+    summary: str
+    sentiment: str
+    time: str
+
+@strawberry.type
+class GlossaryItemType:
+    id: Optional[str] = None
+    term: str
+    short: str
+    long: str
+    category: str
+    example: Optional[str] = None
+
+@strawberry.type
+class AnalysisResultType:
+    success: bool
+    summary: Optional[str] = None
+    data: Optional[strawberry.scalars.JSON] = None
+    metadata: Optional[strawberry.scalars.JSON] = None
+
+@strawberry.type
+class RecommendationType:
+    portfolio_id: str
+    recommendations: List[strawberry.scalars.JSON]
+    summary: Optional[strawberry.scalars.JSON] = None
+    metadata: Optional[strawberry.scalars.JSON] = None

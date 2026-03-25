@@ -1,6 +1,7 @@
 from app.agents.base_agent import BaseAgent
 from typing import Dict, Any, List
 import logging
+import json
 logger = logging.getLogger(__name__)
 
 class JargonAgent(BaseAgent):
@@ -42,26 +43,67 @@ class JargonAgent(BaseAgent):
                 }
             
             # 2. Fallback to Gemini
-            prompt = f"Explain the financial term '{term}' in simple language that a non-expert can understand. Use analogies if helpful. Keep it concise but informative."
-            explanation = await self.get_response(prompt)
+            prompt = f"""
+You are a financial educator. Explain the financial term '{term}' as a valid JSON object with these exact keys:
+
+- "short": One clear sentence (30–50 words). No markdown.
+- "long": A detailed explanation (150–200 words). Use **bold** for key concepts, bullet points where helpful.
+- "example": A real-world example (50–75 words). Use plain prose.
+- "category": The financial category (e.g. Valuation, Banking, Macro, Trading, Derivatives).
+
+Respond with ONLY the JSON object, no extra text, no code fences.
+"""
+            try:
+                raw_response = await self.get_response(prompt)
+            except Exception as e:
+                logger.error(f"Gemini error in JargonAgent: {e}")
+                return {
+                    "term": term,
+                    "error": str(e),
+                    "source": "gemini_error"
+                }
             
-            # 3. Save to DB for future use
-            new_entry = {
-                "term": term,
-                "definition": explanation,
-                "source": "gemini",
-                "created_at": None # Could add timestamp here
-            }
-            await collection.insert_one(new_entry)
+            # Basic JSON extraction (Gemini might wrap in code blocks)
+            json_str = raw_response.strip()
+            if "```json" in json_str:
+                json_str = json_str.split("```json")[1].split("```")[0].strip()
+            elif "```" in json_str:
+                json_str = json_str.split("```")[1].split("```")[0].strip()
+                
+            try:
+                ai_data = json.loads(json_str)
+            except:
+                # Fallback if AI doesn't return JSON
+                ai_data = {
+                    "short": raw_response[:100] + "...",
+                    "long": raw_response,
+                    "example": "N/A",
+                    "category": "General"
+                }
+            
+            # 3. Save to DB for future use - ONLY if not an error message
+            if "Error:" not in ai_data.get("long", ""):
+                new_entry = {
+                    "term": term,
+                    "short": ai_data.get("short", ""),
+                    "long": ai_data.get("long", ""),
+                    "definition": ai_data.get("long", ""), # Keep for legacy
+                    "example": ai_data.get("example", ""),
+                    "category": ai_data.get("category", "General"),
+                    "source": "gemini",
+                    "created_at": None 
+                }
+                await collection.insert_one(new_entry)
             
             return {
                 "term": term, 
-                "explanation": explanation,
+                "short": ai_data.get("short", ""),
+                "long": ai_data.get("long", ""),
+                "category": ai_data.get("category", "General"),
+                "example": ai_data.get("example", ""),
                 "source": "gemini_saved"
             }
             
         except Exception as e:
             logger.error(f"Error in JargonAgent: {e}")
-            # Even if DB fails, try to return Gemini response
-            explanation = await self.get_response(f"Explain financial term: {term}")
-            return {"term": term, "explanation": explanation, "source": "fallback_gemini"}
+            return {"term": term, "error": str(e), "source": "final_fallback"}

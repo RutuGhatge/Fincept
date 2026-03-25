@@ -9,9 +9,7 @@ import {
   Terminal as AllocateIcon,
   ChevronDown,
   Code,
-  Info,
-  Building2,
-  UserCircle
+  Info
 } from 'lucide-react';
 
 

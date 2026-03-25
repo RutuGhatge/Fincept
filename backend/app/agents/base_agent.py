@@ -20,7 +20,8 @@ class BaseAgent(ABC):
         try:
             if settings.GOOGLE_API_KEY:
                 genai.configure(api_key=settings.GOOGLE_API_KEY)
-                self.llm = genai.GenerativeModel('gemini-1.5-flash')
+                # Use the model specified in settings
+                self.llm = genai.GenerativeModel(settings.GEMINI_MODEL)
             else:
                 logger.warning(f"No Google API key found for agent {self.name}")
         except Exception as e:
@@ -28,16 +29,15 @@ class BaseAgent(ABC):
 
     async def get_response(self, prompt: str) -> str:
         if self.llm is None:
-            return f"Agent {self.name} is not fully configured (missing API key)."
+            raise ValueError(f"Agent {self.name} is not fully configured (missing API key).")
         
         try:
-            # Type hint for the linter
             model = self.llm
             response = await model.generate_content_async(prompt)
             return response.text
         except Exception as e:
             logger.error(f"Error in agent {self.name}: {e}")
-            return f"Error: {e}"
+            raise e
 
     @abstractmethod
     async def process_task(self, task: Dict[str, Any]) -> Dict[str, Any]:

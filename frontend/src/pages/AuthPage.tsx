@@ -24,7 +24,7 @@ const AuthPage: React.FC = () => {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('user_id', data.user_id);
       } else {
-        const data = await authService.register({ name, email, password });
+        await authService.register({ name, email, password });
         // After register, automatically log them in or ask to sign in
         const loginData = await authService.login({ email, password });
         localStorage.setItem('access_token', loginData.access_token);

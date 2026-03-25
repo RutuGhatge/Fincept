@@ -1,53 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import { 
   Search, 
-  BookOpen, 
   ChevronRight, 
   X,
   Lightbulb,
-  ArrowLeft
+  ArrowLeft,
+  Loader2
 } from 'lucide-react';
-
-const jargons = [
-  {
-    term: "EBITDA",
-    short: "Earnings Before Interest, Taxes, Depreciation, and Amortization.",
-    long: "EBITDA is a measure of a company's overall financial performance and is used as an alternative to net income in some circumstances. EBITDA, however, can be misleading because it strips out the cost of capital investments like property, plant, and equipment.",
-    category: "Financial Metrics",
-    example: "If a company has high net income but low EBITDA, it might be due to high interest payments or tax benefits."
-  },
-  {
-    term: "P/E Ratio",
-    short: "Price-to-Earnings Ratio.",
-    long: "The price-to-earnings ratio (P/E ratio) is the ratio for valuing a company that measures its current share price relative to its per-share earnings (EPS). The price-to-earnings ratio is also sometimes known as the price multiple or the earnings multiple.",
-    category: "Valuation",
-    example: "A high P/E ratio could mean that a company's stock is over-valued, or else that investors are expecting high growth rates in the future."
-  },
-  {
-    term: "Tax-Loss Harvesting",
-    short: "Selling securities at a loss to offset a capital gains tax liability.",
-    long: "Tax-loss harvesting is the timely selling of securities at a loss to offset the amount of capital gains tax due on the sale of other investments at a profit. This strategy is most often used to limit the recognition of short-term capital gains.",
-    category: "Taxation",
-    example: "Selling a stock that dropped 20% to offset the gains from another stock that rose 50% can reduce your taxable income."
-  }
-];
+import { jargonService } from '../services/apiService';
 
 const JargonDecoderPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedJargon, setSelectedJargon] = useState<any>(null);
+  const [jargons, setJargons] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [searchingAI, setSearchingAI] = useState(false);
+  const limit = 12;
 
-  // Filter without suggestions as requested
+  const fetchGlossary = async (isLoadMore = false) => {
+    if (!isLoadMore) setLoading(true);
+    try {
+      const currentSkip = isLoadMore ? skip + limit : 0;
+      const response = await jargonService.getGlossary(currentSkip, limit);
+      
+      if (response && response.glossary) {
+        if (isLoadMore) {
+          setJargons(prev => [...prev, ...response.glossary]);
+          setSkip(currentSkip);
+        } else {
+          setJargons(response.glossary);
+          setSkip(0);
+        }
+        
+        if (response.glossary.length < limit) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching glossary:", error);
+    } finally {
+      if (!isLoadMore) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGlossary();
+  }, []);
+
+  const handleSearchAI = async () => {
+    if (!search.trim()) return;
+    setSearchingAI(true);
+    try {
+      const result = await jargonService.explainTerm(search);
+      if (result && !result.error) {
+        // Add new term to the list if not already there
+        const newJargon = {
+          term: result.term,
+          short: result.short,
+          long: result.long,
+          category: result.category,
+          example: result.example,
+          source: result.source
+        };
+        setJargons(prev => [newJargon, ...prev]);
+        setSelectedJargon(newJargon);
+      }
+    } catch (err) {
+      console.error("Search AI failed:", err);
+    } finally {
+      setSearchingAI(false);
+    }
+  };
+
   const filteredJargons = jargons.filter(j => 
     j.term.toLowerCase().includes(search.toLowerCase()) ||
-    j.category.toLowerCase().includes(search.toLowerCase())
+    (j.category && j.category.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
     <div className="pt-32 pb-24 bg-white min-h-screen">
       <div className="container mx-auto px-6">
         <AnimatePresence mode="wait">
-          {!selectedJargon ? (
+          {loading ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center py-40 space-y-4"
+            >
+              <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+              <p className="text-xl font-bold text-stripe-slate">Fetching glossary...</p>
+            </motion.div>
+          ) : !selectedJargon ? (
             <motion.div
               key="list"
               initial={{ opacity: 0 }}
@@ -64,10 +115,10 @@ const JargonDecoderPage: React.FC = () => {
                   <span className="text-orange-500">Decoder.</span>
                 </motion.h1>
                 <p className="text-2xl text-stripe-slate leading-relaxed mb-12">
-                  Finance is complicated, but it shouldn't be. Explore our blog-style glossary of financial terms made simple.
+                  Finance is complicated, but it shouldn't be. Explore our glossary or search any term to get an AI-powered explanation.
                 </p>
 
-                {/* Pure Search - No Suggestions as requested */}
+                {/* Search with AI Fallback */}
                 <div className="relative max-w-2xl mb-12">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
                   <input 
@@ -75,6 +126,7 @@ const JargonDecoderPage: React.FC = () => {
                     placeholder="Search terms (e.g. EBITDA, P/E Ratio)..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && filteredJargons.length === 0 && handleSearchAI()}
                     className="w-full pl-16 pr-6 py-6 bg-slate-50 border border-slate-100 rounded-[2rem] text-xl font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-inner"
                   />
                   {search && (
@@ -83,12 +135,37 @@ const JargonDecoderPage: React.FC = () => {
                     </button>
                   )}
                 </div>
+
+                {search && filteredJargons.length === 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-8 bg-orange-50 rounded-[2rem] border border-orange-100 flex flex-col md:flex-row items-center justify-between gap-6"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-white rounded-2xl shadow-sm">
+                        <Lightbulb className="w-6 h-6 text-orange-500" />
+                      </div>
+                      <p className="text-lg font-bold text-stripe-dark">
+                        Term not in library. Search with Gemini AI?
+                      </p>
+                    </div>
+                    <button 
+                      onClick={handleSearchAI}
+                      disabled={searchingAI}
+                      className="px-8 py-3 bg-orange-500 text-white rounded-xl font-black hover:bg-orange-600 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {searchingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                      Explain "{search}"
+                    </button>
+                  </motion.div>
+                )}
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                 {filteredJargons.map((j, i) => (
                   <motion.div
-                    key={j.term}
+                    key={j.term + i}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05 }}
@@ -97,12 +174,12 @@ const JargonDecoderPage: React.FC = () => {
                   >
                     <div>
                       <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 inline-block">
-                        {j.category}
+                        {j.category || "General"}
                       </span>
                       <h3 className="text-2xl font-black text-stripe-dark mb-4 group-hover:text-orange-500 transition-colors">
                         {j.term}
                       </h3>
-                      <p className="text-stripe-slate leading-relaxed font-medium">
+                      <p className="text-stripe-slate leading-relaxed font-medium line-clamp-3">
                         {j.short}
                       </p>
                     </div>
@@ -112,6 +189,17 @@ const JargonDecoderPage: React.FC = () => {
                   </motion.div>
                 ))}
               </div>
+
+              {hasMore && !search && (
+                <div className="flex justify-center">
+                  <button 
+                    onClick={() => fetchGlossary(true)}
+                    className="px-12 py-5 bg-stripe-dark text-white rounded-2xl font-black text-xl hover:opacity-90 transition-all shadow-xl"
+                  >
+                    Load More Jargons
+                  </button>
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -140,9 +228,16 @@ const JargonDecoderPage: React.FC = () => {
                 </div>
 
                 <div className="prose prose-orange prose-xl max-w-none text-stripe-slate leading-relaxed">
-                  <p className="text-2xl font-medium">
-                    {selectedJargon.long}
-                  </p>
+                  <ReactMarkdown
+                    components={{
+                      p: ({children}) => <p className="text-xl font-medium mb-4 leading-relaxed">{children}</p>,
+                      strong: ({children}) => <strong className="font-black text-stripe-dark">{children}</strong>,
+                      ul: ({children}) => <ul className="list-disc pl-6 space-y-2 my-4">{children}</ul>,
+                      li: ({children}) => <li className="text-xl font-medium text-stripe-slate">{children}</li>,
+                    }}
+                  >
+                    {selectedJargon.long || selectedJargon.definition || ''}
+                  </ReactMarkdown>
                 </div>
 
                 <div className="p-10 bg-orange-50 rounded-[3rem] border border-orange-100 relative overflow-hidden">

@@ -1,39 +1,68 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Newspaper, 
   TrendingUp, 
   AlertCircle,
   ExternalLink,
   Filter,
-  ArrowRight
+  ArrowRight,
+  Loader2,
+  Newspaper
 } from 'lucide-react';
-
-const newsData = [
-  {
-    category: "Indian Equity",
-    title: "Reliance to invest $10B in Green Energy over next 3 years",
-    summary: "RIL's pivot to renewable energy gathers pace as board approves massive capital expenditure for solar and hydrogen projects.",
-    sentiment: "Positive",
-    time: "2 hours ago"
-  },
-  {
-    category: "Regulatory",
-    title: "SEBI proposes new norms for Index Provider registration",
-    summary: "Market regulator looks to bring index providers under its direct oversight to improve transparency and governance.",
-    sentiment: "Neutral",
-    time: "4 hours ago"
-  },
-  {
-    category: "Macro",
-    title: "India's GST collection hits record high in March",
-    summary: "Robust economic activity and improved compliance drive tax collections to an all-time peak of ₹1.82 lakh crore.",
-    sentiment: "Positive",
-    time: "6 hours ago"
-  }
-];
+import { newsService, portfolioService } from '../services/apiService';
 
 const MarketPulsePage: React.FC = () => {
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('All News');
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true);
+      try {
+        const userId = localStorage.getItem('user_id');
+        let portfolio = null;
+        
+        if (userId) {
+          const portfolios = await portfolioService.getUserPortfolios(userId);
+          if (portfolios && portfolios.length > 0) {
+            portfolio = portfolios[0];
+          }
+        }
+
+        const newsData = await newsService.getNews(portfolio);
+        if (newsData && newsData.news) {
+          setNews(newsData.news);
+        } else if (newsData && Array.isArray(newsData)) {
+          setNews(newsData);
+        } else {
+          // Fallback to dummy news if none found
+          setNews([
+            {
+              category: "Indian Equity",
+              title: "Reliance to invest $10B in Green Energy",
+              summary: "RIL's pivot to renewable energy gathers pace as board approves massive capital expenditure.",
+              sentiment: "Positive",
+              time: "2 hours ago"
+            },
+            {
+              category: "Macro",
+              title: "India's GST collection hits record high",
+              summary: "Robust economic activity and improved compliance drive tax collections to an all-time peak.",
+              sentiment: "Positive",
+              time: "6 hours ago"
+            }
+          ]);
+        }
+      } catch (err) {
+        console.error("Error fetching news:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
   return (
     <div className="pt-32 pb-24 bg-white min-h-screen">
       <div className="container mx-auto px-6">
@@ -77,53 +106,85 @@ const MarketPulsePage: React.FC = () => {
           </div>
 
           {/* News Feed */}
-          <div className="lg:col-span-3 space-y-8">
-            {newsData.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="group p-10 rounded-[3rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-stripe-cyan/5 transition-all cursor-pointer relative overflow-hidden"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-                  <div className="flex items-center gap-4">
-                    <span className="px-4 py-1 rounded-full bg-white text-stripe-dark text-xs font-black uppercase tracking-widest shadow-sm">
-                      {item.category}
-                    </span>
-                    <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-                      {item.time}
-                    </span>
-                  </div>
-                  <div className={`px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 ${
-                    item.sentiment === 'Positive' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {item.sentiment === 'Positive' ? <TrendingUp className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                    {item.sentiment} Sentiment
-                  </div>
-                </div>
-                
-                <h2 className="text-3xl font-black text-stripe-dark mb-4 group-hover:text-stripe-cyan transition-colors leading-tight">
-                  {item.title}
-                </h2>
-                <p className="text-xl text-stripe-slate leading-relaxed mb-8">
-                  {item.summary}
-                </p>
-                
-                <div className="flex items-center gap-6">
-                  <button className="flex items-center gap-2 text-stripe-cyan font-bold hover:text-stripe-dark transition-all">
-                    Read more <ExternalLink className="w-4 h-4" />
+          <div className="lg:col-span-3">
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div 
+                  key="loader"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="py-40 flex flex-col items-center gap-4"
+                >
+                  <Loader2 className="w-12 h-12 text-stripe-cyan animate-spin" />
+                  <p className="text-xl font-bold text-stripe-slate">Curating your pulse...</p>
+                </motion.div>
+              ) : news.length === 0 ? (
+                <motion.div 
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="py-40 text-center space-y-4"
+                >
+                  <Newspaper className="w-16 h-16 text-slate-200 mx-auto" />
+                  <p className="text-2xl font-black text-slate-300 tracking-tight">No news found for your focus.</p>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="feed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-8"
+                >
+                  {news.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="group p-10 rounded-[3rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-stripe-cyan/5 transition-all cursor-pointer relative overflow-hidden"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
+                        <div className="flex items-center gap-4">
+                          <span className="px-4 py-1 rounded-full bg-white text-stripe-dark text-xs font-black uppercase tracking-widest shadow-sm">
+                            {item.category || "General"}
+                          </span>
+                          <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+                            {item.time || "Just now"}
+                          </span>
+                        </div>
+                        <div className={`px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 ${
+                          item.sentiment === 'Positive' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                        }`}>
+                          {item.sentiment === 'Positive' ? <TrendingUp className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                          {item.sentiment || "Neutral"} Sentiment
+                        </div>
+                      </div>
+                      
+                      <h2 className="text-3xl font-black text-stripe-dark mb-4 group-hover:text-stripe-cyan transition-colors leading-tight">
+                        {item.title}
+                      </h2>
+                      <p className="text-xl text-stripe-slate leading-relaxed mb-8">
+                        {item.summary}
+                      </p>
+                      
+                      <div className="flex items-center gap-6">
+                        <button className="flex items-center gap-2 text-stripe-cyan font-bold hover:text-stripe-dark transition-all">
+                          Read more <ExternalLink className="w-4 h-4" />
+                        </button>
+                        <button className="flex items-center gap-2 text-slate-400 font-bold hover:text-stripe-dark transition-all">
+                          Show impact on my portfolio <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  <button className="w-full py-6 bg-slate-100 text-stripe-slate rounded-[2rem] font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-inner">
+                    Load More Insights
                   </button>
-                  <button className="flex items-center gap-2 text-slate-400 font-bold hover:text-stripe-dark transition-all">
-                    Show impact on my portfolio <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-            
-            <button className="w-full py-6 bg-slate-100 text-stripe-slate rounded-[2rem] font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-inner">
-              Load More Insights
-            </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         {/* External News Sources Section */}

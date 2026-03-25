@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { UserCircle, Building2, Users, ShieldCheck, Globe, Zap, ArrowRight, Check } from 'lucide-react';
+import { UserCircle, Building2, Users, ArrowRight, Check } from 'lucide-react';
 
 const PricingTier: React.FC<{
   title: string;

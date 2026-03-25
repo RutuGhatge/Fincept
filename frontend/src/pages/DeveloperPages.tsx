@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Code, Info, FileText, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Info, FileText, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const DeveloperPageContainer: React.FC<{
