@@ -48,13 +48,25 @@ class MarketDataService:
     @staticmethod
     def _fetch_from_mfapi(symbol: str) -> Optional[float]:
         try:
-            # Strip ISIN codes (e.g., INF846K01146) to improve search accuracy
-            search_query = symbol.split("INF")[0].strip() if "INF" in symbol else symbol
+            # Handle ISIN codes (e.g., INF846K01146)
+            if "INF" in symbol.upper():
+                # If it's an ISIN, try searching for the ISIN directly
+                # MFAPI search works well with ISINs too.
+                search_query = symbol.strip()
+            else:
+                search_query = symbol.strip()
             
             import requests
             search_res = requests.get(f"https://api.mfapi.in/mf/search?q={search_query}", timeout=4.0)
             if search_res.status_code == 200:
                 results = search_res.json()
+                # If no results with standard query, try splitting if it looks like an ISIN
+                if not results and "INF" in symbol.upper():
+                    search_query = symbol.split("INF")[0].strip()
+                    if search_query:
+                        search_res = requests.get(f"https://api.mfapi.in/mf/search?q={search_query}", timeout=4.0)
+                        results = search_res.json() if search_res.status_code == 200 else []
+
                 if results and isinstance(results, list) and len(results) > 0:
                     best_match = results[0]
                     # Attempt to strictly match the Growth variant as it's the default in most Indian portfolios

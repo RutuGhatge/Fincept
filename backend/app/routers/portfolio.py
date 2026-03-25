@@ -14,8 +14,103 @@ from app.services.portfolio_parser import PortfolioParser
 
 logger = logging.getLogger(__name__)
 
+from app.schemas.allocation import AllocationRequest, AllocationResponse
+
 router = APIRouter()
 
+@router.post("/{portfolio_id}/allocate", response_model=AllocationResponse)
+async def allocate_budget(
+    portfolio_id: str,
+    request: AllocationRequest,
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Suggest how to allocate a budget based on user profile and current portfolio"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.get_portfolio(portfolio_id, user_id)
+        
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+
+        # Prepare task for AnalysisAgent
+        task_data = {
+            "type": "allocate_budget",
+            "data": {
+                "budget": request.budget,
+                "goal": request.goal,
+                "age": request.age,
+                "profession": request.profession,
+                "portfolio": portfolio.get("holdings", [])
+            }
+        }
+        
+        result = await orchestrator.process_request(
+            user_id=user_id,
+            request={
+                "intent": "market_analysis",
+                "data": task_data
+            }
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=result.get("error", "Failed to get allocation suggestions")
+            )
+        
+        return result["data"]
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in allocation endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{portfolio_id}/insights")
+async def get_portfolio_insights(
+    portfolio_id: str,
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Get deep AI insights for a portfolio"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.get_portfolio(portfolio_id, user_id)
+        
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+
+        # Fetch news also to provide context
+        from app.tools.news_scraper import NewsScraper
+        scraper = NewsScraper()
+        news = await scraper.fetch_news()
+
+        task_data = {
+            "type": "get_portfolio_insights",
+            "data": {
+                "portfolio": portfolio.get("holdings", []),
+                "news": news
+            }
+        }
+        
+        result = await orchestrator.process_request(
+            user_id=user_id,
+            request={
+                "intent": "market_analysis",
+                "data": task_data
+            }
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=400, detail="Failed to get insights")
+            
+        return result["data"]
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in insights endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/", response_model=PortfolioResponse)
 async def create_portfolio(

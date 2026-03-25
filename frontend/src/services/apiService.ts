@@ -51,6 +51,14 @@ export const portfolioService = {
       },
     });
     return response.data;
+  },
+  allocateBudget: async (id: string, data: any) => {
+    const response = await api.post(`/portfolio/${id}/allocate`, data);
+    return response.data;
+  },
+  getInsights: async (id: string) => {
+    const response = await api.get(`/portfolio/${id}/insights`);
+    return response.data;
   }
 };
 
@@ -66,8 +74,9 @@ export const analysisService = {
 };
 
 export const newsService = {
-  getNews: async (symbol?: string) => {
-    const response = await api.get('/news', { params: { symbol } });
+  getNews: async (portfolio?: any) => {
+    // Pass portfolio context if available to get categorized news
+    const response = await api.post('/news/categorize', { portfolio });
     return response.data;
   },
 };
@@ -77,6 +86,10 @@ export const jargonService = {
     const response = await api.get(`/jargon/explain/${term}`);
     return response.data;
   },
+  getGlossary: async () => {
+    const response = await api.get('/jargon/glossary');
+    return response.data;
+  }
 };
 
 export default api;

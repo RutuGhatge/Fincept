@@ -1,16 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import portfolio, analysis, news, jargon
-from app.db.database import connect_to_mongo, close_mongo_connection
-from app.config.settings import settings
 import logging
+from app.config.settings import settings
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

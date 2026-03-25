@@ -36,7 +36,16 @@ class Orchestrator:
     async def process_request(self, user_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
         """Process a high-level request from a user"""
         intent = request.get("intent")
-        data = request.get("data", {})
+        raw_data = request.get("data", {})
+        
+        # Ensure we have a mutable dictionary for data
+        data: Dict[str, Any] = {}
+        if isinstance(raw_data, dict):
+            for key, value in raw_data.items():
+                data[str(key)] = value
+        else:
+            data["raw_value"] = raw_data
+            
         data["user_id"] = user_id
         
         # In a real scenario, this would use an LLM or rule-based system to 
@@ -44,6 +53,7 @@ class Orchestrator:
         intent_to_agent = {
             "portfolio_management": "PortfolioAgent",
             "market_analysis": "AnalysisAgent",
+            "market_news": "NewsAgent",
             "financial_jargon": "JargonAgent",
             "financial_news": "NewsAgent"
         }
@@ -56,7 +66,7 @@ class Orchestrator:
             return {"success": False, "error": f"Unsupported intent: {intent}"}
             
         result = await self.distribute_task(agent_name, data)
-        if "error" in result:
+        if result and "error" in result:
             return {"success": False, "error": result["error"]}
             
         return {"success": True, "data": result}

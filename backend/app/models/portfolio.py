@@ -13,13 +13,13 @@ class Asset(BaseModel):
     name: str
     quantity: float
     average_price: float
-    current_price: Optional[float] = None
     type: str  # stock, crypto, etc.
+    current_price: Optional[float] = None
 
 class Portfolio(BaseModel):
-    id: Optional[str] = Field(None, alias="_id")
     user_id: str
     name: str
+    id: Optional[str] = Field(None, alias="_id")
     description: Optional[str] = None
     assets: List[Asset] = []
     created_at: datetime = Field(default_factory=datetime.utcnow)

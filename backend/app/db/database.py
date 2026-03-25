@@ -1,10 +1,12 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from app.config.settings import settings
 import logging
+from app.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 class Database:
     client: AsyncIOMotorClient = None
-    db = None
+    database = None
 
     async def connect(self):
         """Connect to MongoDB"""
@@ -41,17 +43,12 @@ class Database:
 # Create a singleton instance
 db = Database()
 
+# Legacy / Compatibility helpers
 async def connect_to_mongo():
-    db.client = AsyncIOMotorClient(settings.MONGODB_URL)
-    db.db = db.client[settings.DATABASE_NAME]
-    logging.info("Connected to MongoDB")
+    await db.connect()
 
 async def close_mongo_connection():
-    db.client.close()
-    logging.info("Closed MongoDB connection")
-
-def get_database():
-    return db.db
+    await db.disconnect()
 
 def get_db():
     return db.get_database()

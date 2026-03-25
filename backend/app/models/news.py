@@ -50,18 +50,15 @@ class NewsSource(BaseModel):
 
 
 class NewsArticle(BaseModel):
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     title: str = Field(..., description="Article title")
     content: str = Field(..., description="Article content/full text")
-    summary: Optional[str] = Field(None, description="AI-generated summary")
-    
-    # Source information
     source: NewsSource = Field(..., description="News source information")
-    author: Optional[str] = Field(None, description="Article author")
     url: str = Field(..., description="Article URL")
-    
-    # Categorization
     category: NewsCategory = Field(..., description="News category")
+    published_at: datetime = Field(..., description="Publication timestamp")
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    summary: Optional[str] = Field(None, description="AI-generated summary")
+    author: Optional[str] = Field(None, description="Article author")
     tags: List[str] = Field(default_factory=list, description="Article tags")
     mentioned_symbols: List[str] = Field(default_factory=list, description="Stock symbols mentioned")
     mentioned_companies: List[str] = Field(default_factory=list, description="Company names mentioned")

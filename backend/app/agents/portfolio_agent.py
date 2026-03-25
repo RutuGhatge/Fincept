@@ -2,13 +2,18 @@ from app.agents.base_agent import BaseAgent
 from typing import Dict, Any, List
 import logging
 
+logger = logging.getLogger(__name__)
+
 class PortfolioAgent(BaseAgent):
     def __init__(self):
         super().__init__(name="PortfolioAgent", role="Smart Portfolio Management")
 
+
     async def process_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         task_type = task.get("type")
-        data = task.get("data")
+        data = task.get("data", {})
+        if not isinstance(data, dict):
+            data = {"raw_value": data}
         
         if task_type == "create_portfolio":
             return await self._create_portfolio_recommendation(data)

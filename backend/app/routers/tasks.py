@@ -85,9 +85,9 @@ async def start_portfolio_analysis(
 
 @router.post("/news/fetch")
 async def start_news_fetch(
+    background_tasks: BackgroundTasks,
     category: str = "market_news",
     limit: int = 50,
-    background_tasks: BackgroundTasks,
     db=Depends(get_db)
 ):
     """Start background task to fetch news"""

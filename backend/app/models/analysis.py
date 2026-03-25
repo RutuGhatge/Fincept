@@ -48,10 +48,10 @@ class AnalysisStatus(str, Enum):
 
 
 class PortfolioAnalysis(BaseModel):
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     portfolio_id: PyObjectId = Field(..., description="Portfolio ID being analyzed")
     user_id: PyObjectId = Field(..., description="User ID who owns the portfolio")
     analysis_type: AnalysisType = Field(..., description="Type of analysis performed")
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     status: AnalysisStatus = Field(default=AnalysisStatus.PENDING, description="Analysis status")
     
     # Analysis results

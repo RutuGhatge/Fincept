@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
+from typing import Optional, List
+import json
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Investment Intelligence"
@@ -11,17 +12,36 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "investment_intelligence"
     
     # AI Keys
-    OPENAI_API_KEY: Optional[str] = None
+    # Note: .env uses GEMINI_API_KEY, but code uses GOOGLE_API_KEY in some places.
+    # We'll allow both or map one to the other.
     GOOGLE_API_KEY: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-1.5-flash"
     
     # Financial Data APIs
     ALPHA_VANTAGE_API_KEY: Optional[str] = None
     NEWS_API_KEY: Optional[str] = None
     
+    # Security
+    SECRET_KEY: str = "your-secret-key-change-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    # CORS
+    ALLOWED_ORIGINS: List[str] = ["*"]
+    
     # Cache
     CACHE_ENABLED: bool = True
     CACHE_EXPIRATION: int = 3600  # 1 hour
     
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding='utf-8', extra="ignore")
+
+    def __init__(self, **values):
+        super().__init__(**values)
+        if self.GEMINI_API_KEY and not self.GOOGLE_API_KEY:
+            self.GOOGLE_API_KEY = self.GEMINI_API_KEY
+        if not self.GOOGLE_API_KEY:
+            # Fallback if both are missing
+            pass
 
 settings = Settings()
