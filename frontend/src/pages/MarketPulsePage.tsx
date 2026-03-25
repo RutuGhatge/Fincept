@@ -126,8 +126,53 @@ const MarketPulsePage: React.FC = () => {
             </button>
           </div>
         </div>
+        {/* External News Sources Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-32 p-12 bg-stripe-dark rounded-[4rem] text-center space-y-12 shadow-2xl relative overflow-hidden"
+        >
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-stripe-cyan/10 blur-[80px] -translate-y-1/2 translate-x-1/2" />
+          
+          <div className="space-y-4 relative z-10">
+            <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+              Read more news in details, <br />
+              <span className="text-stripe-cyan">gain more information.</span>
+            </h3>
+            <p className="text-slate-400 text-xl font-medium max-w-2xl mx-auto">
+              Deepen your research by visiting our trusted external financial intelligence partners.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+            {[
+              { name: "Moneycontrol", url: "https://www.moneycontrol.com/" },
+              { name: "Chittorgarh", url: "https://www.chittorgarh.com/" },
+              { name: "Financial Express", url: "https://www.financialexpress.com/" },
+              { name: "The Economic Times", url: "https://economictimes.indiatimes.com/" }
+            ].map((source) => (
+              <a 
+                key={source.name}
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-stripe-cyan/50 transition-all group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-white font-black text-lg tracking-tight group-hover:text-stripe-cyan transition-colors">
+                    {source.name}
+                  </span>
+                  <ExternalLink className="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </div>
+
   );
 };
 
