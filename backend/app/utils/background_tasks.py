@@ -193,7 +193,6 @@ async def analyze_portfolio_task(portfolio_id: str, analysis_type: str, task_id:
     """Background task to analyze portfolio"""
     try:
         from app.agents.analysis_agent import AnalysisAgent
-        from app.agents.base_agent import AgentInput
         
         agent = AnalysisAgent()
         
@@ -201,20 +200,30 @@ async def analyze_portfolio_task(portfolio_id: str, analysis_type: str, task_id:
         if task_id:
             task_manager.update_task_progress(task_id, 25, "Initializing analysis")
         
-        # Prepare input
-        input_data = AgentInput(
-            user_id="system",
-            data={
-                "analysis_type": analysis_type,
-                "portfolio_id": portfolio_id
+        # Prepare task with correct mapping
+        task_mapping = {
+            "performance": "analyze_performance",
+            "risk": "assess_risk",
+            "allocation": "analyze_performance", # Fallback or specific allocation logic
+            "recommendation": "provide_recommendations",
+            "comprehensive": "analyze_performance" # Usually comprehensive starts with performance
+        }
+        
+        task_type = task_mapping.get(analysis_type, "analyze_performance")
+        
+        task = {
+            "type": task_type,
+            "data": {
+                "portfolio_id": portfolio_id,
+                "analysis_type": analysis_type
             }
-        )
+        }
         
         if task_id:
             task_manager.update_task_progress(task_id, 50, "Running analysis")
         
         # Run analysis
-        result = await agent.process(input_data)
+        result = await agent.process_task(task)
         
         if task_id:
             task_manager.update_task_progress(task_id, 90, "Finalizing results")
@@ -226,7 +235,7 @@ async def analyze_portfolio_task(portfolio_id: str, analysis_type: str, task_id:
         raise
 
 
-async def fetch_news_task(category: str = "market_news", limit: int = 50, task_id: str = None):
+async def fetch_news_task(category: str = "market_news", limit: int = 50, task_id: Optional[str] = None):
     """Background task to fetch news"""
     try:
         from app.tools.news_scraper import NewsScraper
