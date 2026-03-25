@@ -22,9 +22,9 @@ Fincept solves the "What's Next?" problem. By consolidating your entire portfoli
 - **Smart Portfolio Management**: institutional-grade tracking with multi-broker sync and dynamic CSV/Excel-based data ingestion.
 - **AI Insights & Risk Analysis**: Automated portfolio health checks, performance attribution, and sector exposure alerts.
 - **Allocate (Capital Optimizer)**: A personalized suggestion engine that tells you where to invest your next capital (e.g., ₹50,000) by analyzing your current asset distribution.
-- **Market Pulse**: AI-powered news intelligence that filters relevant financial updates and performs sentiment analysis on your holdings.
+- **Market Pulse**: AI-powered news intelligence that filters relevant financial updates, performs sentiment analysis, and provides direct links to trusted research partners (Moneycontrol, Economic Times, etc.).
 - **Jargon Decoder**: An AI financial coach that simplifies complex terms and explains market movements in plain language.
-- **Unified Pricing Tiers**: Tailored solutions for Individual (Retail), Multi-user (Enterprise), and Family Office needs.
+- **Unified Pricing Tiers**: Consolidated solutions for Individual (Retail), Multi-user (Enterprise), and Family Office (Wealth) needs.
 
 ## ⚙️ How we are doing this (The Architecture)
 We utilize a **Multi-Agent AI Architecture** where specialized agents collaborate to process user requests:
