@@ -9,15 +9,11 @@ import {
   Terminal as AllocateIcon,
   ChevronDown,
   Code,
-<<<<<<< HEAD
-  Info
-=======
   Info,
   Building2,
   UserCircle,
   LogOut,
   User
->>>>>>> 74309ae (feat: implement user profiles and personalized investment dashboard)
 } from 'lucide-react';
 import { authService } from '../services/apiService';
 
