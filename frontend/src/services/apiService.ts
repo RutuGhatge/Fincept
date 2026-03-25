@@ -32,6 +32,10 @@ export const authService = {
   register: async (data: any) => {
     const response = await axios.post(`${AUTH_BASE_URL}/register`, data);
     return response.data;
+  },
+  getProfile: async () => {
+    const response = await api.get(`${AUTH_BASE_URL}/me`);
+    return response.data;
   }
 };
 
