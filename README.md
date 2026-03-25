@@ -5,11 +5,11 @@ A multi-agent, AI-powered investment assistant built with FastAPI (backend) and 
 ## 🚀 Features
 
 ### Core MVP Features
-- **Smart Portfolio Management**: Create, update, and track investment portfolios
-- **AI-Powered Analysis**: Portfolio performance, risk assessment, and recommendations
-- **Financial News Intelligence**: Fetch, filter, and analyze relevant financial news
-- **Jargon Explainer**: AI-powered explanations of financial terms in simple language
-- **Real-time Market Data**: Live price updates and portfolio valuation
+- **Smart Portfolio Management**: Institutional-grade tracking with multi-broker sync and dynamic manual uploads (CSV/Excel support for Zerodha and others).
+- **AI-Powered Analysis**: Automated portfolio health checks, performance attribution, and sector exposure alerts.
+- **Allocate (Capital Optimizer)**: A personalized suggestion engine that analyzes your unique holdings to suggest how to invest your next capital (e.g., ₹50,000).
+- **Market Pulse**: AI-powered financial news aggregator with sentiment analysis and direct links to trusted research partners (Moneycontrol, Economic Times, etc.).
+- **Jargon Decoder**: An AI financial assistant that simplifies complex financial terms and concepts in plain language.
 
 ### Technical Features
 - **Multi-Agent Architecture**: Specialized AI agents for different tasks
@@ -197,7 +197,7 @@ The system uses a multi-agent architecture:
 
 ### AnalysisAgent
 - Performs portfolio analysis
-- Risk assessment and recommendations
+- Risk assessment and capital optimization (Allocate feature)
 - Performance metrics calculation
 
 ### NewsAgent
@@ -214,6 +214,13 @@ The system uses a multi-agent architecture:
 - Coordinates between agents
 - Handles multi-agent workflows
 - Routes user requests
+
+## 💰 Solutions & Pricing
+
+The platform offers consolidated pricing tiers for various user profiles:
+- **Retail**: Perfect for individual investors needing AI-powered portfolio healthcare.
+- **Enterprise**: Institutional-grade tools for corporate treasuries and large portfolios.
+- **Family Office**: Strategic wealth tracking and allocation for multi-generational wealth.
 
 ## 🔧 Configuration
 
