@@ -14,17 +14,10 @@ const Footer: React.FC = () => {
         { label: "AI Insights", path: "/analysis" },
         { label: "Market Pulse", path: "/news" },
         { label: "Jargon Decoder", path: "/jargon" },
-        { label: "Terminal", path: "/market-data" },
+        { label: "Allocate", path: "/allocate" },
       ]
     },
-    {
-      title: "Solutions",
-      links: [
-        { label: "Retail", path: "/solutions/retail" },
-        { label: "Enterprise", path: "/solutions/enterprise" },
-        { label: "Family", path: "/solutions/family" },
-      ]
-    },
+
     {
       title: "Developers",
       links: [
@@ -86,7 +79,13 @@ const Footer: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-12 mb-24">
             {/* Brand Column */}
             <div className="col-span-2 md:col-span-1 space-y-8">
-              <h2 onClick={() => navigate('/')} className="text-4xl font-black text-stripe-blue cursor-pointer tracking-tighter hover:scale-105 transition-transform">
+              <h2 
+                onClick={() => {
+                  navigate('/');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
+                className="text-4xl font-black text-stripe-blue cursor-pointer tracking-tighter hover:scale-105 transition-transform"
+              >
                 Fincept.
               </h2>
               <p className="text-stripe-slate text-sm leading-relaxed max-w-[200px] font-medium">

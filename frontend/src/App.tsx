@@ -1,24 +1,35 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import AnimatedBackground from "./components/AnimatedBackground";
 import MainLayout from "./components/MainLayout";
 import ScrollToTop from "./components/ScrollToTop";
+
 import Home from "./pages/Home";
 import PortfolioPage from "./pages/PortfolioPage";
 import AIInsightPage from "./pages/AIInsightPage";
 import MarketPulsePage from "./pages/MarketPulsePage";
 import JargonDecoderPage from "./pages/JargonDecoderPage";
-import TerminalPage from "./pages/TerminalPage";
+import AllocatePage from "./pages/AllocatePage";
 import Benefits from "./pages/Benefits";
+
 import ProductsOverview from "./pages/ProductsOverview";
+
 import { AboutProject, Documentation } from "./pages/DeveloperPages";
-import { Retail, Enterprise, Family } from "./pages/SolutionPages";
+import PricingPage from "./pages/PricingPage";
 import { PrivacyPolicy, TermsOfService, Cookies } from "./pages/LegalPages";
+
 import AuthPage from "./pages/AuthPage";
+
 
 const App: React.FC = () => {
   return (
     <Router>
+      {/* 🔥 BACKGROUND */}
+      <AnimatedBackground />
+
       <ScrollToTop />
+
       <MainLayout>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -26,29 +37,24 @@ const App: React.FC = () => {
           <Route path="/analysis" element={<AIInsightPage />} />
           <Route path="/news" element={<MarketPulsePage />} />
           <Route path="/jargon" element={<JargonDecoderPage />} />
-          <Route path="/market-data" element={<TerminalPage />} />
+          <Route path="/allocate" element={<AllocatePage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+
+
           <Route path="/benefits" element={<Benefits />} />
           <Route path="/products-overview" element={<ProductsOverview />} />
-          
-          {/* Solutions */}
-          <Route path="/solutions/retail" element={<Retail />} />
-          <Route path="/solutions/enterprise" element={<Enterprise />} />
-          <Route path="/solutions/family" element={<Family />} />
-          
-          {/* Developers */}
+
+
           <Route path="/developer/about" element={<AboutProject />} />
           <Route path="/developer/docs" element={<Documentation />} />
-          
-          {/* Auth */}
+
           <Route path="/auth/signin" element={<AuthPage />} />
-          
-          {/* Legal */}
+
           <Route path="/legal/privacy" element={<PrivacyPolicy />} />
           <Route path="/legal/terms" element={<TermsOfService />} />
           <Route path="/legal/cookies" element={<Cookies />} />
-          
-          {/* Pricing Placeholder */}
-          <Route path="/pricing" element={<div className="pt-32 p-10 text-center text-4xl font-black">Pricing Coming Soon</div>} />
+
+
         </Routes>
       </MainLayout>
     </Router>

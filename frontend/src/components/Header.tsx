@@ -6,14 +6,14 @@ import {
   ShieldCheck, 
   Newspaper, 
   BookOpen, 
-  Terminal as TerminalIcon,
+  Terminal as AllocateIcon,
   ChevronDown,
   Code,
   Info,
-  Users,
   Building2,
   UserCircle
 } from 'lucide-react';
+
 
 const Header: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -33,14 +33,9 @@ const Header: React.FC = () => {
     { title: "AI Insights", icon: <ShieldCheck className="w-5 h-5" />, path: "/analysis" },
     { title: "Market Pulse", icon: <Newspaper className="w-5 h-5" />, path: "/news" },
     { title: "Jargon Decoder", icon: <BookOpen className="w-5 h-5" />, path: "/jargon" },
-    { title: "Terminal", icon: <TerminalIcon className="w-5 h-5" />, path: "/market-data" },
+    { title: "Allocate", icon: <AllocateIcon className="w-5 h-5" />, path: "/allocate" },
   ];
 
-  const solutions = [
-    { title: "Retail", icon: <UserCircle className="w-5 h-5" />, path: "/solutions/retail" },
-    { title: "Enterprise", icon: <Building2 className="w-5 h-5" />, path: "/solutions/enterprise" },
-    { title: "Family", icon: <Users className="w-5 h-5" />, path: "/solutions/family" },
-  ];
 
   const developers = [
     { title: "GitHub", icon: <Code className="w-5 h-5" />, path: "https://github.com/RutuGhatge/Investment_Intelligence", external: true },
@@ -63,11 +58,15 @@ const Header: React.FC = () => {
     }`}>
       <div className="container mx-auto px-6 flex items-center justify-between">
         <div 
-          onClick={() => navigate('/')}
+          onClick={() => {
+            navigate('/');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           className="text-3xl font-black cursor-pointer tracking-tighter hover:opacity-80 transition-opacity text-stripe-blue"
         >
           Fincept.
         </div>
+
 
         {/* Navigation */}
         <nav className="hidden lg:flex items-center gap-10">
@@ -107,41 +106,7 @@ const Header: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* Solutions Dropdown */}
-          <div 
-            className="relative group"
-            onMouseEnter={() => setActiveMenu('solutions')}
-            onMouseLeave={() => setActiveMenu(null)}
-          >
-            <button className="flex items-center gap-1.5 font-bold text-stripe-dark hover:text-stripe-blue transition-colors">
-              Solutions <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
-            </button>
-            <AnimatePresence>
-              {activeMenu === 'solutions' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white rounded-2xl shadow-2xl p-4 border border-slate-100"
-                >
-                   <div className="space-y-1">
-                    {solutions.map((s) => (
-                      <button
-                        key={s.title}
-                        onClick={() => handleNav(s)}
-                        className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
-                      >
-                        <div className="p-2 bg-stripe-purple/10 rounded-lg text-stripe-purple">
-                          {s.icon}
-                        </div>
-                        <span className="font-semibold text-stripe-dark text-sm">{s.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+
 
           <div 
             className="relative group"
