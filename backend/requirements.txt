@@ -12,10 +12,10 @@ google-generativeai==0.3.2
 python-dotenv==1.0.0
 loguru==0.7.2
 yfinance>=0.2.40
-pandas==2.1.4
-numpy==1.25.2
+pandas>=2.1.4
+numpy>=1.25.2
 beautifulsoup4==4.12.2
-lxml==4.9.3
+lxml>=4.9.3
 aiofiles==23.2.1
 email-validator>=2.1.0
 strawberry-graphql>=0.214.0

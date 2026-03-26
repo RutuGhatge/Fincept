@@ -59,7 +59,12 @@ const NewsCard: React.FC<{ item: any; impact: 'positive' | 'negative' | 'none'; 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
-      className={`group p-8 rounded-[2.5rem] border transition-all ${isAlert ? 'bg-amber-50/30 border-amber-100 shadow-amber-500/5' : 'bg-white border-slate-100 hover:shadow-xl hover:shadow-stripe-cyan/5'}`}
+      className={`group p-8 rounded-[2.5rem] border transition-all ${
+        isAlert ? 'bg-amber-50/30 border-amber-100 shadow-amber-500/5' : 
+        impact === 'positive' ? 'bg-emerald-50/40 border-emerald-100 shadow-emerald-500/5' :
+        impact === 'negative' ? 'bg-red-50/40 border-red-100 shadow-red-500/5' :
+        'bg-white border-slate-100 hover:shadow-xl hover:shadow-stripe-cyan/5'
+      }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 flex-wrap">
@@ -101,16 +106,27 @@ const NewsCard: React.FC<{ item: any; impact: 'positive' | 'negative' | 'none'; 
               </p>
               {impact !== 'none' && (
                 <div className={`p-4 rounded-2xl ${impact === 'positive' ? 'bg-emerald-50 border border-emerald-100' : 'bg-red-50 border border-red-100'}`}>
-                  <p className={`text-sm font-bold ${impact === 'positive' ? 'text-emerald-700' : 'text-red-600'}`}>
+                  <p className={`text-sm font-bold ${impact === 'positive' ? 'text-emerald-700' : 'text-red-600'} mb-2`}>
                     {impact === 'positive' ? '✅ Portfolio Impact: Positive' : '⚠️ Portfolio Impact: Caution Advised'}
                   </p>
+                  {item.impact_reason && (
+                    <div className="pt-3 border-t border-current opacity-30">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1.5 opacity-70">Expert Portfolio Analysis</p>
+                      <p className={`text-sm font-bold leading-relaxed ${impact === 'positive' ? 'text-emerald-900' : 'text-red-900'}`}>
+                        {item.impact_reason}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
-              {item.source_url && item.source_url !== '#' && (
-                <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-stripe-cyan font-bold text-sm hover:underline">
-                  View full source <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
+              <a 
+                href={item.source_url && item.source_url !== '#' ? item.source_url : `https://news.google.com/search?q=${encodeURIComponent(item.title)}`}
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="inline-flex items-center gap-2 px-6 py-3 bg-stripe-cyan/10 text-stripe-cyan rounded-xl font-bold text-sm hover:bg-stripe-cyan hover:text-white transition-all group"
+              >
+                Read Full Story on Source <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </a>
             </div>
           </motion.div>
         )}
@@ -168,7 +184,9 @@ const MarketPulsePage: React.FC = () => {
     [allNews, symbols]
   );
 
-  const displayedNews = tab === 'portfolio' ? portfolioNews : allNews;
+  const displayedNews = tab === 'portfolio' 
+    ? portfolioNews 
+    : allNews.filter(item => !isRelatedToPortfolio(item, symbols));
 
   return (
     <div className="pt-32 pb-24 bg-slate-50 min-h-screen">

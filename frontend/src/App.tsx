@@ -15,6 +15,7 @@ import MarketPulsePage from "./pages/MarketPulsePage";
 import JargonDecoderPage from "./pages/JargonDecoderPage";
 import AllocatePage from "./pages/AllocatePage";
 import Benefits from "./pages/Benefits";
+import BrokerConnectPage from "./pages/BrokerConnectPage";
 
 import ProductsOverview from "./pages/ProductsOverview";
 
@@ -38,6 +39,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/broker-connect" element={<BrokerConnectPage />} />
           <Route path="/my-portfolio" element={<MyPortfolioPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/analysis" element={<AIInsightPage />} />

@@ -12,6 +12,7 @@ import {
   RefreshCcw,
   Search,
   Upload,
+  BarChart2,
   BarChart3,
   AlertCircle
 } from 'lucide-react';
@@ -221,43 +222,60 @@ const MyPortfolioPage: React.FC = () => {
               </span>
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-7xl font-black text-stripe-dark tracking-tight"
-            >
-              ₹{totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-            </motion.h1>
-
-            <div className="flex flex-wrap items-center gap-6 mt-4">
-              <div className={`flex items-center gap-1 font-black ${isProfit ? 'text-emerald-600' : 'text-red-500'}`}>
-                {isProfit ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                <span>{isProfit ? '+' : ''}₹{Math.abs(overallPnl).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                <span className="text-sm">({isProfit ? '+' : ''}{overallPnlPct.toFixed(2)}%)</span>
-              </div>
-              <span className="text-stripe-slate font-medium text-sm">
-                Invested: ₹{totalInvested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-black text-stripe-slate uppercase tracking-widest">
+                Total Investment
               </span>
+              <h2 className="text-3xl md:text-4xl font-black text-slate-400">
+                ₹{totalInvested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </h2>
+            </div>
+
+            <div className="flex flex-col gap-2 mt-6">
+              <span className="text-sm font-black text-stripe-blue uppercase tracking-widest">
+                Current Portfolio Value
+              </span>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-6xl md:text-8xl font-black text-stripe-dark tracking-tight"
+              >
+                ₹{totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </motion.h1>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 mt-6">
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-lg ${isProfit ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                {isProfit ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                <span>{isProfit ? '+' : ''}₹{Math.abs(overallPnl).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                <span className="text-base">({isProfit ? '+' : ''}{overallPnlPct.toFixed(2)}%)</span>
+              </div>
               {portfolio.updated_at && (
-                <span className="text-xs text-slate-400 font-medium">
-                  Updated {new Date(portfolio.updated_at).toLocaleDateString('en-IN')}
+                <span className="text-xs text-slate-400 font-medium bg-white px-3 py-1 rounded-full border border-slate-100">
+                  Refreshed {new Date(portfolio.updated_at).toLocaleDateString('en-IN')}
                 </span>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={fetchPortfolio}
-              className="p-4 bg-white border border-slate-200 rounded-2xl text-stripe-dark hover:bg-slate-50 transition-all group shadow-sm"
+              onClick={() => navigate('/news')}
+              className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-stripe-slate font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
             >
-              <RefreshCcw className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" />
+              <BarChart2 className="w-4 h-4" /> Market Pulse
             </button>
             <button
               onClick={() => navigate('/portfolio')}
-              className="flex items-center gap-2 px-8 py-4 bg-stripe-dark text-white rounded-2xl font-black shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+              className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-stripe-slate font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
             >
-              <Plus className="w-5 h-5" /> Add Holdings
+              <Plus className="w-4 h-4" /> Add Holdings
+            </button>
+            <button
+              onClick={fetchPortfolio}
+              className="p-3 bg-white border border-slate-200 rounded-2xl text-stripe-dark hover:bg-slate-50 transition-all group shadow-sm"
+            >
+              <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
             </button>
           </div>
         </div>
