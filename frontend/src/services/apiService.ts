@@ -49,11 +49,7 @@ export const portfolioService = {
     return response.data;
   },
   uploadPortfolio: async (formData: FormData) => {
-    const response = await api.post('/portfolio/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post('/portfolio/upload', formData);
     return response.data;
   },
   allocateBudget: async (id: string, data: any) => {

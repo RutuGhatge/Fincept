@@ -87,11 +87,11 @@ class PortfolioResponse(BaseModel):
     holdings: List[HoldingResponse]
     total_value: Optional[float]
     total_invested: Optional[float]
-    currency: str
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
-    metadata: Dict[str, Any]
+    currency: str = "INR"
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
     files: List[PortfolioFileResponse] = []
     
     # Computed fields
