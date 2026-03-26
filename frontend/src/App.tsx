@@ -16,6 +16,7 @@ import JargonDecoderPage from "./pages/JargonDecoderPage";
 import AllocatePage from "./pages/AllocatePage";
 import Benefits from "./pages/Benefits";
 import BrokerConnectPage from "./pages/BrokerConnectPage";
+import GeopoliticsPage from "./pages/GeopoliticsPage";
 
 import ProductsOverview from "./pages/ProductsOverview";
 
@@ -46,6 +47,7 @@ const App: React.FC = () => {
           <Route path="/analysis/audit" element={<PortfolioAuditPage />} />
           <Route path="/coming-soon" element={<ComingSoonPage />} />
           <Route path="/news" element={<MarketPulsePage />} />
+          <Route path="/geopolitics" element={<GeopoliticsPage />} />
           <Route path="/jargon" element={<JargonDecoderPage />} />
           <Route path="/allocate" element={<AllocatePage />} />
           <Route path="/pricing" element={<PricingPage />} />

@@ -44,12 +44,13 @@ async def shutdown_db_client():
     await db.disconnect()
 
 # Include REST Routers
-from app.routers import user, portfolio, analysis, news, jargon, recommendations, tasks
+from app.routers import user, portfolio, analysis, news, jargon, recommendations, tasks, geopolitics
 
 app.include_router(user.router)
 app.include_router(portfolio.router, prefix="/api/v1/portfolio", tags=["portfolio"])
 app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])
 app.include_router(news.router, prefix="/api/v1/news", tags=["news"])
+app.include_router(geopolitics.router, prefix="/api/v1/news", tags=["geopolitics"])
 app.include_router(jargon.router, prefix="/api/v1/jargon", tags=["jargon"])
 app.include_router(recommendations.router, prefix="/api/v1/recommendations", tags=["recommendations"])
 app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])

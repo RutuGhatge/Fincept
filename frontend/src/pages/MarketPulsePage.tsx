@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, TrendingDown, Minus, ExternalLink, Loader2,
   Newspaper, ChevronDown, ChevronUp, RefreshCcw, Wallet,
-  Zap, Info, AlertCircle
+  Zap, Info, AlertCircle, Globe
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { newsService, portfolioService } from '../services/apiService';
@@ -312,6 +312,35 @@ const MarketPulsePage: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Geopolitics Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          onClick={() => navigate('/geopolitics')}
+          className="mt-20 p-12 bg-gradient-to-br from-slate-900 to-red-950 rounded-[3rem] text-white cursor-pointer hover:shadow-2xl hover:shadow-red-500/20 transition-all relative overflow-hidden group border border-red-500/20"
+        >
+          <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-8">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2 mb-4 text-red-400">
+                <Globe className="w-5 h-5 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-[0.2em]">Geopolitical Risk Lens</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight">
+                War. Elections. Trade. <br />
+                <span className="text-red-500 underline decoration-red-500/30 underline-offset-8">How does it hit YOUR wallet?</span>
+              </h2>
+              <p className="text-xl font-medium text-slate-300 leading-relaxed">
+                Global tensions ripple through markets instantly. Decode how the Middle East, US-China relations, and local politics are affecting your specific holdings.
+              </p>
+            </div>
+            <div className="flex items-center gap-4 px-10 py-5 bg-red-600 text-white rounded-2xl font-black shadow-xl hover:bg-red-500 transition-colors group-hover:scale-105 transform duration-300">
+              Check Geopolitical Impact <Zap className="w-6 h-6 fill-white" />
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} featureName="Portfolio Intelligence" />
