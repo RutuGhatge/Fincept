@@ -3,8 +3,6 @@ import {
   TrendingUp, 
   TrendingDown, 
   DollarSign, 
-  PieChart as PieChartIcon,
-  ArrowUpRight,
   Plus
 } from 'lucide-react';
 import { 

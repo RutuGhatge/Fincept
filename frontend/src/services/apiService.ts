@@ -79,6 +79,14 @@ export const portfolioService = {
   getUserPortfolios: async (userId: string) => {
     const response = await api.get('/portfolio/', { params: { user_id: userId } });
     return response.data;
+  },
+  deletePortfolio: async (portfolioId: string, userId: string) => {
+    const response = await api.delete(`/portfolio/${portfolioId}`, { params: { user_id: userId } });
+    return response.data;
+  },
+  deletePortfolioFile: async (portfolioId: string, fileId: string, userId: string) => {
+    const response = await api.delete(`/portfolio/${portfolioId}/files/${fileId}`, { params: { user_id: userId } });
+    return response.data;
   }
 };
 
@@ -108,6 +116,18 @@ export const newsService = {
     });
     return response.data;
   },
+};
+
+export const geopoliticsService = {
+  getGeopolitics: async (symbols?: string, forceRefresh?: boolean) => {
+    const response = await api.get('/news/geopolitics', {
+      params: {
+        symbols,
+        force_refresh: forceRefresh
+      }
+    });
+    return response.data;
+  }
 };
 
 export const jargonService = {

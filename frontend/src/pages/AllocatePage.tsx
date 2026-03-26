@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Settings2, Cpu, Zap, PieChart, ArrowRight, Lock, 
-  Loader2, AlertCircle, LogIn, TrendingUp,
+  Settings2, Cpu, Zap, PieChart, Lock, 
+  Loader2, AlertCircle, LogIn,
   Download, MessageSquare, User, Target, Calendar,
-  ChevronRight, RefreshCcw, FileText
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../services/apiService';
@@ -44,7 +44,6 @@ const AllocatePage: React.FC = () => {
   const [allocation, setAllocation] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [error, setError] = useState('');
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -82,7 +81,6 @@ const AllocatePage: React.FC = () => {
   const handleAIAllocation = async () => {
     if (!portfolio) return;
     setLoading(true);
-    setError('');
     
     const payload = mode === 'manual' ? {
       budget: parseInt(budget),
@@ -101,12 +99,9 @@ const AllocatePage: React.FC = () => {
       const response = await portfolioService.allocateWithGemini(portfolio.id, payload);
       if (response.success) {
         setAllocation(response.data);
-      } else {
-        setError(response.detail || "Failed to generate AI allocation.");
       }
     } catch (err: any) {
       console.error("AI Allocation failed:", err);
-      setError("AI engine encountered an error. Please try again.");
     } finally {
       setLoading(false);
     }

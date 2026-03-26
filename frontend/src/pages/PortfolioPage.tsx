@@ -12,7 +12,10 @@ import {
   Loader,
   Lock,
   LayoutDashboard,
-  Wallet
+  Wallet,
+  Trash2,
+  Clock,
+  Calendar
 } from 'lucide-react';
 import { portfolioService } from '../services/apiService';
 import AuthModal from '../components/AuthModal';
@@ -25,6 +28,7 @@ const PortfolioPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [portfolio, setPortfolio] = useState<any>(null);
   const [hasPortfolio, setHasPortfolio] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -39,11 +43,24 @@ const PortfolioPage: React.FC = () => {
     }
     // Check if portfolio already exists
     if (userId) {
-      portfolioService.getMyPortfolio(userId)
-        .then(p => { if (p?.id) setHasPortfolio(true); })
-        .catch(() => {});
+      fetchPortfolioData(userId);
     }
   }, []);
+
+  const fetchPortfolioData = async (userId: string) => {
+    try {
+      const p = await portfolioService.getMyPortfolio(userId);
+      if (p?.id) {
+        setPortfolio(p);
+        setHasPortfolio(true);
+      } else {
+        setHasPortfolio(false);
+        setPortfolio(null);
+      }
+    } catch (err) {
+      console.error("Failed to fetch portfolio:", err);
+    }
+  };
 
   const checkAuth = () => {
     if (!isAuthenticated) {
@@ -77,6 +94,7 @@ const PortfolioPage: React.FC = () => {
       await portfolioService.uploadPortfolio(formData);
       setSuccess(true);
       setFile(null); // Clear after upload
+      fetchPortfolioData(localStorage.getItem('user_id') || '');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Upload failed. Please check the file format (Excel/CSV).');
     } finally {
@@ -154,10 +172,18 @@ const PortfolioPage: React.FC = () => {
                 <Wallet className="w-4 h-4" /> View My Portfolio
               </button>
               <button
-                onClick={() => navigate('/my-portfolio')}
-                className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-stripe-blue text-stripe-blue rounded-2xl font-black hover:bg-stripe-blue hover:text-white transition-all shadow-md"
+                onClick={async () => {
+                  const p = await portfolioService.getMyPortfolio(localStorage.getItem('user_id') || '');
+                  if (p?.id && window.confirm("Are you sure you want to delete your entire portfolio? This cannot be undone.")) {
+                    await portfolioService.deletePortfolio(p.id, localStorage.getItem('user_id') || '');
+                    setHasPortfolio(false);
+                    setSuccess(false);
+                    window.location.reload();
+                  }
+                }}
+                className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 border-2 border-red-100 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all shadow-md"
               >
-                <LayoutDashboard className="w-4 h-4" /> View My Dashboard
+                Delete Portfolio
               </button>
             </div>
           </motion.div>
@@ -202,7 +228,7 @@ const PortfolioPage: React.FC = () => {
                       onClick={() => navigate('/my-portfolio')}
                       className="w-full py-4 bg-stripe-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-dark transition-all shadow-lg"
                     >
-                      <BarChart3 className="w-5 h-5" /> Go to My Dashboard
+                      <BarChart3 className="w-5 h-5" /> Go to My Portfolio
                     </button>
                   </div>
                 )}
@@ -234,7 +260,7 @@ const PortfolioPage: React.FC = () => {
             </div>
             <h3 className="text-3xl font-black text-stripe-dark mb-4">Upload Manual Data</h3>
             <p className="text-lg text-stripe-slate leading-relaxed mb-8">
-              Upload your portfolio in CSV, Excel (XLSX), PDF, or DOCX formats. Our AI agent will parse the data and generate comprehensive insights.
+              Upload your portfolio in CSV, Excel (XLSX), PDF, or DOCX formats. You can upload multiple files to combine your portfolios into a single view.
             </p>
 
             {method === 'manual' && (
@@ -303,6 +329,71 @@ const PortfolioPage: React.FC = () => {
             )}
           </motion.div>
         </div>
+
+        {/* Manage Uploaded Files Section */}
+                {/* Manage Uploaded Files Section */}
+        {hasPortfolio && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-20"
+          >
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-slate-100 rounded-2xl">
+                <FileText className="w-6 h-6 text-stripe-dark" />
+              </div>
+              <h2 className="text-3xl font-black text-stripe-dark">Manage Uploaded Files</h2>
+            </div>
+
+            {portfolio?.files?.length > 0 ? (
+              <div className="grid gap-4">
+                {portfolio.files.map((f: any) => (
+                  <div 
+                    key={f.id} 
+                    className="bg-slate-50 border border-slate-100 p-6 rounded-[2rem] flex items-center justify-between group hover:border-stripe-blue/30 transition-all"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                        <FileText className="w-6 h-6 text-stripe-blue" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-stripe-dark text-lg">{f.filename}</p>
+                        <div className="flex items-center gap-4 text-sm text-stripe-slate font-medium">
+                          <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {new Date(f.upload_date).toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1.5"><BarChart3 className="w-4 h-4" /> {f.holdings_count} Holdings</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (window.confirm(`Are you sure you want to remove ${f.filename}? This will update your merged portfolio.`)) {
+                          try {
+                            await portfolioService.deletePortfolioFile(portfolio.id, f.id, localStorage.getItem('user_id') || '');
+                            fetchPortfolioData(localStorage.getItem('user_id') || '');
+                          } catch (err) {
+                            alert("Failed to delete file.");
+                          }
+                        }
+                      }}
+                      className="p-4 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
+                      title="Remove File"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-12 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] text-center">
+                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                <p className="text-stripe-slate font-medium">
+                  No file tracking data available for previous uploads. <br />
+                  New uploads will appear here for individual management.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Feature Highlights */}
         <div className="mt-24 grid md:grid-cols-3 gap-8">

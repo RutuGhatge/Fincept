@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  TrendingUp, TrendingDown, Zap, Target, ArrowUpRight, ArrowRight,
+  TrendingUp, TrendingDown, Zap, Target, ArrowRight,
   PieChart, Loader2, Lock, ShieldCheck, BarChart3, AlertTriangle,
-  CheckCircle2, XCircle, Activity, FileText, ChevronRight, Upload,
+  CheckCircle2, Activity, FileText, Upload,
   RefreshCcw, Layers, Globe, Building2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -49,18 +49,6 @@ function inferSector(symbol: string, name: string): string {
   }
   return 'Diversified';
 }
-
-const SECTOR_TRENDS: Record<string, { trend: 'bullish' | 'bearish' | 'neutral'; reason: string; confidence: number }> = {
-  'Technology': { trend: 'bullish', reason: 'IT exports resilient. AI tailwinds benefiting mid-cap IT. Weak USD remains a risk.', confidence: 72 },
-  'Banking & Finance': { trend: 'bullish', reason: 'RBI pause cycle supports NIMs. Credit growth at 14%. PSU banks re-rating ongoing.', confidence: 68 },
-  'Pharma & Healthcare': { trend: 'neutral', reason: 'US FDA approvals steady but pricing pressure continues. Generic headwinds.', confidence: 55 },
-  'Consumer & FMCG': { trend: 'neutral', reason: 'Rural recovery slow. Input costs stable. Volume growth improving QoQ.', confidence: 58 },
-  'Energy & Utilities': { trend: 'bullish', reason: 'Green energy capex boom. Govt infra push. Reliance refining margins stable.', confidence: 65 },
-  'Mutual Funds': { trend: 'bullish', reason: 'SIP inflows at record highs. Broad market participation supporting equity MFs.', confidence: 70 },
-  'Infrastructure': { trend: 'bullish', reason: 'Govt ₹11L Cr capex target. Order books at 5-year high. Cement volume growth strong.', confidence: 74 },
-  'Auto & EV': { trend: 'neutral', reason: 'EV transition underway. Semiconductor supply normalized. Premium segment strong.', confidence: 60 },
-  'Diversified': { trend: 'neutral', reason: 'Mixed signals. Consider reclassifying holdings for better exposure mapping.', confidence: 45 },
-};
 
 // ---- Derived Analysis ----
 function analyzePortfolio(portfolio: Portfolio) {
@@ -423,7 +411,6 @@ const AIInsightPage: React.FC = () => {
                 ) : (
                   <div className="space-y-5">
                     {analysis!.sectorExposure.map((s, i) => {
-                      const trend = SECTOR_TRENDS[s.name];
                       return (
                         <div key={s.name} className={`p-6 rounded-2xl border ${
                           s.pnlPct >= 5 ? 'bg-emerald-50/50 border-emerald-100' :

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Briefcase, TrendingUp, Plus, Search, Filter } from 'lucide-react';
+import { TrendingUp, Plus, Search, Filter } from 'lucide-react';
 
 const assets = [
   { symbol: 'AAPL', name: 'Apple Inc.', quantity: 15, avgPrice: 175.20, currentPrice: 189.45, change: 8.1, type: 'Stock' },

@@ -70,6 +70,16 @@ class PortfolioUpdate(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
 
 
+class PortfolioFileResponse(BaseModel):
+    id: str
+    filename: str
+    upload_date: datetime
+    holdings_count: int
+
+    class Config:
+        from_attributes = True
+
+
 class PortfolioResponse(BaseModel):
     id: str
     name: str
@@ -82,6 +92,7 @@ class PortfolioResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata: Dict[str, Any]
+    files: List[PortfolioFileResponse] = []
     
     # Computed fields
     total_return: Optional[float] = Field(None, description="Total return amount")

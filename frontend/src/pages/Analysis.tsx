@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, ShieldAlert, Zap, MessageSquare, Send } from 'lucide-react';
+import { ShieldAlert, Zap } from 'lucide-react';
 
 const Analysis = () => {
   return (

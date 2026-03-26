@@ -10,7 +10,6 @@ import {
   ChevronDown,
   Code,
   Info,
-  Building2,
   UserCircle,
   LogOut,
   User

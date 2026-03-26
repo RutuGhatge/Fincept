@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, TrendingDown, Minus, ExternalLink, Loader2,
   Newspaper, ChevronDown, ChevronUp, RefreshCcw, Wallet,
-  Zap, Info, AlertCircle, Globe
+  Zap, Info, Globe
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { newsService, portfolioService } from '../services/apiService';
@@ -177,7 +177,7 @@ const MarketPulsePage: React.FC = () => {
     }
   }, [portfolio]);
 
-  useEffect(() => { fetchNews(); }, []);
+  useEffect(() => { fetchNews(); }, [fetchNews]);
 
   const portfolioNews = useMemo(() =>
     allNews.filter(item => isRelatedToPortfolio(item, symbols)),

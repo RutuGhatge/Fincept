@@ -170,7 +170,8 @@ async def upload_portfolio(
             user_id=user_id,
             name=portfolio_name,
             holdings=[h.dict() for h in holdings_create],
-            currency="INR"
+            currency="INR",
+            file_info={"filename": file.filename}
         )
         
         if not result:
@@ -357,6 +358,40 @@ async def delete_portfolio(
         raise
     except Exception as e:
         logger.error(f"Error deleting portfolio: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+@router.delete("/{portfolio_id}/files/{file_id}", response_model=PortfolioResponse)
+async def delete_portfolio_file(
+    portfolio_id: str,
+    file_id: str,
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Delete a specific uploaded file from portfolio"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.delete_portfolio_file(
+            portfolio_id=portfolio_id,
+            file_id=file_id,
+            user_id=user_id
+        )
+        
+        if not portfolio:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Portfolio or file not found"
+            )
+        
+        return portfolio
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting portfolio file: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)

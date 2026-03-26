@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -14,7 +14,8 @@ import {
   Upload,
   BarChart2,
   BarChart3,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -101,7 +102,7 @@ const MyPortfolioPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  const fetchPortfolio = async () => {
+  const fetchPortfolio = useCallback(async () => {
     const userId = localStorage.getItem('user_id');
     const token = localStorage.getItem('access_token');
 
@@ -124,11 +125,27 @@ const MyPortfolioPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  }, [navigate]);
+
+  const handleDelete = async () => {
+    if (!portfolio || !portfolio.id) return;
+    
+    if (window.confirm("Are you sure you want to delete your entire portfolio? This action cannot be undone.")) {
+      try {
+        const userId = localStorage.getItem('user_id') || '';
+        await portfolioService.deletePortfolio(portfolio.id, userId);
+        setPortfolio(null);
+        navigate('/portfolio');
+      } catch (err: any) {
+        console.error("Failed to delete portfolio:", err);
+        alert("Failed to delete portfolio. Please try again.");
+      }
+    }
   };
 
   useEffect(() => {
     fetchPortfolio();
-  }, []);
+  }, [fetchPortfolio]);
 
   // ---- Derived analytics from real data ----
 
@@ -270,6 +287,13 @@ const MyPortfolioPage: React.FC = () => {
               className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-stripe-slate font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
             >
               <Plus className="w-4 h-4" /> Add Holdings
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-3 bg-white border border-red-200 rounded-2xl text-red-500 hover:bg-red-50 transition-all shadow-sm"
+              title="Delete Portfolio"
+            >
+              <Trash2 className="w-5 h-5" />
             </button>
             <button
               onClick={fetchPortfolio}

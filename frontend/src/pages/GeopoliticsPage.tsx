@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Globe, Loader2, AlertTriangle, TrendingDown, TrendingUp,
   Eye, ArrowLeft, RefreshCcw, ExternalLink, Shield,
-  Minus, Zap, MapPin, Users
+  Zap, MapPin, Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { portfolioService } from '../services/apiService';
-import axios from 'axios';
+import { portfolioService, geopoliticsService } from '../services/apiService';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+
 
 const CONFLICT_COLORS: Record<string, string> = {
   'High':   'bg-red-100 text-red-700 border-red-200',
@@ -48,11 +47,9 @@ const GeopoliticsPage: React.FC = () => {
         } catch (_) {}
       }
 
-      const res = await axios.get(`${API_BASE}/news/geopolitics`, {
-        params: { symbols: symbolsParam },
-      });
-      setGeoNews(res.data.geo_news ?? []);
-      setPortfolioImpact(res.data.portfolio_impact ?? []);
+      const res = await geopoliticsService.getGeopolitics(symbolsParam);
+      setGeoNews(res.geo_news ?? []);
+      setPortfolioImpact(res.portfolio_impact ?? []);
     } catch (e: any) {
       setError('Could not load geopolitical intelligence. Please try again.');
     } finally {

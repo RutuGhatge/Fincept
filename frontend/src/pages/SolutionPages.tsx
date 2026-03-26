@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { UserCircle, Building2, Users, ArrowRight, ShieldCheck, Globe, Zap } from 'lucide-react';
+import { UserCircle, Building2, Users, Zap } from 'lucide-react';
 
 const SolutionContainer: React.FC<{
   title: string;
