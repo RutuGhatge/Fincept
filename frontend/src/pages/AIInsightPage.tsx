@@ -4,7 +4,7 @@ import {
   TrendingUp, TrendingDown, Zap, Target, ArrowUpRight, ArrowRight,
   PieChart, Loader2, Lock, ShieldCheck, BarChart3, AlertTriangle,
   CheckCircle2, XCircle, Activity, FileText, ChevronRight, Upload,
-  RefreshCcw, Layers
+  RefreshCcw, Layers, Globe, Building2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../services/apiService';
@@ -29,6 +29,38 @@ interface Portfolio {
   total_invested: number;
   holdings: Holding[];
 }
+
+// ---- Sector Inference ----
+const SECTOR_KEYWORDS: Record<string, string[]> = {
+  'Technology': ['tech', 'software', 'it', 'infosys', 'tcs', 'wipro', 'hcl', 'tech mahindra', 'mphasis', 'ltimindtree', 'oracle', 'persistent'],
+  'Banking & Finance': ['bank', 'hdfc', 'icici', 'kotak', 'axis', 'sbi', 'finance', 'financial', 'nbfc', 'bajaj finserv', 'indusind'],
+  'Pharma & Healthcare': ['pharma', 'health', 'med', 'sun pharma', 'dr reddy', 'cipla', 'divi', 'biocon', 'abbott'],
+  'Consumer & FMCG': ['fmcg', 'consumer', 'hindustan unilever', 'hul', 'nestle', 'dabur', 'marico', 'tata consumer', 'britannia', 'colgate'],
+  'Energy & Utilities': ['energy', 'oil', 'gas', 'reliance', 'ongc', 'power', 'ntpc', 'tata power', 'adani green', 'bpcl', 'iocl'],
+  'Mutual Funds': ['fund', 'growth', 'direct', 'flex', 'cap', 'nifty', 'index', 'midcap', 'smallcap', 'quant', 'parag parikh'],
+  'Infrastructure': ['infra', 'construction', 'larsen', 'l&t', 'cement', 'ultratech', 'acc', 'ambuja', 'dlf', 'godrej'],
+  'Auto & EV': ['auto', 'motor', 'tata motors', 'maruti', 'mahindra', 'bajaj auto', 'hero', 'eicher', 'tvs'],
+};
+
+function inferSector(symbol: string, name: string): string {
+  const text = (symbol + ' ' + name).toLowerCase();
+  for (const [sector, kws] of Object.entries(SECTOR_KEYWORDS)) {
+    if (kws.some(kw => text.includes(kw.toLowerCase()))) return sector;
+  }
+  return 'Diversified';
+}
+
+const SECTOR_TRENDS: Record<string, { trend: 'bullish' | 'bearish' | 'neutral'; reason: string; confidence: number }> = {
+  'Technology': { trend: 'bullish', reason: 'IT exports resilient. AI tailwinds benefiting mid-cap IT. Weak USD remains a risk.', confidence: 72 },
+  'Banking & Finance': { trend: 'bullish', reason: 'RBI pause cycle supports NIMs. Credit growth at 14%. PSU banks re-rating ongoing.', confidence: 68 },
+  'Pharma & Healthcare': { trend: 'neutral', reason: 'US FDA approvals steady but pricing pressure continues. Generic headwinds.', confidence: 55 },
+  'Consumer & FMCG': { trend: 'neutral', reason: 'Rural recovery slow. Input costs stable. Volume growth improving QoQ.', confidence: 58 },
+  'Energy & Utilities': { trend: 'bullish', reason: 'Green energy capex boom. Govt infra push. Reliance refining margins stable.', confidence: 65 },
+  'Mutual Funds': { trend: 'bullish', reason: 'SIP inflows at record highs. Broad market participation supporting equity MFs.', confidence: 70 },
+  'Infrastructure': { trend: 'bullish', reason: 'Govt ₹11L Cr capex target. Order books at 5-year high. Cement volume growth strong.', confidence: 74 },
+  'Auto & EV': { trend: 'neutral', reason: 'EV transition underway. Semiconductor supply normalized. Premium segment strong.', confidence: 60 },
+  'Diversified': { trend: 'neutral', reason: 'Mixed signals. Consider reclassifying holdings for better exposure mapping.', confidence: 45 },
+};
 
 // ---- Derived Analysis ----
 function analyzePortfolio(portfolio: Portfolio) {
@@ -76,10 +108,33 @@ function analyzePortfolio(portfolio: Portfolio) {
   const marketBenchmark = 8;
   const isBeatingMarket = overallPnlPct > marketBenchmark;
 
+  // Sector exposure
+  const sectorMap: Record<string, { value: number; invested: number; holdings: string[] }> = {};
+  withPnl.forEach(h => {
+    const sector = inferSector(h.symbol, h.name);
+    if (!sectorMap[sector]) sectorMap[sector] = { value: 0, invested: 0, holdings: [] };
+    sectorMap[sector].value += h.marketVal;
+    sectorMap[sector].invested += h.invested;
+    sectorMap[sector].holdings.push(h.symbol);
+  });
+
+  const sectorExposure = Object.entries(sectorMap)
+    .map(([name, data]) => ({
+      name,
+      value: data.value,
+      invested: data.invested,
+      pnl: data.value - data.invested,
+      pnlPct: data.invested > 0 ? ((data.value - data.invested) / data.invested) * 100 : 0,
+      allocationPct: totalValue > 0 ? (data.value / totalValue) * 100 : 0,
+      holdingCount: data.holdings.length,
+      symbols: data.holdings,
+    }))
+    .sort((a, b) => b.allocationPct - a.allocationPct);
+
   return {
     withPnl, topPerformers, stopLosers, overallPnl, overallPnlPct, top3Weight,
     isConcentrated, equityPct, mfPct, diversificationScore, isDiversified,
-    holdingsCount, losersCount, gainersCount, isBeatingMarket
+    holdingsCount, losersCount, gainersCount, isBeatingMarket, sectorExposure
   };
 }
 
@@ -353,6 +408,204 @@ const AIInsightPage: React.FC = () => {
                     </p>
                   </div>
                 </div>
+              </motion.div>
+
+              {/* Sector Exposure Breakdown */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-stripe-cyan/10 rounded-xl"><Building2 className="w-5 h-5 text-stripe-cyan" /></div>
+                  <h3 className="text-2xl font-black text-stripe-dark">Sector Exposure Breakdown</h3>
+                </div>
+                <p className="text-slate-400 text-sm font-medium mb-8 ml-14">Detailed allocation across sectors — where your money actually lives and how each sector performs.</p>
+
+                {analysis!.sectorExposure.length === 0 ? (
+                  <p className="text-slate-400 text-sm text-center py-8">Could not auto-detect sectors. Ensure holdings have clear names.</p>
+                ) : (
+                  <div className="space-y-5">
+                    {analysis!.sectorExposure.map((s, i) => {
+                      const trend = SECTOR_TRENDS[s.name];
+                      return (
+                        <div key={s.name} className={`p-6 rounded-2xl border ${
+                          s.pnlPct >= 5 ? 'bg-emerald-50/50 border-emerald-100' :
+                          s.pnlPct <= -5 ? 'bg-red-50/50 border-red-100' :
+                          'bg-slate-50 border-slate-100'
+                        }`}>
+                          <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-base font-black text-stripe-dark">{s.name}</span>
+                                <span className="text-xs font-bold text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-100">{s.holdingCount} holding{s.holdingCount > 1 ? 's' : ''}</span>
+                              </div>
+                              <p className="text-xs text-slate-400 font-medium">{s.symbols.join(', ')}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Allocation</p>
+                                <p className="text-xl font-black text-stripe-dark">{s.allocationPct.toFixed(1)}%</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sector P&L</p>
+                                <p className={`text-xl font-black ${s.pnlPct >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{s.pnlPct >= 0 ? '+' : ''}{s.pnlPct.toFixed(2)}%</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Value</p>
+                                <p className="text-xl font-black text-stripe-dark">₹{s.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bar */}
+                          <div className="h-2 bg-white/80 rounded-full overflow-hidden mb-3">
+                            <div
+                              className={`h-full rounded-full transition-all ${s.pnlPct >= 5 ? 'bg-emerald-400' : s.pnlPct <= -5 ? 'bg-red-400' : 'bg-stripe-blue'}`}
+                              style={{ width: `${Math.min(100, s.allocationPct)}%` }}
+                            />
+                          </div>
+
+                          {/* Risk note */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {s.allocationPct > 40 && (
+                              <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-100 px-3 py-1 rounded-full flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> High Concentration Risk</span>
+                            )}
+                            {s.pnlPct >= 10 && (
+                              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Strong Performer</span>
+                            )}
+                            {s.pnlPct <= -10 && (
+                              <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-3 py-1 rounded-full flex items-center gap-1"><TrendingDown className="w-3 h-3" /> Review Exit Strategy</span>
+                            )}
+                            <span className="text-xs text-slate-400 font-medium ml-auto">Invested: ₹{s.invested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Portfolio Underlying Sector Composition */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-stripe-purple/10 rounded-xl"><Globe className="w-5 h-5 text-stripe-purple" /></div>
+                  <h3 className="text-2xl font-black text-stripe-dark">Underlying Sector Composition</h3>
+                </div>
+                <p className="text-slate-400 text-sm font-medium mb-8 ml-14">
+                  Your actual money in each sector — combining direct stocks <em>and</em> what your mutual funds invest in (Pharma, Finance, Tech, etc.).
+                </p>
+
+                {(() => {
+                  const MF_SECTOR_ALLOC: Record<string, Record<string, number>> = {
+                    'parag parikh': { 'Banking & Finance': 18, 'Technology': 22, 'Consumer & FMCG': 15, 'Energy': 10, 'Pharma & Healthcare': 8, 'Auto & EV': 7, 'Infrastructure': 5, 'Cash & Others': 15 },
+                    'quant small cap': { 'Energy': 20, 'Banking & Finance': 16, 'Consumer & FMCG': 14, 'Infrastructure': 12, 'Technology': 10, 'Auto & EV': 8, 'Pharma & Healthcare': 7, 'Cash & Others': 13 },
+                    'hdfc flexi': { 'Banking & Finance': 27, 'Technology': 18, 'Consumer & FMCG': 13, 'Energy': 11, 'Auto & EV': 9, 'Pharma & Healthcare': 8, 'Infrastructure': 6, 'Cash & Others': 8 },
+                    'axis bluechip': { 'Banking & Finance': 30, 'Technology': 20, 'Consumer & FMCG': 14, 'Energy': 10, 'Auto & EV': 8, 'Pharma & Healthcare': 7, 'Cash & Others': 11 },
+                  };
+
+                  const SECTOR_COLORS: Record<string, string> = {
+                    'Banking & Finance': 'bg-blue-500',
+                    'Technology': 'bg-violet-500',
+                    'Consumer & FMCG': 'bg-orange-400',
+                    'Energy': 'bg-yellow-400',
+                    'Pharma & Healthcare': 'bg-emerald-500',
+                    'Auto & EV': 'bg-cyan-400',
+                    'Infrastructure': 'bg-slate-400',
+                    'Cash & Others': 'bg-pink-300',
+                    'Diversified': 'bg-gray-300',
+                  };
+
+                  const holdings = portfolio!.holdings ?? [];
+                  const totalVal = portfolio!.total_value ?? 0;
+                  const masterSectors: Record<string, number> = {};
+
+                  holdings.forEach(h => {
+                    const nameL = (h.name ?? '').toLowerCase();
+                    const hValue = h.market_value ?? (h.average_cost * h.quantity);
+                    const isMF = h.asset_type === 'mutual_fund' || nameL.includes('fund') || nameL.includes('growth') || nameL.includes('cap') || nameL.includes('flexi') || nameL.includes('direct');
+
+                    if (isMF) {
+                      let matched = false;
+                      for (const [key, alloc] of Object.entries(MF_SECTOR_ALLOC)) {
+                        if (nameL.includes(key)) {
+                          Object.entries(alloc).forEach(([sec, pct]) => {
+                            masterSectors[sec] = (masterSectors[sec] ?? 0) + (hValue * pct / 100);
+                          });
+                          matched = true;
+                          break;
+                        }
+                      }
+                      if (!matched) {
+                        const generic: Record<string, number> = { 'Banking & Finance': 25, 'Technology': 18, 'Consumer & FMCG': 14, 'Energy': 11, 'Pharma & Healthcare': 9, 'Auto & EV': 7, 'Cash & Others': 16 };
+                        Object.entries(generic).forEach(([sec, pct]) => {
+                          masterSectors[sec] = (masterSectors[sec] ?? 0) + (hValue * pct / 100);
+                        });
+                      }
+                    } else {
+                      const sec = inferSector(h.symbol ?? '', h.name ?? '');
+                      masterSectors[sec] = (masterSectors[sec] ?? 0) + hValue;
+                    }
+                  });
+
+                  const sorted = Object.entries(masterSectors)
+                    .map(([name, val]) => ({ name, value: val, pct: totalVal > 0 ? (val / totalVal) * 100 : 0 }))
+                    .sort((a, b) => b.pct - a.pct);
+
+                  if (sorted.length === 0) return <p className="text-slate-400 text-sm text-center py-8">Upload a portfolio to see composition.</p>;
+
+                  return (
+                    <>
+                      {/* Top chips */}
+                      <div className="flex flex-wrap gap-3 mb-8">
+                        {sorted.slice(0, 4).map(s => (
+                          <div key={s.name} className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div className={`w-2.5 h-2.5 rounded-full ${SECTOR_COLORS[s.name] ?? 'bg-slate-300'}`} />
+                            <span className="text-sm font-black text-stripe-dark">{s.name}</span>
+                            <span className="text-sm font-black text-stripe-blue">{s.pct.toFixed(1)}%</span>
+                          </div>
+                        ))}
+                        {sorted.length > 4 && <div className="flex items-center px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100"><span className="text-sm font-bold text-slate-400">+{sorted.length - 4} more</span></div>}
+                      </div>
+
+                      {/* Stacked visual bar */}
+                      <div className="h-5 rounded-full overflow-hidden flex mb-8 shadow-inner">
+                        {sorted.map(s => (
+                          <div key={s.name} className={`${SECTOR_COLORS[s.name] ?? 'bg-slate-300'} h-full`} style={{ width: `${s.pct}%` }} title={`${s.name}: ${s.pct.toFixed(1)}%`} />
+                        ))}
+                      </div>
+
+                      {/* Sector rows */}
+                      <div className="space-y-4">
+                        {sorted.map((s, i) => (
+                          <div key={s.name} className="flex items-center gap-4">
+                            <span className="w-5 text-xs font-black text-slate-300">#{i + 1}</span>
+                            <div className={`w-3 h-3 rounded-full flex-shrink-0 ${SECTOR_COLORS[s.name] ?? 'bg-slate-300'}`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-sm font-black text-stripe-dark">{s.name}</span>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-sm font-black text-stripe-blue">{s.pct.toFixed(1)}%</span>
+                                  <span className="text-xs font-bold text-slate-400 w-28 text-right">₹{s.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                                </div>
+                              </div>
+                              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${SECTOR_COLORS[s.name] ?? 'bg-slate-300'}`} style={{ width: `${(s.pct / sorted[0].pct) * 100}%` }} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Concentration warning */}
+                      {sorted[0]?.pct > 35 && (
+                        <div className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
+                          <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                          <p className="text-sm text-amber-700 font-medium">
+                            <strong>{sorted[0].pct.toFixed(0)}%</strong> of your portfolio is concentrated in <strong>{sorted[0].name}</strong>. 
+                            Consider diversifying to reduce sector-specific risk.
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </motion.div>
 
               {/* Full Audit CTA */}

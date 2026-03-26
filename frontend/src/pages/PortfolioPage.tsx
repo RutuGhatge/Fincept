@@ -10,7 +10,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader,
-  Lock
+  Lock,
+  LayoutDashboard,
+  Wallet
 } from 'lucide-react';
 import { portfolioService } from '../services/apiService';
 import AuthModal from '../components/AuthModal';
@@ -23,14 +25,23 @@ const PortfolioPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasPortfolio, setHasPortfolio] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    const userId = localStorage.getItem('user_id');
     setIsAuthenticated(!!token);
     if (!token) {
       setIsAuthModalOpen(true);
+      return;
+    }
+    // Check if portfolio already exists
+    if (userId) {
+      portfolioService.getMyPortfolio(userId)
+        .then(p => { if (p?.id) setHasPortfolio(true); })
+        .catch(() => {});
     }
   }, []);
 
@@ -66,11 +77,6 @@ const PortfolioPage: React.FC = () => {
       await portfolioService.uploadPortfolio(formData);
       setSuccess(true);
       setFile(null); // Clear after upload
-      
-      // Auto redirect after small delay
-      setTimeout(() => {
-        navigate('/my-portfolio');
-      }, 1500);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Upload failed. Please check the file format (Excel/CSV).');
     } finally {
@@ -80,15 +86,7 @@ const PortfolioPage: React.FC = () => {
 
   const handleConnectAPI = () => {
     if (!checkAuth()) return;
-    setUploading(true);
-    // Simulate API connection
-    setTimeout(() => {
-      setUploading(false);
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/my-portfolio');
-      }, 1000);
-    }, 2000);
+    navigate('/broker-connect');
   };
 
   return (
@@ -132,6 +130,39 @@ const PortfolioPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Portfolio Already Exists Banner */}
+        {(hasPortfolio || success) && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 p-6 bg-gradient-to-r from-stripe-blue/10 to-stripe-purple/10 rounded-[2rem] border border-stripe-blue/20 flex flex-wrap items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-stripe-blue/15 rounded-2xl">
+                <CheckCircle2 className="w-6 h-6 text-stripe-blue" />
+              </div>
+              <div>
+                <p className="font-black text-stripe-dark text-lg">Portfolio Connected</p>
+                <p className="text-sm text-stripe-slate font-medium">Your holdings are synced and ready to view.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/my-portfolio')}
+                className="flex items-center gap-2 px-6 py-3 bg-stripe-blue text-white rounded-2xl font-black hover:scale-105 transition-all shadow-lg"
+              >
+                <Wallet className="w-4 h-4" /> View My Portfolio
+              </button>
+              <button
+                onClick={() => navigate('/my-portfolio')}
+                className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-stripe-blue text-stripe-blue rounded-2xl font-black hover:bg-stripe-blue hover:text-white transition-all shadow-md"
+              >
+                <LayoutDashboard className="w-4 h-4" /> View My Dashboard
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         <div className="grid md:grid-cols-2 gap-12">
           {/* API Connection Card */}
           <motion.div
@@ -162,14 +193,31 @@ const PortfolioPage: React.FC = () => {
                     <option>Angel One</option>
                   </select>
                 </div>
-                <button 
-                  onClick={handleConnectAPI}
-                  disabled={uploading}
-                  className="w-full py-4 bg-stripe-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all disabled:opacity-50"
-                >
-                  {uploading ? <Loader className="w-5 h-5 animate-spin" /> : 'Connect and Fetch Portfolio'} <ArrowRight className="w-5 h-5" />
-                </button>
-                <p className="text-xs text-slate-400 text-center font-medium italic">We'll provide API keys after sometime for full integration.</p>
+                {success && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-sm font-medium flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> Live portfolio connected and fetched successfully!
+                    </div>
+                    <button 
+                      onClick={() => navigate('/my-portfolio')}
+                      className="w-full py-4 bg-stripe-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-dark transition-all shadow-lg"
+                    >
+                      <BarChart3 className="w-5 h-5" /> Go to My Dashboard
+                    </button>
+                  </div>
+                )}
+                {!success && (
+                  <>
+                    <button 
+                      onClick={handleConnectAPI}
+                      disabled={uploading}
+                      className="w-full py-4 bg-stripe-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all disabled:opacity-50"
+                    >
+                      {uploading ? <Loader className="w-5 h-5 animate-spin" /> : 'Connect and Fetch Portfolio'} <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <p className="text-xs text-slate-400 text-center font-medium italic">We'll provide API keys after sometime for full integration.</p>
+                  </>
+                )}
               </motion.div>
             )}
           </motion.div>
@@ -228,14 +276,24 @@ const PortfolioPage: React.FC = () => {
                   </div>
                 )}
 
-                <button
-                  onClick={handleUpload}
-                  disabled={!file || uploading}
-                  className="w-full py-4 bg-stripe-purple text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all disabled:opacity-50"
-                >
-                  {uploading ? <Loader className="w-5 h-5 animate-spin" /> : 'Analyze Portfolio'}{' '}
-                  {!uploading && <ArrowRight className="w-5 h-5" />}
-                </button>
+                {success && (
+                  <button 
+                    onClick={() => navigate('/my-portfolio')}
+                    className="w-full py-4 bg-stripe-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-dark transition-all shadow-lg"
+                  >
+                    <BarChart3 className="w-5 h-5" /> Go to My Dashboard
+                  </button>
+                )}
+                {!success && (
+                  <button
+                    onClick={handleUpload}
+                    disabled={!file || uploading}
+                    className="w-full py-4 bg-stripe-purple text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-slate transition-all disabled:opacity-50"
+                  >
+                    {uploading ? <Loader className="w-5 h-5 animate-spin" /> : 'Analyze Portfolio'}{' '}
+                    {!uploading && <ArrowRight className="w-5 h-5" />}
+                  </button>
+                )}
 
                 <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />

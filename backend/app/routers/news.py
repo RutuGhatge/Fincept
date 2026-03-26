@@ -78,6 +78,7 @@ def _gemini_process_news(raw_items: list, symbols: List[str] = None) -> list:
 1. Convert these ET RSS items into structured JSON.
 2. IMPORTANT: Here are specific portfolio symbols I care about: {symbols_str}.
 3. If these symbols are NOT mentioned in the RSS items, create 2-3 brief 'Alpha Alerts' for them based on current Indian market sentiment or sector trends. Tag these as category 'Portfolio Alert'.
+4. For any news (from RSS or Alpha Alerts) relevant to the symbols, provide an "impact_reason" explaining WHY it impacts the investor's portfolio in very simple, non-finance language.
 
 For each item, output:
 {{
@@ -87,7 +88,8 @@ For each item, output:
   "sentiment": "Positive, Negative, or Neutral",
   "time": "Just now",
   "source_url": "original link or '#' for alerts",
-  "full_content": "Detailed 3-4 sentence analysis including investor takeaway."
+  "full_content": "Detailed 3-4 sentence analysis including investor takeaway.",
+  "impact_reason": "Simple 1-sentence explanation of why this impacts the portfolio symbols, in non-technical language (only for portfolio-relevant news, else null)"
 }}
 
 Return a JSON array only.
