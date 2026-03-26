@@ -14,8 +14,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from fastapi.exceptions import ResponseValidationError
+from fastapi.exceptions import ResponseValidationError, RequestValidationError
 from fastapi.responses import JSONResponse
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request, exc):
+    logger.error(f"Request Validation Error: {exc.errors()}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "Input Validation Error", "errors": exc.errors()}
+    )
 
 @app.exception_handler(ResponseValidationError)
 async def validation_exception_handler(request, exc):
