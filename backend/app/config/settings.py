@@ -7,8 +7,9 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
-    # MongoDB
-    MONGODB_URL: str = "mongodb://localhost:27017"
+    # MongoDB (Handles both MONGODB_URL and MONGO_URL for deployment compatibility)
+    MONGODB_URL: Optional[str] = None
+    MONGO_URL: Optional[str] = None
     DATABASE_NAME: str = "investment_intelligence"
     
     # AI Keys
@@ -38,10 +39,13 @@ class Settings(BaseSettings):
 
     def __init__(self, **values):
         super().__init__(**values)
+        
+        # Mapping MONGO_URL/MONGODB_URL for platform compatibility
+        mongo_url = self.MONGODB_URL or self.MONGO_URL or "mongodb://localhost:27017"
+        self.MONGODB_URL = mongo_url
+        
+        # Mapping GEMINI_API_KEY/GOOGLE_API_KEY
         if self.GEMINI_API_KEY and not self.GOOGLE_API_KEY:
             self.GOOGLE_API_KEY = self.GEMINI_API_KEY
-        if not self.GOOGLE_API_KEY:
-            # Fallback if both are missing
-            pass
 
 settings = Settings()
