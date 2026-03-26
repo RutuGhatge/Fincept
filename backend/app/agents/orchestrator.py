@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Optional
 import logging
+logger = logging.getLogger(__name__)
 from app.agents.base_agent import BaseAgent
 from app.agents.portfolio_agent import PortfolioAgent
 from app.agents.analysis_agent import AnalysisAgent
@@ -108,61 +109,36 @@ class Orchestrator:
 
     async def process_geopolitics_chain(self, symbols: List[str]) -> Dict[str, Any]:
         """
-        Executes a high-impact geopolitics chain:
-        1. NewsAgent: Fetch world news.
-        2. AnalysisAgent: Map news to portfolio symbols.
-        3. AnalysisAgent: Critique and refine the impact mapping.
+        Fast Geopolitics: Fetches raw news and performs consolidated analysis in one step.
         """
-        logging.info(f"Starting geopolitics agency chain for symbols: {symbols}")
+        logging.info(f"Starting FAST geopolitics chain for symbols: {symbols}")
         
-        # Step 1: Fetch News (NewsAgent)
-        logger.warning("--- [Step 1: News Intelligence] Fetching global signals ---")
+        # Step 1: Fetch Raw News (NewsAgent) - No AI here
+        logger.warning("--- [FAST Step 1: Raw Signals] Fetching world headlines ---")
         news_result = await self.distribute_task("NewsAgent", {
-            "type": "fetch_geopolitics",
+            "type": "fetch_raw_geopolitics",
             "data": {}
         })
         if "error" in news_result:
             return news_result
         
-        geo_news = news_result.get("geo_news", [])
+        raw_news = news_result.get("raw_news", [])
         
-        # Step 2: Analyze Impact (AnalysisAgent)
-        logger.warning(f"--- [Step 2: Strategic Mapping] Mapping impacts for {len(symbols)} symbols ---")
-        impact_result = await self.distribute_task("AnalysisAgent", {
-            "type": "analyze_geopolitics",
+        # Step 2: Consolidated Mapping (AnalysisAgent) - One AI call for everything
+        logger.warning(f"--- [FAST Step 2: Consolidated Mapping] Analyzing impacts for {len(symbols)} symbols ---")
+        final_result = await self.distribute_task("AnalysisAgent", {
+            "type": "analyze_geopolitics_fast",
             "data": {
-                "geo_news": geo_news,
-                "symbols": symbols
-            }
-        })
-        if "error" in impact_result:
-            return impact_result
-            
-        portfolio_impact = impact_result.get("portfolio_impact", [])
-        
-        # Step 3: Self-Correction Loop (Refinement)
-        logger.warning("--- [Step 3: Agentic Refinery] Finalizing and critiquing analysis ---")
-        refinement_result = await self.distribute_task("AnalysisAgent", {
-            "type": "review_and_refine",
-            "data": {
-                "previous_output": {"geo_news": geo_news, "portfolio_impact": portfolio_impact},
-                "original_task": "geopolitical_strategic_mapping",
+                "raw_news": raw_news,
                 "symbols": symbols
             }
         })
         
-        if "error" in refinement_result:
-            return refinement_result
+        # Log completion
+        if "error" not in final_result:
+            logger.info("Successfully completed fast geopolitics analysis.")
+            return {"success": True, "data": final_result}
             
-        final_data = refinement_result # AnalysisAgent returns the refined dict directamente
-        
-        # Inject meta reasoning for hackathon impact
-        final_data["reasoning_path"] = [
-            "Autonomous NewsAgent gathered global geopolitical signals from RSS.",
-            "AnalysisAgent performed cross-asset mapping to current portfolio holdings.",
-            "CriticAgent validated logical consistency and refined strategic action hints."
-        ]
-            
-        return {"success": True, "data": final_data}
+        return {"success": False, "error": final_result.get("error", "Unknown error in AnalysisAgent")}
 
 orchestrator = Orchestrator()

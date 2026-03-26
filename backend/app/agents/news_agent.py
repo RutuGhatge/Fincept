@@ -20,6 +20,8 @@ class NewsAgent(BaseAgent):
             return await self._analyze_news_impact(data)
         elif task_type == "fetch_geopolitics":
             return await self._fetch_geopolitics(data)
+        elif task_type == "fetch_raw_geopolitics":
+            return await self._fetch_raw_geopolitics(data)
         
         return {"error": "Unknown task type for NewsAgent"}
 
@@ -131,4 +133,31 @@ class NewsAgent(BaseAgent):
         match = re.search(r'\[.*\]', response, re.DOTALL)
         result = json.loads(match.group()) if match else []
         
-        return {"geo_news": result}
+    async def _fetch_raw_geopolitics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Fetches raw world headlines without AI processing for fast paths."""
+        import urllib.request
+        import xml.etree.ElementTree as ET
+        
+        urls = [
+            "https://feeds.bbci.co.uk/news/world/rss.xml",
+            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+            "https://economictimes.indiatimes.com/news/international/world-news/rssfeeds/1898055.cms",
+        ]
+        
+        raw_items = []
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; InvestmentIntelligence/1.0)"}
+        for url in urls:
+            try:
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    xml_data = resp.read().decode("utf-8", errors="ignore")
+                    root = ET.fromstring(xml_data)
+                    for item in root.findall(".//item")[:10]: # More items for the single AI call
+                        title = (item.findtext("title") or "").strip()
+                        desc = (item.findtext("description") or "").strip()
+                        link = (item.findtext("link") or "#").strip()
+                        if title:
+                            raw_items.append({"title": title, "summary": desc[:300], "link": link})
+            except: continue
+            
+        return {"raw_news": raw_items}

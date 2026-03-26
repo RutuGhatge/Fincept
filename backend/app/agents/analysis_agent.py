@@ -28,6 +28,8 @@ class AnalysisAgent(BaseAgent):
             return await self._review_and_refine(data)
         elif task_type == "analyze_geopolitics":
             return await self._analyze_geopolitics(data)
+        elif task_type == "analyze_geopolitics_fast":
+            return await self._analyze_geopolitics_fast(data)
         
         return {"error": "Unknown task type for AnalysisAgent"}
 
@@ -218,3 +220,44 @@ class AnalysisAgent(BaseAgent):
         prompt = f"Based on the analysis of {data.get('analysis_data')} and the user's risk tolerance of {data.get('risk_tolerance')}, provide strategic investment recommendations."
         recommendations = await self.get_response(prompt)
         return {"recommendations": recommendations}
+
+    async def _analyze_geopolitics_fast(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Consolidated fast path: Structures news and analyzes impact in one AI call."""
+        raw_news = data.get("raw_news", [])
+        symbols = data.get("symbols", [])
+        
+        if not raw_news:
+            return {"geo_news": [], "portfolio_impact": [], "reasoning_path": []}
+
+        prompt = f"""
+        Analyze these raw geopolitical news items and map their impact to the user's portfolio symbols.
+        
+        NEWS ITEMS:
+        {raw_news}
+        
+        PORTFOLIO SYMBOLS:
+        {symbols}
+        
+        Return a single JSON object with:
+        1. "geo_news": Array of structured news cards:
+           {{"title", "summary" (2 sentences), "region", "conflict_level", "key_players", "source_url", "time"}}
+        2. "portfolio_impact": Array of mapping objects:
+           {{"symbol", "impact" (High/Low/Watch), "geo_event" (title of news), "impact_reason", "action_hint", "holding_name"}}
+        3. "reasoning_path": Array of 3 strings explaining the top-level trends.
+        
+        Be decisive. Use professional financial terminology.
+        Only return the JSON.
+        """
+        
+        response = await self.get_response(prompt)
+        
+        import json, re
+        try:
+            # Clean response to ensure it's just JSON
+            match = re.search(r'\{.*\}', response, re.DOTALL)
+            if match:
+                result = json.loads(match.group())
+                return result
+            return {"error": "Failed to parse consolidated AI response", "raw": response[:200]}
+        except Exception as e:
+            return {"error": f"JSON Parse Error: {str(e)}", "raw": response[:200]}
