@@ -3,7 +3,6 @@ import os
 import json
 import logging
 from typing import List, Optional, Dict, Any
-import google.generativeai as genai
 
 from app.schemas.portfolio import (
     PortfolioCreate, PortfolioUpdate, PortfolioResponse, PortfolioSummary,
@@ -14,6 +13,8 @@ from app.services.portfolio_service import PortfolioService
 from app.agents.orchestrator import orchestrator
 from app.db.database import get_db
 from app.services.portfolio_parser import PortfolioParser
+from app.utils.ai_utils import get_gemini_response
+from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,7 @@ from app.schemas.allocation import AllocationRequest, AllocationResponse
 
 router = APIRouter()
 
-# Configure Gemini
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Use centralized AI utility for Gemini requests
 
 @router.post("/{portfolio_id}/allocate", response_model=AllocationResponse)
 async def allocate_budget(
@@ -54,21 +51,35 @@ async def allocate_budget(
             }
         }
         
-        result = await orchestrator.process_request(
-            user_id=user_id,
-            request={
-                "intent": "market_analysis",
-                "data": task_data
-            }
-        )
+        # Construct prompt for allocation
+        budget = request.budget
+        goal = request.goal
+        age = request.age
+        profession = request.profession
+        portfolio_summary = ", ".join([f"{p.get('symbol') or p.get('name')}: {p.get('market_value', 'N/A')}" for p in portfolio.get("holdings", [])])
         
-        if not result.get("success"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=result.get("error", "Failed to get allocation suggestions")
-            )
+        prompt = f"""
+        As an expert financial advisor, suggest how to allocate a budget of {budget} INR for an investor with the following profile:
+        - Age: {age}
+        - Profession: {profession}
+        - Goal: {goal}
+        - Current Portfolio: {portfolio_summary}
         
-        return result["data"]
+        Provide your suggestions in a structured JSON format with:
+        1. suggestions: A list of objects with fund_name, allocation_amount, and reason.
+        2. total_allocated: Total sum of allocated amounts.
+        3. summary: A brief explanation of the strategy.
+        4. diversification_score: A score from 0.0 to 1.0.
+        
+        Only return the JSON.
+        """
+
+        # Use centralized AI utility with fallback
+        try:
+            response_text = await get_gemini_response(prompt)
+        except Exception as e:
+            logger.error(f"AI Allocation Error: {e}")
+            raise HTTPException(status_code=500, detail="Failed to generate allocation insights")
         
     except HTTPException:
         raise
@@ -672,21 +683,21 @@ Output strictly in JSON format:
 }}
 """
 
-        if not os.environ.get("GEMINI_API_KEY"):
-             # Fallback logic if no API key
-             return {"success": False, "detail": "Gemini API key not configured"}
-
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        
-        if text.startswith("```"):
-            text = "\n".join(text.split("\n")[1:])
-            if text.endswith("```"):
-                text = text[:-3].strip()
-        
-        result = json.loads(text)
-        return {"success": True, "data": result}
+        # Use centralized AI utility with fallback
+        try:
+            text = await get_gemini_response(prompt)
+            text = text.strip()
+            
+            if text.startswith("```"):
+                text = "\n".join(text.split("\n")[1:])
+                if text.endswith("```"):
+                    text = text[:-3].strip()
+            
+            result = json.loads(text)
+            return {"success": True, "data": result}
+        except Exception as e:
+            logger.error(f"AI Allocate-AI Error: {e}")
+            raise HTTPException(status_code=500, detail="Failed to generate AI allocation")
 
     except Exception as e:
         logger.error(f"Error in allocate-ai: {e}")

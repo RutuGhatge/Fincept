@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 import google.generativeai as genai
 from app.config.settings import settings
+from app.utils.ai_utils import get_gemini_response
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,7 @@ class BaseAgent(ABC):
         self.name = name
         self.role = role
         self.llm = None
+        self.fallback_models = settings.GEMINI_FALLBACK_MODELS
         super().__init__()
         self._setup_llm()
 
@@ -28,13 +30,8 @@ class BaseAgent(ABC):
             logger.error(f"Error setting up LLM for agent {self.name}: {e}")
 
     async def get_response(self, prompt: str) -> str:
-        if self.llm is None:
-            raise ValueError(f"Agent {self.name} is not fully configured (missing API key).")
-        
         try:
-            model = self.llm
-            response = await model.generate_content_async(prompt)
-            return response.text
+            return await get_gemini_response(prompt, self.fallback_models)
         except Exception as e:
             logger.error(f"Error in agent {self.name}: {e}")
             raise e

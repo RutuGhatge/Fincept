@@ -83,19 +83,36 @@ class AnalysisAgent(BaseAgent):
         
         If you find issues, FIX THEM in the final output. If the output is already perfect, return it as is but slightly polished.
         
-        Return ONLY the refined final response.
+        Return ONLY the refined final response. If the original data was structured (JSON/Lists), preserve that structure in your response.
         """
         
         refined_output = await self.get_response(prompt)
         
         # If the original output was a dict, try to maintain structure or just return as is
         if isinstance(previous_output, dict):
-            # Attempt to merge or update the main content field
-            # This is a bit heuristic, but let's assume the main field is 'insights' or 'impact'
+            import json, re
             result = previous_output.copy()
-            for key in ["insights", "performance_analysis", "risk_assessment", "geo_news", "portfolio_impact"]:
+            
+            # Identify if we need to parse JSON from the refined string
+            structured_keys = ["geo_news", "portfolio_impact", "suggestions", "top_insights"]
+            
+            for key in structured_keys:
                 if key in result:
-                    result[key] = refined_output
+                    # Attempt to extract and parse JSON from the refined string
+                    try:
+                        # Case 1: The refined output is a valid JSON array or object
+                        if '[' in refined_output or '{' in refined_output:
+                            match = re.search(r'\[.*\]|\{.*\}', refined_output, re.DOTALL)
+                            if match:
+                                parsed = json.loads(match.group())
+                                result[key] = parsed
+                            else:
+                                result[key] = refined_output # Fallback to string if no JSON found
+                        else:
+                            result[key] = refined_output
+                    except:
+                         result[key] = refined_output # Fallback
+            
             result["refined"] = True
             return result
             

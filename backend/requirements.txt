@@ -8,7 +8,7 @@ python-multipart==0.0.6
 python-jose[cryptography]==3.3.0
 bcrypt>=4.0.0
 httpx==0.25.2
-google-generativeai==0.3.2
+google-generativeai==0.7.2
 python-dotenv==1.0.0
 loguru==0.7.2
 yfinance>=0.2.40

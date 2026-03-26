@@ -136,7 +136,7 @@ const GeopoliticsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-4">
-                    {reasoningPath.map((step, idx) => (
+                    {Array.isArray(reasoningPath) && reasoningPath.map((step, idx) => (
                       <div key={idx} className="flex items-start gap-4 group">
                         <div className="flex flex-col items-center gap-1 mt-1">
                           <div className="w-2 h-2 rounded-full bg-amber-400" />
@@ -168,10 +168,8 @@ const GeopoliticsPage: React.FC = () => {
                 >
                   <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                 </button>
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {geoNews.map((event, i) => (
+                       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.isArray(geoNews) && geoNews.map((event, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
@@ -205,6 +203,7 @@ const GeopoliticsPage: React.FC = () => {
                   </motion.div>
                 ))}
               </div>
+         </div>
             </section>
 
             {/* ── Section 2: Portfolio & Geopolitics Impact ── */}
@@ -247,7 +246,7 @@ const GeopoliticsPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {portfolioImpact.map((item, i) => {
+                  {Array.isArray(portfolioImpact) && portfolioImpact.map((item, i) => {
                     const cfg = IMPACT_COLORS[item.impact] ?? IMPACT_COLORS['Watch'];
                     return (
                       <motion.div

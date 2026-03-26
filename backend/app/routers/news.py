@@ -7,18 +7,14 @@ from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, Depends
 from app.agents.orchestrator import orchestrator
 from typing import Dict, Any, Optional, List
-import google.generativeai as genai
-import logging
+from app.utils.ai_utils import get_gemini_response
 from app.db.database import get_db
+import logging
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# Configure Gemini
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Use centralized AI utility for Gemini requests
 
 ET_RSS_URLS = [
     "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",  # Markets
@@ -60,13 +56,9 @@ def _fetch_rss_items(limit: int = 30) -> list:
             logger.warning(f"RSS fetch failed for {url}: {e}")
     return items[:limit]
 
-def _gemini_process_news(raw_items: list, symbols: List[str] = None) -> list:
+async def _gemini_process_news(raw_items: list, symbols: List[str] = None) -> list:
     """Enhanced Gemini processing: parses RSS AND generates fallback news for symbols if missing"""
-    if not GEMINI_API_KEY:
-        return []
-    
     try:
-        model = genai.GenerativeModel(GEMINI_MODEL)
         items_text = "\n".join(
             [f"{i+1}. TITLE: {r['title']}\nDESC: {r['description'][:200]}"
              for i, r in enumerate(raw_items[:15])]
@@ -97,8 +89,9 @@ Return a JSON array only.
 Items:
 {items_text}"""
 
-        resp = model.generate_content(prompt)
-        text = resp.text.strip()
+        # Use centralized AI utility with fallback
+        text = await get_gemini_response(prompt)
+        text = text.strip()
         if text.startswith("```"):
             text = "\n".join(text.split("\n")[1:])
             if text.endswith("```"):
@@ -132,7 +125,7 @@ async def get_et_rss_news(
     # 2. Revalidate/Refresh (Background usually, but here we'll wait since user wants latest)
     try:
         raw = await asyncio.get_event_loop().run_in_executor(None, _fetch_rss_items, 25)
-        structured = await asyncio.get_event_loop().run_in_executor(None, _gemini_process_news, raw, symbol_list)
+        structured = await _gemini_process_news(raw, symbol_list)
         
         if not structured and cached:
              return {"news": cached["news"], "source": "Cache (Fallback)", "count": len(cached["news"]), "status": "stale"}

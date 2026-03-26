@@ -116,6 +116,7 @@ class Orchestrator:
         logging.info(f"Starting geopolitics agency chain for symbols: {symbols}")
         
         # Step 1: Fetch News (NewsAgent)
+        logger.warning("--- [Step 1: News Intelligence] Fetching global signals ---")
         news_result = await self.distribute_task("NewsAgent", {
             "type": "fetch_geopolitics",
             "data": {}
@@ -126,6 +127,7 @@ class Orchestrator:
         geo_news = news_result.get("geo_news", [])
         
         # Step 2: Analyze Impact (AnalysisAgent)
+        logger.warning(f"--- [Step 2: Strategic Mapping] Mapping impacts for {len(symbols)} symbols ---")
         impact_result = await self.distribute_task("AnalysisAgent", {
             "type": "analyze_geopolitics",
             "data": {
@@ -139,6 +141,7 @@ class Orchestrator:
         portfolio_impact = impact_result.get("portfolio_impact", [])
         
         # Step 3: Self-Correction Loop (Refinement)
+        logger.warning("--- [Step 3: Agentic Refinery] Finalizing and critiquing analysis ---")
         refinement_result = await self.distribute_task("AnalysisAgent", {
             "type": "review_and_refine",
             "data": {
