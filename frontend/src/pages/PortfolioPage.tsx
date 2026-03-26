@@ -307,7 +307,7 @@ const PortfolioPage: React.FC = () => {
                     onClick={() => navigate('/my-portfolio')}
                     className="w-full py-4 bg-stripe-blue text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-stripe-dark transition-all shadow-lg"
                   >
-                    <BarChart3 className="w-5 h-5" /> Go to My Dashboard
+                    <Wallet className="w-5 h-5" /> View My Portfolio
                   </button>
                 )}
                 {!success && (

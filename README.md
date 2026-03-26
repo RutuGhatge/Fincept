@@ -4,19 +4,20 @@ A multi-agent, AI-powered investment assistant built with FastAPI (backend) and 
 
 ## 🚀 Features
 
-### Core MVP Features
-- **Smart Portfolio Management**: Institutional-grade tracking with multi-broker sync and dynamic manual uploads (CSV/Excel support for Zerodha and others).
-- **AI-Powered Analysis**: Automated portfolio health checks, performance attribution, and sector exposure alerts.
-- **Allocate (Capital Optimizer)**: A personalized suggestion engine that analyzes your unique holdings to suggest how to invest your next capital (e.g., ₹50,000).
-- **Market Pulse**: AI-powered financial news aggregator with sentiment analysis and direct links to trusted research partners (Moneycontrol, Economic Times, etc.).
-- **Jargon Decoder**: An AI financial assistant that simplifies complex financial terms and concepts in plain language.
+### Core Intelligence Features
+- **Institutional-Grade Portfolio Tracking**: Multi-broker sync and dynamic manual uploads. Supports combining multiple CSV/Excel/PDF statements into a unified view.
+- **Advanced File Management**: Track holdings by individual upload source. Delete specific files to re-calculate your portfolio instantly.
+- **Geopolitical Impact Analysis**: Live news integration paired with AI that maps global events (e.g., conflicts, trade policy) to your specific holdings.
+- **AI-Powered Health Audit**: Automated portfolio health checks, performance attribution, and deep sector exposure analysis.
+- **Allocate (Capital Optimizer)**: Personalized suggestion engine that identifies gaps in your current portfolio to suggest the best use for new capital.
+- **Market Pulse**: Real-time financial news aggregator with AI sentiment analysis.
+- **Jargon Decoder**: An interactive AI assistant that simplifies complex financial terminology in plain language.
 
 ### Technical Features
-- **Multi-Agent Architecture**: Specialized AI agents for different tasks
-- **Background Task Processing**: Async operations for data fetching and analysis
-- **In-Memory Caching**: Fast response times for frequently accessed data
-- **RESTful API**: Clean, documented endpoints
-- **Modern UI**: Responsive React frontend with Tailwind CSS
+- **Multi-Agent Orchestration**: Specialized AI agents (Portfolio, Analysis, News, Jargon) coordinated by a central orchestrator.
+- **Asynchronous Data Processing**: Real-time market data fetching and background analysis using FastAPI's async capabilities.
+- **Secure JWT Authentication**: Full user management system with secure session handling.
+- **Premium UI/UX**: High-performance dashboard built with React, Framer Motion for micro-animations, and a sleek modern aesthetic.
 
 ## 📁 Project Structure
 
@@ -70,21 +71,20 @@ Investment_Intelligence/
 ## 🛠️ Tech Stack
 
 ### Backend
-- **FastAPI**: Modern, fast web framework for building APIs
-- **MongoDB**: NoSQL database for flexible data storage
-- **Motor**: Async MongoDB driver
-- **Pydantic**: Data validation and settings management
-- **OpenAI**: AI integration for intelligent analysis
-- **yFinance**: Financial data fetching
-- **BeautifulSoup**: Web scraping for news
+- **FastAPI**: High-performance Python web framework.
+- **MongoDB & Motor**: Asynchronous NoSQL database integration.
+- **Google Generative AI (Gemini)**: Powering all multi-agent intelligence and analysis.
+- **Pydantic v2**: Robust data validation and settings management.
+- **PyJWT**: Secure authentication and session management.
+- **BeautifulSoup4 & Feedparser**: Advanced scraping and RSS intelligence.
 
 ### Frontend
-- **React**: Modern UI framework
-- **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **React Router**: Client-side routing
-- **React Query**: Data fetching and caching
-- **Recharts**: Chart library for data visualization
+- **React 18**: Modern component-based architecture.
+- **TypeScript**: Full type-safety across the application.
+- **Tailwind CSS**: Professional, utility-first styling.
+- **Framer Motion**: Smooth, institutional-grade animations and transitions.
+- **Lucide React**: Clean and consistent iconography.
+- **Axios**: Promised-based HTTP client for API communication.
 
 ### Infrastructure
 - **In-Memory Caching**: Simple caching solution for MVP
@@ -176,6 +176,7 @@ Once the backend is running, visit:
 #### News
 - `GET /api/v1/news/latest` - Get latest news
 - `GET /api/v1/news/portfolio/{id}` - Get portfolio-relevant news
+- `GET /api/v1/news/geopolitics` - Get geopolitical news and portfolio impact
 
 #### Jargon Explainer
 - `POST /api/v1/jargon/explain` - Explain financial term
