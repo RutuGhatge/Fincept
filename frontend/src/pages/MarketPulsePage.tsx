@@ -329,10 +329,10 @@ const MarketPulsePage: React.FC = () => {
                 <span className="text-xs font-black uppercase tracking-[0.2em]">Geopolitical Risk Lens</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight">
-                War. Elections. Trade. <br />
-                <span className="text-red-500 underline decoration-red-500/30 underline-offset-8">How does it hit YOUR wallet?</span>
+                <span className="text-white">War. Elections. Trade.</span> <br />
+                <span className="text-amber-400 underline decoration-amber-400/30 underline-offset-8">How does it hit YOUR wallet?</span>
               </h2>
-              <p className="text-xl font-medium text-slate-300 leading-relaxed">
+              <p className="text-xl font-medium text-white/90 leading-relaxed">
                 Global tensions ripple through markets instantly. Decode how the Middle East, US-China relations, and local politics are affecting your specific holdings.
               </p>
             </div>
