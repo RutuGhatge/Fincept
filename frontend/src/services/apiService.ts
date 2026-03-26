@@ -49,7 +49,14 @@ export const portfolioService = {
     return response.data;
   },
   uploadPortfolio: async (formData: FormData) => {
-    const response = await api.post('/portfolio/upload', formData);
+    // We use a raw axios call here to avoid the 'application/json' default header 
+    // from our 'api' instance, allowing the browser to correctly set the multipart boundary.
+    const token = localStorage.getItem('access_token');
+    const response = await axios.post(`${API_BASE_URL}/portfolio/upload`, formData, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     return response.data;
   },
   allocateBudget: async (id: string, data: any) => {

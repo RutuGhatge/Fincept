@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from app.config.settings import settings
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 # CORS configuration
