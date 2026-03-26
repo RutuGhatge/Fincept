@@ -7,14 +7,13 @@ A multi-agent, AI-powered investment assistant built with FastAPI (backend) and 
 ### Core Intelligence Features
 - **Institutional-Grade Portfolio Tracking**: Multi-broker sync and dynamic manual uploads. Supports combining multiple CSV/Excel/PDF statements into a unified view.
 - **Advanced File Management**: Track holdings by individual upload source. Delete specific files to re-calculate your portfolio instantly.
-- **Geopolitical Impact Analysis**: Live news integration paired with AI that maps global events (e.g., conflicts, trade policy) to your specific holdings.
-- **AI-Powered Health Audit**: Automated portfolio health checks, performance attribution, and deep sector exposure analysis.
-- **Allocate (Capital Optimizer)**: Personalized suggestion engine that identifies gaps in your current portfolio to suggest the best use for new capital.
-- **Market Pulse**: Real-time financial news aggregator with AI sentiment analysis.
+- **Autonomous Geopolitical Intelligence**: A multi-agent chain that independently gathers world news, maps it to your specific holdings, and performs a self-correction loop to ensure high-accuracy strategic insights.
+- **Agentic Reasoning Trace**: Visualize the AI's "thought process" on the dashboard, showing exactly how the agents collaborated to reach their conclusions.
+- **Self-Correction Logic**: Built-in "Critic" agents that audit initial analysis for logical consistency and professional depth before presenting it to the user.
 - **Jargon Decoder**: An interactive AI assistant that simplifies complex financial terminology in plain language.
 
 ### Technical Features
-- **Multi-Agent Orchestration**: Specialized AI agents (Portfolio, Analysis, News, Jargon) coordinated by a central orchestrator.
+- **Agentic Orchestration Framework**: A custom-built reasoning engine that supports deterministic multi-step chains (e.g., Analysis -> Critique -> Refinement) without the overhead of external graph libraries.
 - **Asynchronous Data Processing**: Real-time market data fetching and background analysis using FastAPI's async capabilities.
 - **Secure JWT Authentication**: Full user management system with secure session handling.
 - **Premium UI/UX**: High-performance dashboard built with React, Framer Motion for micro-animations, and a sleek modern aesthetic.

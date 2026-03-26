@@ -18,6 +18,8 @@ class NewsAgent(BaseAgent):
             return await self._fetch_and_filter_news(data)
         elif task_type == "analyze_news":
             return await self._analyze_news_impact(data)
+        elif task_type == "fetch_geopolitics":
+            return await self._fetch_geopolitics(data)
         
         return {"error": "Unknown task type for NewsAgent"}
 
@@ -74,3 +76,59 @@ class NewsAgent(BaseAgent):
         prompt = f"Analyze the impact of these news items: {data.get('news_items')} on the following assets: {data.get('assets')}."
         analysis = await self.get_response(prompt)
         return {"news_impact_analysis": analysis}
+
+    async def _fetch_geopolitics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Fetches and structures geopolitical news from RSS feeds."""
+        import urllib.request
+        import xml.etree.ElementTree as ET
+        
+        urls = [
+            "https://feeds.bbci.co.uk/news/world/rss.xml",
+            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+            "https://economictimes.indiatimes.com/news/international/world-news/rssfeeds/1898055.cms",
+        ]
+        
+        items = []
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; InvestmentIntelligence/1.0)"}
+        for url in urls:
+            try:
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    xml_data = resp.read().decode("utf-8", errors="ignore")
+                    root = ET.fromstring(xml_data)
+                    for item in root.findall(".//item")[:5]:
+                        title = (item.findtext("title") or "").strip()
+                        desc = (item.findtext("description") or "").strip()
+                        link = (item.findtext("link") or "#").strip()
+                        if title:
+                            items.append({"title": title, "summary": desc[:200], "source_url": link})
+            except: continue
+            
+        if not items:
+            return {"geo_news": []}
+            
+        # Convert to list of titles for the prompt to avoid complex type slicing
+        titles = [i['title'] for i in items[:10]]
+        
+        prompt = f"""
+        Structure these world headlines into institutional-grade geopolitical news cards.
+        Headlines: {titles}
+        
+        Return a JSON array of objects:
+        {{
+          "title": "headline",
+          "summary": "2-sentence summary",
+          "region": "Region Name",
+          "conflict_level": "High/Medium/Low",
+          "key_players": ["country1", "country2"],
+          "source_url": "link",
+          "time": "Today"
+        }}
+        """
+        
+        response = await self.get_response(prompt)
+        import json, re
+        match = re.search(r'\[.*\]', response, re.DOTALL)
+        result = json.loads(match.group()) if match else []
+        
+        return {"geo_news": result}

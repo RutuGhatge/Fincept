@@ -26,6 +26,7 @@ const GeopoliticsPage: React.FC = () => {
   const navigate = useNavigate();
   const [geoNews, setGeoNews] = useState<any[]>([]);
   const [portfolioImpact, setPortfolioImpact] = useState<any[]>([]);
+  const [reasoningPath, setReasoningPath] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [hasPortfolio, setHasPortfolio] = useState(false);
@@ -50,6 +51,7 @@ const GeopoliticsPage: React.FC = () => {
       const res = await geopoliticsService.getGeopolitics(symbolsParam);
       setGeoNews(res.geo_news ?? []);
       setPortfolioImpact(res.portfolio_impact ?? []);
+      setReasoningPath(res.reasoning_path ?? []);
     } catch (e: any) {
       setError('Could not load geopolitical intelligence. Please try again.');
     } finally {
@@ -112,6 +114,43 @@ const GeopoliticsPage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-16">
+            
+            {/* ── Agentic Reasoning Trace ── */}
+            {reasoningPath.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-stripe-dark text-white rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                  <Zap className="w-32 h-32" />
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-white/10 rounded-xl">
+                      <Zap className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black tracking-tight">Autonomous Agency Trace</h3>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Multi-Agent Reasoning Chain</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {reasoningPath.map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-4 group">
+                        <div className="flex flex-col items-center gap-1 mt-1">
+                          <div className="w-2 h-2 rounded-full bg-amber-400" />
+                          {idx !== reasoningPath.length - 1 && <div className="w-0.5 h-6 bg-white/10" />}
+                        </div>
+                        <p className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* ── Section 1: Global Geopolitical News ── */}
             <section>

@@ -15,7 +15,8 @@ import {
   BarChart2,
   BarChart3,
   AlertCircle,
-  Trash2
+  Trash2,
+  CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -57,6 +58,153 @@ interface Portfolio {
 }
 
 // ---- Sub-components ----
+
+const AIPortfolioHealth: React.FC<{ portfolioId: string }> = ({ portfolioId }) => {
+  const [insights, setInsights] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [scanStep, setScanStep] = useState(0);
+
+  const steps = [
+    "Analyzing sector concentration...",
+    "Cross-referencing live market signals...",
+    "Auditing risk/reward ratio...",
+    "Finalizing strategic action hints..."
+  ];
+
+  useEffect(() => {
+    const fetchInsights = async () => {
+      try {
+        setLoading(true);
+        // Step-through animation for "Proof of Agency"
+        for (let i = 0; i < steps.length; i++) {
+          setScanStep(i);
+          await new Promise(r => setTimeout(r, 1200));
+        }
+        const data = await portfolioService.getInsights(portfolioId);
+        setInsights(data);
+      } catch (err) {
+        console.error("Failed to fetch AI insights:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInsights();
+  }, [portfolioId]);
+
+  if (loading || !insights) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 mb-12 overflow-hidden relative"
+      >
+        <div className="absolute top-0 left-0 w-full h-1 bg-slate-50 overflow-hidden">
+          <motion.div 
+            className="h-full bg-stripe-blue"
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
+          />
+        </div>
+        <div className="flex flex-col items-center justify-center py-10">
+          <RefreshCcw className="w-10 h-10 text-stripe-blue animate-spin mb-6" />
+          <h3 className="text-2xl font-black text-stripe-dark mb-2">Agentic Health Audit</h3>
+          <p className="text-stripe-slate font-medium animate-pulse">{steps[scanStep]}</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  const scoreColor = insights.health_score > 70 ? 'text-emerald-500' : insights.health_score > 40 ? 'text-amber-500' : 'text-red-500';
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 mb-12"
+    >
+      <div className="flex flex-col lg:flex-row gap-12">
+        {/* Score & Risk */}
+        <div className="flex-shrink-0 flex flex-col items-center justify-center lg:border-r lg:border-slate-50 lg:pr-12">
+          <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+            <svg className="w-full h-full transform -rotate-90">
+              <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100" />
+              <motion.circle 
+                cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" 
+                strokeDasharray="364.4"
+                initial={{ strokeDashoffset: 364.4 }}
+                animate={{ strokeDashoffset: 364.4 - (364.4 * insights.health_score / 100) }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className={scoreColor}
+              />
+            </svg>
+            <span className={`absolute text-4xl font-black ${scoreColor}`}>{insights.health_score}</span>
+          </div>
+          <span className="text-xs font-black text-stripe-slate uppercase tracking-widest mb-1">Health Score</span>
+          <span className={`text-lg font-black ${scoreColor}`}>{insights.risk_level} Risk</span>
+        </div>
+
+        {/* Insights & Actions */}
+        <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div>
+            <h4 className="text-sm font-black text-stripe-dark uppercase tracking-widest mb-6 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-stripe-blue" /> Key AI Observations
+            </h4>
+            <ul className="space-y-4">
+              {insights.top_insights?.map((item: string, i: number) => (
+                <li key={i} className="flex gap-3 text-sm font-medium text-stripe-slate leading-relaxed">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stripe-blue flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <p className="text-[11px] font-black text-stripe-slate uppercase tracking-widest mb-2">Sector Critique</p>
+              <p className="text-xs font-bold text-stripe-dark leading-relaxed">{insights.sector_allocation_critique}</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-black text-stripe-dark uppercase tracking-widest mb-6 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald-500" /> Agentic Action Hints
+            </h4>
+            <div className="space-y-3">
+              {insights.action_hints?.map((hint: string, i: number) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-4 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex items-start gap-3 hover:border-stripe-blue cursor-default transition-all"
+                >
+                  <div className="mt-1 w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                  </div>
+                  <p className="text-xs font-bold text-stripe-dark leading-normal">{hint}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Reasoning Trace */}
+      <div className="mt-10 pt-8 border-t border-slate-50">
+        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
+          <span className="text-[10px] font-black text-stripe-slate uppercase tracking-widest flex-shrink-0">Agency Trace:</span>
+          {insights.reasoning_path?.map((path: string, i: number) => (
+             <div key={i} className="flex items-center gap-3 flex-shrink-0">
+               <span className="text-[10px] font-bold text-stripe-blue bg-stripe-blue/5 px-3 py-1.5 rounded-full whitespace-nowrap">
+                 {path}
+               </span>
+               {i < insights.reasoning_path.length - 1 && <ChevronRight className="w-3 h-3 text-slate-200" />}
+             </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const EmptyState: React.FC<{ onNavigate: () => void }> = ({ onNavigate }) => (
   <motion.div
@@ -303,6 +451,9 @@ const MyPortfolioPage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* AI Health Audit - The Agentic Proof */}
+        <AIPortfolioHealth portfolioId={portfolio.id} />
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">

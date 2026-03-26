@@ -24,6 +24,10 @@ class AnalysisAgent(BaseAgent):
             return await self._allocate_budget(data)
         elif task_type == "get_portfolio_insights":
             return await self._get_portfolio_insights(data)
+        elif task_type == "review_and_refine":
+            return await self._review_and_refine(data)
+        elif task_type == "analyze_geopolitics":
+            return await self._analyze_geopolitics(data)
         
         return {"error": "Unknown task type for AnalysisAgent"}
 
@@ -35,19 +39,107 @@ class AnalysisAgent(BaseAgent):
         news_titles = [n.get("title") for n in news[:5]]
         
         prompt = f"""
-        Provide deep financial insights for a portfolio containing: {portfolio_summary}.
-        Consider this recent market news: {news_titles}.
+        You are an institutional-grade portfolio auditor.
+        Portfolio: {portfolio_summary}
+        Recent Context: {news_titles}
         
-        Your response should include:
-        1. Current health of the portfolio.
-        2. Potential risks based on market news.
-        3. Strategic recommendations for the next 3-6 months.
+        Perform a deep health audit and return a JSON object with:
+        1. "health_score": Numeric value 0-100.
+        2. "risk_level": "Low", "Medium", "High", or "Extreme".
+        3. "top_insights": List of 3 key observations.
+        4. "sector_allocation_critique": A brief professional observation on their sector exposure.
+        5. "action_hints": List of 3 specific, actionable steps.
+        6. "reasoning_path": List of 3 logical steps the agent took to reach this audit.
         
-        Keep it professional and data-driven.
+        Only return the JSON.
         """
         
-        insights = await self.get_response(prompt)
-        return {"insights": insights}
+        response_text = await self.get_response(prompt)
+        try:
+            import json, re
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            return json.loads(match.group()) if match else {"error": "Invalid AI format"}
+        except Exception as e:
+            logger.error(f"Error parsing insights: {e}")
+            return {"error": str(e), "raw": response_text}
+
+    async def _review_and_refine(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        previous_output = data.get("previous_output")
+        original_task = data.get("original_task")
+        
+        prompt = f"""
+        You are acting as a CRITIC and REFINER for a financial AI system.
+        
+        The system previously generated this output for the task '{original_task}':
+        ---
+        {previous_output}
+        ---
+        
+        Your goal is to REVIEW this output for:
+        1. Logical consistency (no contradictory advice).
+        2. Sector accuracy (ensure stocks are mapped to correct sectors).
+        3. Strategic depth (ensure recommendations are actionable and not generic).
+        4. Tone (must be professional and institutional-grade).
+        
+        If you find issues, FIX THEM in the final output. If the output is already perfect, return it as is but slightly polished.
+        
+        Return ONLY the refined final response.
+        """
+        
+        refined_output = await self.get_response(prompt)
+        
+        # If the original output was a dict, try to maintain structure or just return as is
+        if isinstance(previous_output, dict):
+            # Attempt to merge or update the main content field
+            # This is a bit heuristic, but let's assume the main field is 'insights' or 'impact'
+            result = previous_output.copy()
+            for key in ["insights", "performance_analysis", "risk_assessment", "geo_news", "portfolio_impact"]:
+                if key in result:
+                    result[key] = refined_output
+            result["refined"] = True
+            return result
+            
+        return {"refined_output": refined_output}
+
+    async def _analyze_geopolitics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        geo_news = data.get("geo_news", [])
+        symbols = data.get("symbols", [])
+        
+        if not geo_news or not symbols:
+            return {"portfolio_impact": []}
+            
+        geo_summary = "\n".join([f"- {g['title']} ({g.get('region','Global')})" for g in geo_news[:8]])
+        symbols_str = ", ".join(symbols[:15])
+        
+        prompt = f"""
+        You are a geopolitical risk analyst.
+        Portfolio holdings: {symbols_str}
+        Current top geopolitical events:
+        {geo_summary}
+        
+        Identify which holdings are genuinely impacted by these events.
+        For each impacted holding, explain:
+        1. WHY: The causal link (e.g., supply chain, currency, regulation).
+        2. HOW: The direction of impact (Positive/Negative/Watch).
+        3. ACTION: A 1-sentence suggestion.
+        
+        Output a JSON array of objects:
+        {{
+          "symbol": "SYMBOL",
+          "holding_name": "Full Name",
+          "geo_event": "The Event",
+          "impact": "Positive/Negative/Watch",
+          "impact_reason": "2-sentence clear explanation",
+          "action_hint": "Actionable suggestion"
+        }}
+        """
+        
+        response = await self.get_response(prompt)
+        import json, re
+        match = re.search(r'\[.*\]', response, re.DOTALL)
+        result = json.loads(match.group()) if match else []
+        
+        return {"portfolio_impact": result}
 
     async def _allocate_budget(self, data: Dict[str, Any]) -> Dict[str, Any]:
         budget = data.get("budget")
