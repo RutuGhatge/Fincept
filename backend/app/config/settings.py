@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = ["*"]
+    ALLOWED_ORIGINS: List[str] = ["*", "https://fincept.vercel.app"]
     
     # Cache
     CACHE_ENABLED: bool = True
@@ -47,5 +47,23 @@ class Settings(BaseSettings):
         # Mapping GEMINI_API_KEY/GOOGLE_API_KEY
         if self.GEMINI_API_KEY and not self.GOOGLE_API_KEY:
             self.GOOGLE_API_KEY = self.GEMINI_API_KEY
+            
+        # Robust CORS Origin parsing
+        current_origins = self.ALLOWED_ORIGINS
+        if isinstance(current_origins, str):
+            val = current_origins.strip()
+            if val.startswith("[") and val.endswith("]"):
+                try:
+                    self.ALLOWED_ORIGINS = json.loads(val)
+                except:
+                    self.ALLOWED_ORIGINS = [val.strip("[]'\" ")]
+            elif "," in val:
+                self.ALLOWED_ORIGINS = [o.strip() for o in val.split(",")]
+            else:
+                self.ALLOWED_ORIGINS = [val] if val else ["*"]
+        
+        # Ensure we always have at least a list of one string if empty
+        if not self.ALLOWED_ORIGINS:
+            self.ALLOWED_ORIGINS = ["*"]
 
 settings = Settings()
