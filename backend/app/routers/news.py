@@ -198,6 +198,52 @@ Items:
         
         return fallback_news
 
+@router.get("/debug-fresh")
+async def debug_fresh_news(
+    symbols: Optional[str] = "",
+    db = Depends(get_db)
+):
+    """
+    Debug endpoint that bypasses all cache and forces fresh fetch
+    """
+    symbol_list = [s.strip() for s in symbols.split(",") if s.strip()] if symbols else []
+    
+    logger.info(f"DEBUG: Forcing fresh news fetch for symbols: {symbol_list}")
+    
+    try:
+        # Force fresh RSS fetch
+        logger.info("DEBUG: Fetching fresh RSS...")
+        raw = await asyncio.get_event_loop().run_in_executor(None, _fetch_rss_items, 25)
+        logger.info(f"DEBUG: Got {len(raw)} raw RSS items")
+        
+        # Force fresh Gemini processing
+        logger.info("DEBUG: Processing with Gemini...")
+        structured = await _gemini_process_news(raw, symbol_list)
+        logger.info(f"DEBUG: Got {len(structured)} processed items")
+        
+        return {
+            "news": structured,
+            "source": "DEBUG - Fresh RSS + Gemini",
+            "count": len(structured),
+            "status": "debug_fresh",
+            "raw_count": len(raw),
+            "symbols": symbol_list,
+            "debug": True
+        }
+        
+    except Exception as e:
+        logger.error(f"DEBUG: Fresh news error: {e}")
+        import traceback
+        logger.error(f"DEBUG: Traceback: {traceback.format_exc()}")
+        return {
+            "news": [],
+            "source": "DEBUG - Error",
+            "count": 0,
+            "status": "error",
+            "error": str(e),
+            "debug": True
+        }
+
 @router.get("/et-rss")
 async def get_et_rss_news(
     user_id: Optional[str] = "anonymous", 
@@ -212,23 +258,32 @@ async def get_et_rss_news(
     symbol_list = [s.strip() for s in symbols.split(",") if s.strip()]
     cache_key = f"news_{user_id}"
     
-    # 1. Check Cache
+    logger.info(f"News request for user {user_id}, force_refresh={force_refresh}, symbols={len(symbol_list)}")
+    
+    # 1. Check Cache (only if not forcing refresh)
     cached = await db.market_news.find_one({"user_id": user_id})
+    
+    # If force_refresh is true, skip cache check and go straight to fresh fetch
     if cached and not force_refresh:
         # Check if cache is fresh (e.g., < 30 mins)
         try:
             cached_time = datetime.fromisoformat(cached["updated_at"])
             if cached_time > datetime.now() - timedelta(minutes=30):
-                logger.info(f"Serving cached news for user {user_id}, count: {len(cached.get('news', []))}")
-                return {"news": cached["news"], "source": "Cache", "count": len(cached["news"]), "status": "fresh"}
+                news_count = len(cached.get('news', []))
+                logger.info(f"Serving cached news for user {user_id}, count: {news_count}")
+                return {"news": cached["news"], "source": "Cache", "count": news_count, "status": "fresh"}
         except (KeyError, ValueError) as e:
             logger.warning(f"Cache timestamp error for user {user_id}: {e}")
             # Continue to fetch fresh data if cache is corrupted
-
-    # 2. Revalidate/Refresh (Background usually, but here we'll wait since user wants latest)
+    
+    # If we get here, we need fresh data (either no cache, stale cache, or force_refresh)
+    logger.info(f"Fetching fresh news for user {user_id} (force_refresh={force_refresh})")
     try:
         raw = await asyncio.get_event_loop().run_in_executor(None, _fetch_rss_items, 25)
+        logger.info(f"Fetched {len(raw)} raw RSS items")
+        
         structured = await _gemini_process_news(raw, symbol_list)
+        logger.info(f"Processed {len(structured)} news items")
         
         # If AI processing failed but we have cached data, return it
         if not structured:

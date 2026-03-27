@@ -119,6 +119,14 @@ export const newsService = {
     });
     return response.data;
   },
+  getDebugFreshNews: async (symbols?: string) => {
+    const response = await api.get('/news/debug-fresh', { 
+      params: { 
+        symbols
+      } 
+    });
+    return response.data;
+  },
 };
 
 export const geopoliticsService = {
