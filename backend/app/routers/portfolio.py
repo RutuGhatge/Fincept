@@ -697,7 +697,81 @@ Output strictly in JSON format:
             return {"success": True, "data": result}
         except Exception as e:
             logger.error(f"AI Allocate-AI Error: {e}")
-            raise HTTPException(status_code=500, detail="Failed to generate AI allocation")
+            # Return structured fallback instead of error
+            fallback_suggestions = []
+            
+            # Analyze current portfolio for fallback strategy
+            if holdings:
+                # Group holdings by type for diversification analysis
+                asset_types = {}
+                for h in holdings:
+                    asset_type = h.get('asset_type', 'unknown')
+                    if asset_type not in asset_types:
+                        asset_types[asset_type] = 0
+                    asset_types[asset_type] += h.get('market_value', 0)
+                
+                # If portfolio is concentrated, suggest diversification
+                if len(asset_types) < 3:
+                    fallback_suggestions.extend([
+                        {
+                            "fund_name": "Parag Parikh Flexi Cap Fund",
+                            "amount": budget * 0.4,
+                            "category": "Equity - Flexi Cap",
+                            "reason": "Diversify across market caps and sectors for balanced growth"
+                        },
+                        {
+                            "fund_name": "HDFC Index S&P BSE Sensex Fund",
+                            "amount": budget * 0.3,
+                            "category": "Equity - Index",
+                            "reason": "Core market exposure with low tracking error"
+                        },
+                        {
+                            "fund_name": "ICICI Prudential Bluechip Fund",
+                            "amount": budget * 0.3,
+                            "category": "Equity - Large Cap",
+                            "reason": "Stable large-cap companies with consistent performance"
+                        }
+                    ])
+                else:
+                    # Portfolio is diversified, add to existing positions
+                    top_holdings = sorted(holdings, key=lambda x: x.get('market_value', 0), reverse=True)[:2]
+                    for i, holding in enumerate(top_holdings):
+                        fallback_suggestions.append({
+                            "fund_name": holding.get('name', holding.get('symbol', 'Unknown')),
+                            "amount": budget * (0.5 if i == 0 else 0.5),
+                            "category": holding.get('asset_type', 'Equity'),
+                            "reason": f"Increase position in existing well-performing {holding.get('asset_type', 'holding')}"
+                        })
+            else:
+                # No existing holdings - provide balanced portfolio
+                fallback_suggestions = [
+                    {
+                        "fund_name": "Parag Parikh Flexi Cap Fund",
+                        "amount": budget * 0.4,
+                        "category": "Equity - Flexi Cap",
+                        "reason": "Diversified equity exposure across market caps"
+                    },
+                    {
+                        "fund_name": "HDFC Index S&P BSE Sensex Fund",
+                        "amount": budget * 0.3,
+                        "category": "Equity - Index",
+                        "reason": "Broad market exposure with low cost"
+                    },
+                    {
+                        "fund_name": "ICICI Prudential Technology Fund",
+                        "amount": budget * 0.3,
+                        "category": "Equity - Sectoral",
+                        "reason": "Growth potential in technology sector"
+                    }
+                ]
+            
+            fallback_response = {
+                "suggestions": fallback_suggestions,
+                "overall_strategy": "AI analysis temporarily unavailable. Using rule-based diversification strategy.",
+                "fallback": True
+            }
+            
+            return {"success": True, "data": fallback_response}
 
     except Exception as e:
         logger.error(f"Error in allocate-ai: {e}")

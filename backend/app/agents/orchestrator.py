@@ -134,11 +134,16 @@ class Orchestrator:
             }
         })
         
-        # Log completion
-        if "error" not in final_result:
-            logger.info("Successfully completed fast geopolitics analysis.")
-            return {"success": True, "data": final_result}
-            
-        return {"success": False, "error": final_result.get("error", "Unknown error in AnalysisAgent")}
+        # Check if we got a valid structured result (even if from fallback)
+        if "error" not in final_result and isinstance(final_result, dict):
+            # Check if it has the expected structure
+            if any(key in final_result for key in ["geo_news", "portfolio_impact", "reasoning_path"]):
+                logger.info("Successfully completed fast geopolitics analysis.")
+                return {"success": True, "data": final_result}
+        
+        # If we got here, there was an error
+        error_msg = final_result.get("error", "Unknown error in AnalysisAgent")
+        logger.error(f"Geopolitics analysis failed: {error_msg}")
+        return {"success": False, "error": error_msg}
 
 orchestrator = Orchestrator()

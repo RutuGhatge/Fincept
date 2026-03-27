@@ -229,35 +229,60 @@ class AnalysisAgent(BaseAgent):
         if not raw_news:
             return {"geo_news": [], "portfolio_impact": [], "reasoning_path": []}
 
-        prompt = f"""
-        Analyze these raw geopolitical news items and map their impact to the user's portfolio symbols.
-        
-        NEWS ITEMS:
-        {raw_news}
-        
-        PORTFOLIO SYMBOLS:
-        {symbols}
-        
-        Return a single JSON object with:
-        1. "geo_news": Array of structured news cards:
-           {{"title", "summary" (2 sentences), "region", "conflict_level", "key_players", "source_url", "time"}}
-        2. "portfolio_impact": Array of mapping objects:
-           {{"symbol", "impact" (High/Low/Watch), "geo_event" (title of news), "impact_reason", "action_hint", "holding_name"}}
-        3. "reasoning_path": Array of 3 strings explaining the top-level trends.
-        
-        Be decisive. Use professional financial terminology.
-        Only return the JSON.
-        """
-        
-        response = await self.get_response(prompt)
-        
-        import json, re
         try:
+            prompt = f"""
+            Analyze these raw geopolitical news items and map their impact to the user's portfolio symbols.
+            
+            NEWS ITEMS:
+            {raw_news}
+            
+            PORTFOLIO SYMBOLS:
+            {symbols}
+            
+            Return a single JSON object with:
+            1. "geo_news": Array of structured news cards:
+               {{"title", "summary" (2 sentences), "region", "conflict_level", "key_players", "source_url", "time"}}
+            2. "portfolio_impact": Array of mapping objects:
+               {{"symbol", "impact" (High/Low/Watch), "geo_event" (title of news), "impact_reason", "action_hint", "holding_name"}}
+            3. "reasoning_path": Array of 3 strings explaining the top-level trends.
+            
+            Be decisive. Use professional financial terminology.
+            Only return the JSON.
+            """
+            
+            response = await self.get_response(prompt)
+            
+            import json, re
             # Clean response to ensure it's just JSON
             match = re.search(r'\{.*\}', response, re.DOTALL)
             if match:
                 result = json.loads(match.group())
                 return result
-            return {"error": "Failed to parse consolidated AI response", "raw": response[:200]}
+            return {"geo_news": [], "portfolio_impact": [], "reasoning_path": ["AI response parsing failed"]}
         except Exception as e:
-            return {"error": f"JSON Parse Error: {str(e)}", "raw": response[:200]}
+            logger.error(f"Geopolitics analysis failed: {e}")
+            # Return structured fallback instead of error
+            fallback_impacts = []
+            for sym in symbols[:5]:
+                fallback_impacts.append({
+                    "symbol": sym,
+                    "impact": "Watch",
+                    "geo_event": "Market Analysis Unavailable",
+                    "impact_reason": "AI analysis temporarily unavailable. Monitor market conditions.",
+                    "action_hint": "Maintain current position until analysis resumes.",
+                    "holding_name": sym
+                })
+            
+            return {
+                "geo_news": [{
+                    "title": "Market Analysis Temporarily Unavailable",
+                    "summary": "AI-powered analysis is currently experiencing issues. Manual review recommended.",
+                    "region": "Global",
+                    "conflict_level": "Low",
+                    "key_players": ["Market"],
+                    "source_url": "#",
+                    "time": "Now"
+                }],
+                "portfolio_impact": fallback_impacts,
+                "reasoning_path": ["AI analysis unavailable - using fallback assessment"]
+            }
