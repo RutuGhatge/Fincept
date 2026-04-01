@@ -166,19 +166,19 @@ const AllocatePage: React.FC = () => {
   }
 
   return (
-    <div className="pt-32 pb-24 bg-[#f8fafc] min-h-screen relative">
+    <div className="pt-32 pb-24 bg-background-light dark:bg-background-dark min-h-screen relative">
       {!isAuthenticated && (
-        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/10 flex items-center justify-center p-6">
+        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/10 dark:bg-card-dark/50 flex items-center justify-center p-6">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 text-center max-w-lg"
+            className="bg-card-light dark:bg-card-dark p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 dark:border-border-dark text-center max-w-lg"
           >
             <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center text-emerald-600 mx-auto mb-8">
               <Lock className="w-10 h-10" />
             </div>
-            <h2 className="text-3xl font-black text-stripe-dark mb-4">Allocate is Locked</h2>
-            <p className="text-stripe-slate font-medium mb-10 leading-relaxed">
+            <h2 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4">Allocate is Locked</h2>
+            <p className="text-stripe-slate dark:text-slate-400 font-medium mb-10 leading-relaxed">
               Our AI needs your portfolio data to suggest optimal splits. Sign in to unlock this feature.
             </p>
             <button 
@@ -198,12 +198,12 @@ const AllocatePage: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-8"
           >
-            <Cpu className="w-4 h-4" /> Gemini-Powered Investment Strategy
+            <Cpu className="w-4 h-4" /> AI-Powered Investment Strategy
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-5xl md:text-8xl font-black text-stripe-dark mb-8 tracking-tighter"
+            className="text-5xl md:text-8xl font-black text-heading-light dark:text-heading-dark mb-8 tracking-tighter"
           >
             AI <span className="text-emerald-500">Allocate.</span>
           </motion.h1>
@@ -215,17 +215,17 @@ const AllocatePage: React.FC = () => {
         <div className="grid lg:grid-cols-12 gap-12">
           {/* Controls - 5 columns */}
           <div className="lg:col-span-5 space-y-8">
-            <div className="p-8 bg-white rounded-[3rem] shadow-sm border border-slate-100">
-              <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-8">
+            <div className="p-8 bg-card-light dark:bg-card-dark rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700">
+              <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl mb-8">
                 <button 
                   onClick={() => setMode('manual')}
-                  className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${mode === 'manual' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${mode === 'manual' ? 'bg-card-light dark:bg-card-dark text-emerald-600 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                   <Settings2 className="w-4 h-4" /> Manual
                 </button>
                 <button 
                   onClick={() => setMode('nlp')}
-                  className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${mode === 'nlp' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${mode === 'nlp' ? 'bg-card-light dark:bg-card-dark text-emerald-600 shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                   <MessageSquare className="w-4 h-4" /> AI Prompt
                 </button>
@@ -233,12 +233,12 @@ const AllocatePage: React.FC = () => {
 
               <div className="space-y-6">
                 <div>
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Amount to Invest (₹)</label>
+                  <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Amount to Invest (₹)</label>
                   <input 
                     type="number" 
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
-                    className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xl font-bold focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+                    className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-xl font-bold focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
                     placeholder="e.g. 50000"
                   />
                 </div>
@@ -246,59 +246,59 @@ const AllocatePage: React.FC = () => {
                 {mode === 'manual' ? (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Current Age</label>
+                      <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Current Age</label>
                       <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                         <input 
                           type="number"
                           value={age}
                           onChange={(e) => setAge(e.target.value)}
-                          className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                          className="w-full pl-10 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl font-bold outline-none"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Retirement Age</label>
+                    <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Retirement Age</label>
                       <div className="relative">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                         <input 
                           type="number"
                           value={retirementAge}
                           onChange={(e) => setRetirementAge(e.target.value)}
-                          className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                          className="w-full pl-10 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl font-bold outline-none"
                         />
                       </div>
                     </div>
                     <div className="col-span-2 space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Investment Goal</label>
+                    <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Investment Goal</label>
                       <div className="relative">
-                        <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                         <input 
                           type="text"
                           value={goal}
                           onChange={(e) => setGoal(e.target.value)}
-                          className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                          className="w-full pl-10 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl font-bold outline-none"
                           placeholder="e.g. Buying a House"
                         />
                       </div>
                     </div>
                     <div className="col-span-2 space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Expected Return (%)</label>
+                    <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Expected Return (%)</label>
                       <input 
                         type="number"
                         value={expectedReturn}
                         onChange={(e) => setExpectedReturn(e.target.value)}
-                        className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none"
+                        className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl font-bold outline-none"
                       />
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Describe your goals</label>
+                    <label className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Describe your goals</label>
                     <textarea 
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-medium min-h-[220px] outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      className="w-full p-5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl font-medium min-h-[220px] outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
                       placeholder="I am 22 years old. I am planning to buy a house in 10 years. I want to earn at least 15% return. What should be my strategy?"
                     />
                   </div>
@@ -325,7 +325,7 @@ const AllocatePage: React.FC = () => {
                 </p>
                 <button 
                   onClick={() => navigate('/portfolio')}
-                  className="w-full py-3 bg-white text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-50 transition-all"
+                  className="w-full py-3 bg-card-light dark:bg-card-dark text-red-600 border border-red-200 dark:border-red-800 rounded-xl font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                 >
                   Connect Portfolio First
                 </button>
@@ -341,14 +341,14 @@ const AllocatePage: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-full min-h-[600px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[3.5rem] bg-white/50"
+                  className="h-full min-h-[600px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-[3.5rem] bg-card-light/50 dark:bg-card-dark/50"
                 >
                   <div className="relative">
                     <Cpu className="w-20 h-20 text-emerald-500/20 animate-pulse" />
                     <Loader2 className="absolute inset-0 w-20 h-20 text-emerald-500 animate-spin" />
                   </div>
-                  <p className="mt-8 text-2xl font-black text-stripe-dark">Gemini is crunching numbers...</p>
-                  <p className="text-stripe-slate font-medium">Analyzing holdings, risks, and goals...</p>
+                  <p className="mt-8 text-2xl font-black text-heading-light dark:text-heading-dark">Our Jargon Agent is crunching numbers...</p>
+                  <p className="text-stripe-slate dark:text-slate-400 font-medium">Analyzing holdings, risks, and goals...</p>
                 </motion.div>
               ) : allocation ? (
                 <motion.div 

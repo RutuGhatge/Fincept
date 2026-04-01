@@ -29,15 +29,15 @@ const advantages = [
 
 const Advantages: React.FC = () => {
   return (
-    <section className="py-24 bg-white relative overflow-hidden border-t border-slate-100">
+    <section className="py-24 bg-background-light dark:bg-background-dark relative overflow-hidden border-t border-slate-100 dark:border-slate-800">
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-2xl mb-24">
           <h2 className="text-sm font-bold uppercase tracking-widest text-stripe-blue mb-4">Professional Grade</h2>
-          <h3 className="text-4xl md:text-6xl font-black text-stripe-dark mb-8 leading-tight">
+          <h3 className="text-4xl md:text-6xl font-black text-heading-light dark:text-heading-dark mb-8 leading-tight">
             Intelligence <br />
             <span className="cool-gradient-text text-glow-none">simplified.</span>
           </h3>
-          <p className="text-xl text-stripe-slate leading-relaxed max-w-xl font-medium">
+          <p className="text-xl text-stripe-slate dark:text-slate-400 leading-relaxed max-w-xl font-medium">
             Fincept connects directly to your financial life. We decode the complexity of the Indian markets using secure, borderless intelligence models.
           </p>
         </div>
@@ -50,13 +50,13 @@ const Advantages: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group"
+              className="p-10 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:bg-card-light dark:hover:bg-card-dark hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group"
             >
               <div className={`mb-8 p-5 ${adv.color} rounded-2xl w-fit group-hover:scale-110 transition-transform`}>
                 {adv.icon}
               </div>
-              <h4 className="text-2xl font-black mb-4 text-stripe-dark group-hover:cool-gradient-text transition-all">{adv.title}</h4>
-              <p className="text-stripe-slate leading-relaxed font-medium transition-colors group-hover:text-stripe-dark">
+              <h4 className="text-2xl font-black mb-4 text-heading-light dark:text-heading-dark group-hover:cool-gradient-text transition-all">{adv.title}</h4>
+              <p className="text-stripe-slate dark:text-slate-400 leading-relaxed font-medium transition-colors group-hover:text-heading-light dark:group-hover:text-heading-dark">
                 {adv.description}
               </p>
             </motion.div>

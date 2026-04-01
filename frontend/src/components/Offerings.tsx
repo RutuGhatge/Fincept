@@ -66,11 +66,11 @@ const Offerings: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-24 bg-background-light dark:bg-background-dark relative overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="mb-20">
           <h2 className="text-sm font-bold uppercase tracking-widest text-stripe-blue mb-4">Feature Products</h2>
-          <h3 className="text-4xl md:text-6xl font-black text-stripe-dark max-w-2xl leading-tight">
+          <h3 className="text-4xl md:text-6xl font-black text-heading-light dark:text-heading-dark max-w-2xl leading-tight">
             The backbone of your <br />
             <span className="cool-gradient-text">financial journey.</span>
           </h3>
@@ -84,7 +84,7 @@ const Offerings: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.6 }}
-              className="group relative bg-slate-50 border border-slate-100 p-12 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden hover:bg-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-500"
+              className="group relative bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-12 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden hover:bg-card-light dark:hover:bg-card-dark hover:shadow-2xl hover:-translate-y-1 transition-all duration-500"
             >
               <div className="flex-1 space-y-6 relative z-10">
                 <div className="flex items-center gap-4">
@@ -97,10 +97,10 @@ const Offerings: React.FC = () => {
                 </div>
                 
                 <div>
-                  <h4 className="text-3xl font-black text-stripe-dark mb-4 group-hover:cool-gradient-text transition-all">
+                  <h4 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4 group-hover:cool-gradient-text transition-all">
                     {offering.title}
                   </h4>
-                  <p className="text-xl text-stripe-slate leading-relaxed max-w-xl group-hover:text-stripe-dark transition-colors">
+                  <p className="text-xl text-stripe-slate dark:text-slate-400 leading-relaxed max-w-xl group-hover:text-heading-light dark:group-hover:text-heading-dark transition-colors">
                     {offering.description}
                   </p>
                 </div>
@@ -123,7 +123,7 @@ const Offerings: React.FC = () => {
         <div className="mt-20 text-center">
           <button 
             onClick={() => navigate('/benefits')}
-            className="text-stripe-blue font-bold text-lg hover:text-stripe-dark transition-all flex items-center justify-center gap-2 group"
+            className="text-stripe-blue font-bold text-lg hover:text-heading-light dark:hover:text-heading-dark transition-all flex items-center justify-center gap-2 group"
           >
             Explore all benefits <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>

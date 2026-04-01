@@ -67,10 +67,10 @@ const EmptyState: React.FC<{ onNavigate: () => void }> = ({ onNavigate }) => (
     <div className="w-28 h-28 rounded-[2.5rem] bg-slate-100 flex items-center justify-center mb-8">
       <BarChart3 className="w-14 h-14 text-slate-300" />
     </div>
-    <h2 className="text-4xl font-black text-stripe-dark mb-4 tracking-tight">
+    <h2 className="text-4xl font-black text-heading-light dark:text-heading-dark mb-4 tracking-tight">
       No Portfolio Yet
     </h2>
-    <p className="text-lg text-stripe-slate font-medium max-w-md leading-relaxed mb-10">
+    <p className="text-lg text-stripe-slate dark:text-slate-400 font-medium max-w-md leading-relaxed mb-10">
       Your dashboard is waiting. Upload a broker statement or connect via API to see your
       live holdings, P&L, and allocation insights.
     </p>
@@ -84,7 +84,7 @@ const EmptyState: React.FC<{ onNavigate: () => void }> = ({ onNavigate }) => (
       </button>
       <button
         onClick={onNavigate}
-        className="flex items-center gap-2 px-10 py-4 bg-slate-100 text-stripe-dark rounded-2xl font-black hover:bg-slate-200 transition-all"
+        className="flex items-center gap-2 px-10 py-4 bg-slate-100 dark:bg-slate-800 text-heading-light dark:text-heading-dark rounded-2xl font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
       >
         Connect Broker API
         <ChevronRight className="w-5 h-5" />
@@ -182,7 +182,7 @@ const MyPortfolioPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background-light dark:bg-background-dark">
         <div className="relative w-24 h-24">
           <div className="absolute inset-0 border-4 border-slate-100 rounded-full" />
           <div className="absolute inset-0 border-4 border-stripe-blue border-t-transparent rounded-full animate-spin" />
@@ -198,7 +198,7 @@ const MyPortfolioPage: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-6">
         <AlertCircle className="w-16 h-16 text-red-400" />
-        <p className="text-xl font-black text-stripe-dark">{error}</p>
+        <p className="text-xl font-black text-heading-light dark:text-heading-dark">{error}</p>
         <button
           onClick={fetchPortfolio}
           className="px-8 py-3 bg-stripe-blue text-white rounded-2xl font-bold hover:scale-105 transition-all"
@@ -211,7 +211,7 @@ const MyPortfolioPage: React.FC = () => {
 
   if (!portfolio) {
     return (
-      <div className="min-h-screen bg-slate-50 pt-32">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-800 pt-32">
         <EmptyState onNavigate={() => navigate('/portfolio')} />
       </div>
     );
@@ -220,7 +220,7 @@ const MyPortfolioPage: React.FC = () => {
   // ---- Full Dashboard ----
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 pb-24 px-6 lg:px-12">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-800 pt-32 pb-24 px-6 lg:px-12">
       <div className="max-w-[1400px] mx-auto">
 
         {/* Header */}
@@ -243,7 +243,7 @@ const MyPortfolioPage: React.FC = () => {
               <span className="text-sm font-black text-stripe-slate uppercase tracking-widest">
                 Total Investment
               </span>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-400">
+              <h2 className="text-3xl md:text-4xl font-black text-slate-400 dark:text-slate-500">
                 ₹{totalInvested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </h2>
             </div>
@@ -255,7 +255,7 @@ const MyPortfolioPage: React.FC = () => {
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-6xl md:text-8xl font-black text-stripe-dark tracking-tight"
+                className="text-6xl md:text-8xl font-black text-heading-light dark:text-heading-dark tracking-tight"
               >
                 ₹{totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </motion.h1>
@@ -268,7 +268,7 @@ const MyPortfolioPage: React.FC = () => {
                 <span className="text-base">({isProfit ? '+' : ''}{overallPnlPct.toFixed(2)}%)</span>
               </div>
               {portfolio.updated_at && (
-                <span className="text-xs text-slate-400 font-medium bg-white px-3 py-1 rounded-full border border-slate-100">
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-medium bg-card-light dark:bg-card-dark px-3 py-1 rounded-full border border-slate-100 dark:border-slate-700">
                   Refreshed {new Date(portfolio.updated_at).toLocaleDateString('en-IN')}
                 </span>
               )}
@@ -278,26 +278,26 @@ const MyPortfolioPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => navigate('/news')}
-              className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-stripe-slate font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-3 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-600 rounded-2xl text-stripe-slate dark:text-slate-400 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
             >
               <BarChart2 className="w-4 h-4" /> Market Pulse
             </button>
             <button
               onClick={() => navigate('/portfolio')}
-              className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-stripe-slate font-bold text-sm hover:bg-slate-50 transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-3 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-600 rounded-2xl text-stripe-slate dark:text-slate-400 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
             >
               <Plus className="w-4 h-4" /> Add Holdings
             </button>
             <button
               onClick={handleDelete}
-              className="p-3 bg-white border border-red-200 rounded-2xl text-red-500 hover:bg-red-50 transition-all shadow-sm"
+              className="p-3 bg-card-light dark:bg-card-dark border border-red-200 dark:border-red-800 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm"
               title="Delete Portfolio"
             >
               <Trash2 className="w-5 h-5" />
             </button>
             <button
               onClick={fetchPortfolio}
-              className="p-3 bg-white border border-slate-200 rounded-2xl text-stripe-dark hover:bg-slate-50 transition-all group shadow-sm"
+              className="p-3 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-600 rounded-2xl text-heading-light dark:text-heading-dark hover:bg-slate-50 dark:hover:bg-slate-700 transition-all group shadow-sm"
             >
               <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
             </button>
@@ -312,12 +312,12 @@ const MyPortfolioPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="lg:col-span-2 bg-white rounded-[3rem] p-8 md:p-10 shadow-sm border border-slate-100"
+            className="lg:col-span-2 bg-card-light dark:bg-card-dark rounded-[3rem] p-8 md:p-10 shadow-sm border border-slate-100 dark:border-slate-700"
           >
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-xl font-black text-stripe-dark">Portfolio Value</h3>
-                <p className="text-xs text-slate-400 font-medium mt-1">Estimated 7-day trend based on current value</p>
+                <h3 className="text-xl font-black text-heading-light dark:text-heading-dark">Portfolio Value</h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Estimated 7-day trend based on current value</p>
               </div>
             </div>
             <div className="h-[320px] w-full">
@@ -363,12 +363,12 @@ const MyPortfolioPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100"
+            className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-slate-700"
           >
-            <h3 className="text-xl font-black text-stripe-dark mb-2 flex items-center gap-2">
+            <h3 className="text-xl font-black text-heading-light dark:text-heading-dark mb-2 flex items-center gap-2">
               <PieChartIcon className="w-5 h-5 text-stripe-blue" /> Allocation
             </h3>
-            <p className="text-xs text-slate-400 font-medium mb-6">By asset type</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-6">By asset type</p>
 
             {allocationData.length > 0 ? (
               <>
@@ -402,9 +402,9 @@ const MyPortfolioPage: React.FC = () => {
                       <div key={item.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
-                          <span className="font-bold text-stripe-dark text-sm">{item.name}</span>
+                          <span className="font-bold text-heading-light dark:text-heading-dark text-sm">{item.name}</span>
                         </div>
-                        <span className="font-black text-stripe-slate text-sm">{pct}%</span>
+                        <span className="font-black text-stripe-slate dark:text-slate-400 text-sm">{pct}%</span>
                       </div>
                     );
                   })}
@@ -423,25 +423,25 @@ const MyPortfolioPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden"
+          className="bg-card-light dark:bg-card-dark rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden"
         >
-          <div className="p-10 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="p-10 border-b border-slate-50 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h3 className="text-2xl font-black text-stripe-dark">Holdings</h3>
-              <p className="text-sm text-slate-400 font-medium mt-1">{portfolio.holdings.length} positions</p>
+              <h3 className="text-2xl font-black text-heading-light dark:text-heading-dark">Holdings</h3>
+              <p className="text-sm text-slate-400 dark:text-slate-500 font-medium mt-1">{portfolio.holdings.length} positions</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative flex-1 md:w-72">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search holdings..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stripe-blue/20"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stripe-blue/20"
                 />
               </div>
-              <button className="flex items-center gap-2 px-4 py-3 bg-slate-50 text-stripe-dark border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">
+              <button className="flex items-center gap-2 px-4 py-3 bg-slate-50 dark:bg-slate-800 text-heading-light dark:text-heading-dark border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                 <Filter className="w-4 h-4" /> Filter
               </button>
             </div>

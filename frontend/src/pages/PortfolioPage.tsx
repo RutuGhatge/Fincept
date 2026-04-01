@@ -108,19 +108,19 @@ const PortfolioPage: React.FC = () => {
   };
 
   return (
-    <div className="pt-32 pb-24 bg-white min-h-screen relative">
+    <div className="pt-32 pb-24 bg-background-light dark:bg-background-dark min-h-screen relative">
       {!isAuthenticated && (
-        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/30 flex items-center justify-center p-6">
+        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/30 dark:bg-card-dark/50 flex items-center justify-center p-6">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 text-center max-w-lg"
+            className="bg-card-light dark:bg-card-dark p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 dark:border-border-dark text-center max-w-lg"
           >
             <div className="w-20 h-20 bg-stripe-blue/10 rounded-3xl flex items-center justify-center text-stripe-blue mx-auto mb-8">
               <Lock className="w-10 h-10" />
             </div>
-            <h2 className="text-3xl font-black text-stripe-dark mb-4">Portfolio Locked</h2>
-            <p className="text-stripe-slate font-medium mb-10 leading-relaxed">
+            <h2 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4">Portfolio Locked</h2>
+            <p className="text-stripe-slate dark:text-slate-400 font-medium mb-10 leading-relaxed">
               Consolidate your wealth in one high-performance dashboard. Sign in to safely connect your brokerage accounts or upload statements.
             </p>
             <button 
@@ -138,7 +138,7 @@ const PortfolioPage: React.FC = () => {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-black text-stripe-dark mb-8 tracking-tight"
+            className="text-5xl md:text-7xl font-black text-heading-light dark:text-heading-dark mb-8 tracking-tight"
           >
             Portfolio <br />
             <span className="text-stripe-blue">Management.</span>
@@ -160,8 +160,8 @@ const PortfolioPage: React.FC = () => {
                 <CheckCircle2 className="w-6 h-6 text-stripe-blue" />
               </div>
               <div>
-                <p className="font-black text-stripe-dark text-lg">Portfolio Connected</p>
-                <p className="text-sm text-stripe-slate font-medium">Your holdings are synced and ready to view.</p>
+                <p className="font-black text-heading-light dark:text-heading-dark text-lg">Portfolio Connected</p>
+                <p className="text-sm text-stripe-slate dark:text-slate-400 font-medium">Your holdings are synced and ready to view.</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -194,14 +194,14 @@ const PortfolioPage: React.FC = () => {
           <motion.div
             whileHover={{ scale: 1.02 }}
             onClick={() => setMethod('api')}
-            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${method === 'api' ? 'border-stripe-blue bg-stripe-blue/5 shadow-2xl' : 'border-slate-100 bg-slate-50 hover:border-slate-200'
+            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${method === 'api' ? 'border-stripe-blue bg-stripe-blue/5 dark:bg-stripe-blue/10 shadow-2xl' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-600'
               }`}
           >
             <div className="p-4 bg-stripe-blue/10 rounded-2xl w-fit mb-8">
               <Key className="w-10 h-10 text-stripe-blue" />
             </div>
-            <h3 className="text-3xl font-black text-stripe-dark mb-4">Connect Live via API</h3>
-            <p className="text-lg text-stripe-slate leading-relaxed mb-8">
+            <h3 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4">Connect Live via API</h3>
+            <p className="text-lg text-stripe-slate dark:text-slate-400 leading-relaxed mb-8">
               Connect directly to Zerodha, Groww, Upstox, and 15+ other brokers. Secure, real-time synchronization of your holdings.
             </p>
             {method === 'api' && (
@@ -211,8 +211,8 @@ const PortfolioPage: React.FC = () => {
                 className="space-y-6 pt-6 border-t border-stripe-blue/20"
               >
                 <div className="space-y-4">
-                  <label className="block text-sm font-bold text-stripe-dark uppercase tracking-wider">Select Broker</label>
-                  <select className="w-full p-4 bg-white rounded-xl border border-slate-200 font-medium">
+                  <label className="block text-sm font-bold text-heading-light dark:text-heading-dark uppercase tracking-wider">Select Broker</label>
+                  <select className="w-full p-4 bg-card-light dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-600 font-medium">
                     <option>Zerodha (Kite)</option>
                     <option>Groww</option>
                     <option>Upstox</option>
@@ -241,7 +241,7 @@ const PortfolioPage: React.FC = () => {
                     >
                       {uploading ? <Loader className="w-5 h-5 animate-spin" /> : 'Connect and Fetch Portfolio'} <ArrowRight className="w-5 h-5" />
                     </button>
-                    <p className="text-xs text-slate-400 text-center font-medium italic">We'll provide API keys after sometime for full integration.</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center font-medium italic">We'll provide API keys after sometime for full integration.</p>
                   </>
                 )}
               </motion.div>
@@ -252,14 +252,14 @@ const PortfolioPage: React.FC = () => {
           <motion.div
             whileHover={{ scale: 1.02 }}
             onClick={() => setMethod('manual')}
-            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${method === 'manual' ? 'border-stripe-purple bg-stripe-purple/5 shadow-2xl' : 'border-slate-100 bg-slate-50 hover:border-slate-200'
+            className={`p-10 rounded-[3rem] border-2 transition-all cursor-pointer ${method === 'manual' ? 'border-stripe-purple bg-stripe-purple/5 dark:bg-stripe-purple/10 shadow-2xl' : 'border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-600'
               }`}
           >
             <div className="p-4 bg-stripe-purple/10 rounded-2xl w-fit mb-8">
               <Upload className="w-10 h-10 text-stripe-purple" />
             </div>
-            <h3 className="text-3xl font-black text-stripe-dark mb-4">Upload Manual Data</h3>
-            <p className="text-lg text-stripe-slate leading-relaxed mb-8">
+            <h3 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4">Upload Manual Data</h3>
+            <p className="text-lg text-stripe-slate dark:text-slate-400 leading-relaxed mb-8">
               Upload your portfolio in CSV, Excel (XLSX), PDF, or DOCX formats. You can upload multiple files to combine your portfolios into a single view.
             </p>
 
@@ -279,14 +279,14 @@ const PortfolioPage: React.FC = () => {
 
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-stripe-purple/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 bg-white/50 hover:bg-white transition-all cursor-pointer"
+                  className="border-2 border-dashed border-stripe-purple/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 bg-card-light/50 dark:bg-card-dark/50 hover:bg-card-light dark:hover:bg-card-dark transition-all cursor-pointer"
                 >
                   <FileText className="w-12 h-12 text-stripe-purple/50" />
                   <div>
-                    <p className="font-bold text-stripe-dark">
+                    <p className="font-bold text-heading-light dark:text-heading-dark">
                       {file ? file.name : 'Click to upload or drag & drop'}
                     </p>
-                    <p className="text-sm text-slate-400">CSV, XLS, XLSX (Max 10MB)</p>
+                    <p className="text-sm text-slate-400 dark:text-slate-500">CSV, XLS, XLSX (Max 10MB)</p>
                   </div>
                 </div>
 
@@ -321,7 +321,7 @@ const PortfolioPage: React.FC = () => {
                   </button>
                 )}
 
-                <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                   AI Agent ready for parsing.
                 </div>
@@ -342,7 +342,7 @@ const PortfolioPage: React.FC = () => {
               <div className="p-3 bg-slate-100 rounded-2xl">
                 <FileText className="w-6 h-6 text-stripe-dark" />
               </div>
-              <h2 className="text-3xl font-black text-stripe-dark">Manage Uploaded Files</h2>
+              <h2 className="text-3xl font-black text-heading-light dark:text-heading-dark">Manage Uploaded Files</h2>
             </div>
 
             {portfolio?.files?.length > 0 ? (
@@ -350,15 +350,15 @@ const PortfolioPage: React.FC = () => {
                 {portfolio.files.map((f: any) => (
                   <div 
                     key={f.id} 
-                    className="bg-slate-50 border border-slate-100 p-6 rounded-[2rem] flex items-center justify-between group hover:border-stripe-blue/30 transition-all"
+                    className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-6 rounded-[2rem] flex items-center justify-between group hover:border-stripe-blue/30 transition-all"
                   >
                     <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                      <div className="w-12 h-12 bg-card-light dark:bg-card-dark rounded-2xl flex items-center justify-center shadow-sm">
                         <FileText className="w-6 h-6 text-stripe-blue" />
                       </div>
                       <div>
-                        <p className="font-bold text-stripe-dark text-lg">{f.filename}</p>
-                        <div className="flex items-center gap-4 text-sm text-stripe-slate font-medium">
+                        <p className="font-bold text-heading-light dark:text-heading-dark text-lg">{f.filename}</p>
+                        <div className="flex items-center gap-4 text-sm text-stripe-slate dark:text-slate-400 font-medium">
                           <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {new Date(f.upload_date).toLocaleDateString()}</span>
                           <span className="flex items-center gap-1.5"><BarChart3 className="w-4 h-4" /> {f.holdings_count} Holdings</span>
                         </div>
@@ -384,9 +384,9 @@ const PortfolioPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="p-12 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] text-center">
-                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-stripe-slate font-medium">
+              <div className="p-12 bg-slate-50 dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-600 rounded-[2rem] text-center">
+                <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <p className="text-stripe-slate dark:text-slate-400 font-medium">
                   No file tracking data available for previous uploads. <br />
                   New uploads will appear here for individual management.
                 </p>
@@ -397,26 +397,26 @@ const PortfolioPage: React.FC = () => {
 
         {/* Feature Highlights */}
         <div className="mt-24 grid md:grid-cols-3 gap-8">
-          <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
+          <div className="p-8 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700">
             <AlertCircle className="w-8 h-8 text-stripe-blue mb-4" />
-            <h4 className="text-xl font-black text-stripe-dark mb-4">Risk Detection</h4>
-            <p className="text-stripe-slate">Identify overlapping holdings and high-risk sectors automatically.</p>
+            <h4 className="text-xl font-black text-heading-light dark:text-heading-dark mb-4">Risk Detection</h4>
+            <p className="text-stripe-slate dark:text-slate-400">Identify overlapping holdings and high-risk sectors automatically.</p>
           </div>
-          <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
+          <div className="p-8 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700">
             <BarChart3 className="w-8 h-8 text-stripe-purple mb-4" />
-            <h4 className="text-xl font-black text-stripe-dark mb-4">Live Performance</h4>
-            <p className="text-stripe-slate">Real-time valuation of your entire net worth across all asset classes.</p>
+            <h4 className="text-xl font-black text-heading-light dark:text-heading-dark mb-4">Live Performance</h4>
+            <p className="text-stripe-slate dark:text-slate-400">Real-time valuation of your entire net worth across all asset classes.</p>
           </div>
-          <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
+          <div className="p-8 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700">
             <CheckCircle2 className="w-8 h-8 text-stripe-cyan mb-4" />
-            <h4 className="text-xl font-black text-stripe-dark mb-4">Smart Recs</h4>
-            <p className="text-stripe-slate">Tailored buy/sell suggestions based on your unique financial goals.</p>
+            <h4 className="text-xl font-black text-heading-light dark:text-heading-dark mb-4">Smart Recs</h4>
+            <p className="text-stripe-slate dark:text-slate-400">AI-powered recommendations based on your risk profile and goals.</p>
           </div>
         </div>
       </div>
 
       <AuthModal 
-        isOpen={isAuthModalOpen} 
+        isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)} 
         featureName="Portfolio Management"
       />

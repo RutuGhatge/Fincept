@@ -145,8 +145,8 @@ const HoldingCard: React.FC<{ holding: any; rank: number; isGainer: boolean }> =
         #{rank}
       </div>
       <div>
-        <p className="font-black text-stripe-dark text-sm">{holding.symbol}</p>
-        <p className="text-xs text-slate-400 font-medium truncate max-w-[120px]">{holding.name}</p>
+        <p className="font-black text-heading-light dark:text-heading-dark text-sm">{holding.symbol}</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium truncate max-w-[120px]">{holding.name}</p>
       </div>
     </div>
     <div className="text-right">
@@ -194,23 +194,23 @@ const AIInsightPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background-light dark:bg-background-dark">
         <Loader2 className="w-12 h-12 text-stripe-purple animate-spin" />
-        <p className="text-stripe-slate font-black uppercase tracking-widest text-xs animate-pulse">Running analysis...</p>
+        <p className="text-stripe-slate dark:text-text-dark font-black uppercase tracking-widest text-xs animate-pulse">Running analysis...</p>
       </div>
     );
   }
 
   return (
-    <div className="pt-32 pb-24 bg-slate-50 min-h-screen relative">
+    <div className="pt-32 pb-24 bg-background-light dark:bg-background-dark min-h-screen relative">
       {!isAuthenticated && (
-        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/30 flex items-center justify-center p-6">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 text-center max-w-lg">
+        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/30 dark:bg-card-dark/50 flex items-center justify-center p-6">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-card-light dark:bg-card-dark p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 dark:border-border-dark text-center max-w-lg">
             <div className="w-20 h-20 bg-stripe-purple/10 rounded-3xl flex items-center justify-center text-stripe-purple mx-auto mb-8">
               <Lock className="w-10 h-10" />
             </div>
-            <h2 className="text-3xl font-black text-stripe-dark mb-4">Insights Locked</h2>
-            <p className="text-stripe-slate font-medium mb-10 leading-relaxed">Sign in to unlock AI-powered analysis of your portfolio.</p>
+            <h2 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4">Insights Locked</h2>
+            <p className="text-stripe-slate dark:text-text-dark font-medium mb-10 leading-relaxed">Sign in to unlock AI-powered analysis of your portfolio.</p>
             <button onClick={() => navigate('/auth/signin')} className="w-full py-5 bg-stripe-purple text-white rounded-[2rem] font-black text-lg hover:scale-105 transition-all shadow-xl">
               Sign In to Unlock
             </button>
@@ -225,20 +225,20 @@ const AIInsightPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-stripe-purple/10 text-stripe-purple text-sm font-bold mb-6">
             <Zap className="w-4 h-4" /> AI-Powered Portfolio Intelligence
           </motion.div>
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-5xl md:text-7xl font-black text-stripe-dark mb-4 tracking-tight">
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-5xl md:text-7xl font-black text-heading-light dark:text-heading-dark mb-4 tracking-tight">
             AI Portfolio <br /><span className="text-stripe-purple">Insights.</span>
           </motion.h1>
-          <p className="text-xl text-stripe-slate font-medium">Real-time analysis based on your uploaded holdings.</p>
+          <p className="text-xl text-stripe-slate dark:text-text-dark font-medium">Real-time analysis based on your uploaded holdings.</p>
         </div>
 
         <AnimatePresence mode="wait">
           {!portfolio ? (
-            <motion.div key="empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-20 bg-white rounded-[4rem] border border-slate-100 text-center shadow-sm">
+            <motion.div key="empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-20 bg-card-light dark:bg-card-dark rounded-[4rem] border border-slate-100 dark:border-border-dark text-center shadow-sm">
               <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
                 <Upload className="w-10 h-10 text-slate-400" />
               </div>
-              <h3 className="text-3xl font-black text-stripe-dark mb-4">No Portfolio Linked</h3>
-              <p className="text-lg text-stripe-slate max-w-md mx-auto font-medium mb-10">
+              <h3 className="text-3xl font-black text-heading-light dark:text-heading-dark mb-4">No Portfolio Linked</h3>
+              <p className="text-lg text-stripe-slate dark:text-text-dark max-w-md mx-auto font-medium mb-10">
                 Upload your broker statement to unlock AI analysis, top performers, risk audit, and more.
               </p>
               <button onClick={() => navigate('/portfolio')} className="px-12 py-5 bg-stripe-purple text-white rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-xl flex items-center gap-3 mx-auto">
@@ -252,36 +252,36 @@ const AIInsightPage: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Total Value', value: `₹${(portfolio.total_value ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, icon: <BarChart3 className="w-5 h-5 text-stripe-blue" />, color: 'bg-stripe-blue/5' },
-                  { label: 'Overall P&L', value: `${analysis!.overallPnl >= 0 ? '+' : ''}${analysis!.overallPnlPct.toFixed(2)}%`, icon: analysis!.overallPnl >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-500" /> : <TrendingDown className="w-5 h-5 text-red-500" />, color: analysis!.overallPnl >= 0 ? 'bg-emerald-50' : 'bg-red-50' },
-                  { label: 'Holdings', value: `${analysis!.holdingsCount} positions`, icon: <Layers className="w-5 h-5 text-stripe-purple" />, color: 'bg-stripe-purple/5' },
-                  { label: 'Smart Race', value: analysis!.isBeatingMarket ? 'Beating Market' : 'Trailing Market', icon: <Activity className="w-5 h-5 text-amber-500" />, color: analysis!.isBeatingMarket ? 'bg-emerald-50' : 'bg-amber-50' },
+                  { label: 'Overall P&L', value: `${analysis!.overallPnl >= 0 ? '+' : ''}${analysis!.overallPnlPct.toFixed(2)}%`, icon: analysis!.overallPnl >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-500" /> : <TrendingDown className="w-5 h-5 text-red-500" />, color: analysis!.overallPnl >= 0 ? 'bg-emerald-50 dark:bg-emerald-900' : 'bg-red-50 dark:bg-red-900' },
+                  { label: 'Holdings', value: `${analysis!.holdingsCount} positions`, icon: <Layers className="w-5 h-5 text-stripe-purple" />, color: 'bg-stripe-purple/5 dark:bg-stripe-purple/20' },
+                  { label: 'Smart Race', value: analysis!.isBeatingMarket ? 'Beating Market' : 'Trailing Market', icon: <Activity className="w-5 h-5 text-amber-500" />, color: analysis!.isBeatingMarket ? 'bg-emerald-50 dark:bg-emerald-900' : 'bg-amber-50 dark:bg-amber-900' },
                 ].map((item) => (
-                  <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`${item.color} rounded-[2rem] p-6 border border-slate-100`}>
-                    <div className="flex items-center gap-2 mb-3">{item.icon}<span className="text-xs font-black text-slate-400 uppercase tracking-wider">{item.label}</span></div>
-                    <p className="text-xl font-black text-stripe-dark">{item.value}</p>
+                  <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`${item.color} rounded-[2rem] p-6 border border-slate-100 dark:border-slate-700`}>
+                    <div className="flex items-center gap-2 mb-3">{item.icon}<span className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">{item.label}</span></div>
+                    <p className="text-xl font-black text-heading-light dark:text-heading-dark">{item.value}</p>
                   </motion.div>
                 ))}
               </div>
 
               {/* Top Performers + Stop Losers */}
               <div className="grid md:grid-cols-2 gap-8">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-8 shadow-sm border border-slate-100 dark:border-border-dark">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-emerald-50 rounded-xl"><TrendingUp className="w-5 h-5 text-emerald-600" /></div>
-                    <h3 className="text-xl font-black text-stripe-dark">Top Performers</h3>
+                    <h3 className="text-xl font-black text-heading-light dark:text-heading-dark">Top Performers</h3>
                   </div>
                   <div className="space-y-3">
                     {analysis!.topPerformers.length > 0
                       ? analysis!.topPerformers.map((h, i) => <HoldingCard key={h.symbol} holding={h} rank={i + 1} isGainer={true} />)
-                      : <p className="text-slate-400 text-sm font-medium text-center py-4">No gainers yet</p>
+                      : <p className="text-slate-400 dark:text-slate-500 text-sm font-medium text-center py-4">No gainers yet</p>
                     }
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-8 shadow-sm border border-slate-100 dark:border-border-dark">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-red-50 rounded-xl"><TrendingDown className="w-5 h-5 text-red-500" /></div>
-                    <h3 className="text-xl font-black text-stripe-dark">Stop Losers</h3>
+                    <h3 className="text-xl font-black text-heading-light dark:text-heading-dark">Stop Losers</h3>
                   </div>
                   <div className="space-y-3">
                     {analysis!.stopLosers.filter(h => h.pnlPct < 0).length > 0
@@ -295,37 +295,37 @@ const AIInsightPage: React.FC = () => {
               {/* Smart Race + Diversification */}
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Smart Race */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-border-dark">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-stripe-blue/10 rounded-xl"><Activity className="w-5 h-5 text-stripe-blue" /></div>
-                    <h3 className="text-xl font-black text-stripe-dark">Smart Race</h3>
+                    <h3 className="text-xl font-black text-heading-light dark:text-heading-dark">Smart Race</h3>
                   </div>
-                  <div className={`p-6 rounded-2xl mb-6 ${analysis!.isBeatingMarket ? 'bg-emerald-50 border border-emerald-100' : 'bg-amber-50 border border-amber-100'}`}>
+                  <div className={`p-6 rounded-2xl mb-6 ${analysis!.isBeatingMarket ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800'}`}>
                     <p className={`text-3xl font-black mb-2 ${analysis!.isBeatingMarket ? 'text-emerald-700' : 'text-amber-700'}`}>
                       {analysis!.isBeatingMarket ? '🚀 Beating Market' : '📉 Trailing Market'}
                     </p>
-                    <p className="text-sm font-medium text-slate-600">
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                       Your portfolio return: <strong>{analysis!.overallPnlPct.toFixed(2)}%</strong> vs Nifty 50 benchmark: <strong>8%</strong>
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-50 rounded-2xl text-center">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center">
                       <p className="text-2xl font-black text-emerald-600">{analysis!.gainersCount}</p>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">In Profit</p>
+                      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">In Profit</p>
                     </div>
-                    <div className="p-4 bg-slate-50 rounded-2xl text-center">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center">
                       <p className="text-2xl font-black text-red-500">{analysis!.losersCount}</p>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">In Loss</p>
+                      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">In Loss</p>
                     </div>
                   </div>
                 </motion.div>
 
                 {/* Diversification */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-border-dark">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-stripe-purple/10 rounded-xl"><PieChart className="w-5 h-5 text-stripe-purple" /></div>
-                      <h3 className="text-xl font-black text-stripe-dark">Diversification</h3>
+                      <h3 className="text-xl font-black text-heading-light dark:text-heading-dark">Diversification</h3>
                     </div>
                     <ScoreBadge score={analysis!.diversificationScore} />
                   </div>
@@ -337,10 +337,10 @@ const AIInsightPage: React.FC = () => {
                     ].map(item => (
                       <div key={item.label}>
                         <div className="flex justify-between mb-1.5">
-                          <span className="text-sm font-bold text-stripe-dark">{item.label}</span>
-                          <span className="text-sm font-black text-stripe-slate">{item.pct.toFixed(1)}%</span>
+                          <span className="text-sm font-bold text-heading-light dark:text-heading-dark">{item.label}</span>
+                          <span className="text-sm font-black text-stripe-slate dark:text-slate-400">{item.pct.toFixed(1)}%</span>
                         </div>
-                        <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                           <div className={`h-full ${item.color} rounded-full transition-all`} style={{ width: `${item.pct}%` }} />
                         </div>
                       </div>
@@ -362,34 +362,34 @@ const AIInsightPage: React.FC = () => {
               </div>
 
               {/* Why Portfolio Changed */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-border-dark">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-2 bg-stripe-blue/10 rounded-xl"><Target className="w-5 h-5 text-stripe-blue" /></div>
-                  <h3 className="text-2xl font-black text-stripe-dark">Why Your Portfolio Changed</h3>
+                  <h3 className="text-2xl font-black text-heading-light dark:text-heading-dark">Why Your Portfolio Changed</h3>
                 </div>
                 <div className="grid md:grid-cols-3 gap-6">
-                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                     <p className="text-xs font-black text-stripe-purple uppercase tracking-widest mb-3">Top Driver +</p>
-                    <p className="font-black text-stripe-dark mb-2">{analysis!.topPerformers[0]?.symbol ?? 'N/A'}</p>
-                    <p className="text-sm text-stripe-slate">
+                    <p className="font-black text-heading-light dark:text-heading-dark mb-2">{analysis!.topPerformers[0]?.symbol ?? 'N/A'}</p>
+                    <p className="text-sm text-stripe-slate dark:text-slate-400">
                       {analysis!.topPerformers[0]
                         ? `Contributed the most to gains with ${analysis!.topPerformers[0].pnlPct.toFixed(1)}% return and ${analysis!.topPerformers[0].weight.toFixed(1)}% portfolio weight.`
                         : 'No strong gainer identified.'}
                     </p>
                   </div>
-                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                     <p className="text-xs font-black text-red-500 uppercase tracking-widest mb-3">Top Drag −</p>
-                    <p className="font-black text-stripe-dark mb-2">{analysis!.stopLosers.find(h => h.pnlPct < 0)?.symbol ?? 'None'}</p>
-                    <p className="text-sm text-stripe-slate">
+                    <p className="font-black text-heading-light dark:text-heading-dark mb-2">{analysis!.stopLosers.find(h => h.pnlPct < 0)?.symbol ?? 'None'}</p>
+                    <p className="text-sm text-stripe-slate dark:text-slate-400">
                       {analysis!.stopLosers.find(h => h.pnlPct < 0)
                         ? `Dragging returns with ${analysis!.stopLosers.find(h => h.pnlPct < 0)!.pnlPct.toFixed(1)}% loss. Review exit strategy.`
                         : 'No positions in loss. Great portfolio health!'}
                     </p>
                   </div>
-                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                     <p className="text-xs font-black text-amber-500 uppercase tracking-widest mb-3">Market Condition</p>
-                    <p className="font-black text-stripe-dark mb-2">{analysis!.isBeatingMarket ? 'Outperforming' : 'Underperforming'}</p>
-                    <p className="text-sm text-stripe-slate">
+                    <p className="font-black text-heading-light dark:text-heading-dark mb-2">{analysis!.isBeatingMarket ? 'Outperforming' : 'Underperforming'}</p>
+                    <p className="text-sm text-stripe-slate dark:text-slate-400">
                       {analysis!.isBeatingMarket
                         ? 'Your portfolio is ahead of the Nifty 50 benchmark. Strong selection alpha.'
                         : 'Portfolio is behind the Nifty 50. Consider rebalancing underperformers.'}
@@ -399,50 +399,50 @@ const AIInsightPage: React.FC = () => {
               </motion.div>
 
               {/* Sector Exposure Breakdown */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-border-dark">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-stripe-cyan/10 rounded-xl"><Building2 className="w-5 h-5 text-stripe-cyan" /></div>
-                  <h3 className="text-2xl font-black text-stripe-dark">Sector Exposure Breakdown</h3>
+                  <h3 className="text-2xl font-black text-heading-light dark:text-heading-dark">Sector Exposure Breakdown</h3>
                 </div>
-                <p className="text-slate-400 text-sm font-medium mb-8 ml-14">Detailed allocation across sectors — where your money actually lives and how each sector performs.</p>
+                <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mb-8 ml-14">Detailed allocation across sectors — where your money actually lives and how each sector performs.</p>
 
                 {analysis!.sectorExposure.length === 0 ? (
-                  <p className="text-slate-400 text-sm text-center py-8">Could not auto-detect sectors. Ensure holdings have clear names.</p>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-8">Could not auto-detect sectors. Ensure holdings have clear names.</p>
                 ) : (
                   <div className="space-y-5">
                     {analysis!.sectorExposure.map((s, i) => {
                       return (
                         <div key={s.name} className={`p-6 rounded-2xl border ${
-                          s.pnlPct >= 5 ? 'bg-emerald-50/50 border-emerald-100' :
-                          s.pnlPct <= -5 ? 'bg-red-50/50 border-red-100' :
-                          'bg-slate-50 border-slate-100'
+                          s.pnlPct >= 5 ? 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800' :
+                          s.pnlPct <= -5 ? 'bg-red-50/50 dark:bg-red-900/20 border-red-100 dark:border-red-800' :
+                          'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700'
                         }`}>
                           <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-base font-black text-stripe-dark">{s.name}</span>
-                                <span className="text-xs font-bold text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-100">{s.holdingCount} holding{s.holdingCount > 1 ? 's' : ''}</span>
+                                <span className="text-base font-black text-heading-light dark:text-heading-dark">{s.name}</span>
+                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-600">{s.holdingCount} holding{s.holdingCount > 1 ? 's' : ''}</span>
                               </div>
-                              <p className="text-xs text-slate-400 font-medium">{s.symbols.join(', ')}</p>
+                              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{s.symbols.join(', ')}</p>
                             </div>
                             <div className="flex items-center gap-3">
                               <div className="text-right">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Allocation</p>
-                                <p className="text-xl font-black text-stripe-dark">{s.allocationPct.toFixed(1)}%</p>
+                                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Allocation</p>
+                                <p className="text-xl font-black text-heading-light dark:text-heading-dark">{s.allocationPct.toFixed(1)}%</p>
                               </div>
                               <div className="text-right">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sector P&L</p>
+                                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sector P&L</p>
                                 <p className={`text-xl font-black ${s.pnlPct >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{s.pnlPct >= 0 ? '+' : ''}{s.pnlPct.toFixed(2)}%</p>
                               </div>
                               <div className="text-right">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Value</p>
-                                <p className="text-xl font-black text-stripe-dark">₹{s.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Value</p>
+                                <p className="text-xl font-black text-heading-light dark:text-heading-dark">₹{s.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                               </div>
                             </div>
                           </div>
 
                           {/* Bar */}
-                          <div className="h-2 bg-white/80 rounded-full overflow-hidden mb-3">
+                          <div className="h-2 bg-white/80 dark:bg-slate-700/50 rounded-full overflow-hidden mb-3">
                             <div
                               className={`h-full rounded-full transition-all ${s.pnlPct >= 5 ? 'bg-emerald-400' : s.pnlPct <= -5 ? 'bg-red-400' : 'bg-stripe-blue'}`}
                               style={{ width: `${Math.min(100, s.allocationPct)}%` }}
@@ -460,7 +460,7 @@ const AIInsightPage: React.FC = () => {
                             {s.pnlPct <= -10 && (
                               <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-3 py-1 rounded-full flex items-center gap-1"><TrendingDown className="w-3 h-3" /> Review Exit Strategy</span>
                             )}
-                            <span className="text-xs text-slate-400 font-medium ml-auto">Invested: ₹{s.invested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium ml-auto">Invested: ₹{s.invested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                           </div>
                         </div>
                       );
@@ -470,12 +470,12 @@ const AIInsightPage: React.FC = () => {
               </motion.div>
 
               {/* Portfolio Underlying Sector Composition */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-border-dark">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-stripe-purple/10 rounded-xl"><Globe className="w-5 h-5 text-stripe-purple" /></div>
-                  <h3 className="text-2xl font-black text-stripe-dark">Underlying Sector Composition</h3>
+                  <h3 className="text-2xl font-black text-heading-light dark:text-heading-dark">Underlying Sector Composition</h3>
                 </div>
-                <p className="text-slate-400 text-sm font-medium mb-8 ml-14">
+                <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mb-8 ml-14">
                   Your actual money in each sector — combining direct stocks <em>and</em> what your mutual funds invest in (Pharma, Finance, Tech, etc.).
                 </p>
 
@@ -535,20 +535,20 @@ const AIInsightPage: React.FC = () => {
                     .map(([name, val]) => ({ name, value: val, pct: totalVal > 0 ? (val / totalVal) * 100 : 0 }))
                     .sort((a, b) => b.pct - a.pct);
 
-                  if (sorted.length === 0) return <p className="text-slate-400 text-sm text-center py-8">Upload a portfolio to see composition.</p>;
+                  if (sorted.length === 0) return <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-8">Upload a portfolio to see composition.</p>;
 
                   return (
                     <>
                       {/* Top chips */}
                       <div className="flex flex-wrap gap-3 mb-8">
                         {sorted.slice(0, 4).map(s => (
-                          <div key={s.name} className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100">
+                          <div key={s.name} className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                             <div className={`w-2.5 h-2.5 rounded-full ${SECTOR_COLORS[s.name] ?? 'bg-slate-300'}`} />
-                            <span className="text-sm font-black text-stripe-dark">{s.name}</span>
+                            <span className="text-sm font-black text-heading-light dark:text-heading-dark">{s.name}</span>
                             <span className="text-sm font-black text-stripe-blue">{s.pct.toFixed(1)}%</span>
                           </div>
                         ))}
-                        {sorted.length > 4 && <div className="flex items-center px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100"><span className="text-sm font-bold text-slate-400">+{sorted.length - 4} more</span></div>}
+                        {sorted.length > 4 && <div className="flex items-center px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700"><span className="text-sm font-bold text-slate-400 dark:text-slate-500">+{sorted.length - 4} more</span></div>}
                       </div>
 
                       {/* Stacked visual bar */}
@@ -562,17 +562,17 @@ const AIInsightPage: React.FC = () => {
                       <div className="space-y-4">
                         {sorted.map((s, i) => (
                           <div key={s.name} className="flex items-center gap-4">
-                            <span className="w-5 text-xs font-black text-slate-300">#{i + 1}</span>
+                            <span className="w-5 text-xs font-black text-slate-300 dark:text-slate-600">#{i + 1}</span>
                             <div className={`w-3 h-3 rounded-full flex-shrink-0 ${SECTOR_COLORS[s.name] ?? 'bg-slate-300'}`} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-sm font-black text-stripe-dark">{s.name}</span>
+                                <span className="text-sm font-black text-heading-light dark:text-heading-dark">{s.name}</span>
                                 <div className="flex items-center gap-4">
                                   <span className="text-sm font-black text-stripe-blue">{s.pct.toFixed(1)}%</span>
-                                  <span className="text-xs font-bold text-slate-400 w-28 text-right">₹{s.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500 w-28 text-right">₹{s.value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                                 </div>
                               </div>
-                              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                              <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                                 <div className={`h-full rounded-full ${SECTOR_COLORS[s.name] ?? 'bg-slate-300'}`} style={{ width: `${(s.pct / sorted[0].pct) * 100}%` }} />
                               </div>
                             </div>

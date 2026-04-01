@@ -33,14 +33,14 @@ const AccountPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white pt-20">
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark pt-20">
         <div className="w-8 h-8 border-4 border-stripe-blue border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 pb-24 px-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-800 pt-32 pb-24 px-6">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate(-1)}
@@ -56,13 +56,13 @@ const AccountPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 text-center"
+              className="bg-card-light dark:bg-card-dark rounded-[2.5rem] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center"
             >
               <div className="w-24 h-24 bg-stripe-blue/10 rounded-full flex items-center justify-center text-stripe-blue mx-auto mb-6">
                 <User className="w-12 h-12" />
               </div>
-              <h2 className="text-2xl font-black text-stripe-dark mb-1">{user?.name}</h2>
-              <p className="text-stripe-slate font-medium text-sm mb-6">{user?.email}</p>
+              <h2 className="text-2xl font-black text-heading-light dark:text-heading-dark mb-1">{user?.name}</h2>
+              <p className="text-stripe-slate dark:text-slate-400 font-medium text-sm mb-6">{user?.email}</p>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold uppercase tracking-wider">
                 <Shield className="w-3 h-3" /> Verified Investor
               </div>
@@ -72,18 +72,18 @@ const AccountPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100"
+              className="bg-card-light dark:bg-card-dark rounded-[2rem] p-4 shadow-sm border border-slate-100 dark:border-slate-700"
             >
-              <button className="w-full flex items-center gap-3 p-4 rounded-2xl bg-slate-50 text-stripe-blue transition-all text-left">
+              <button className="w-full flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 text-stripe-blue transition-all text-left">
                 <Settings className="w-5 h-5" />
                 <span className="font-bold text-sm">Personal Info</span>
               </button>
-              <button className="w-full flex items-center gap-3 p-4 rounded-2xl hover:bg-slate-50 text-stripe-dark transition-all text-left">
-                <Bell className="w-5 h-5 text-slate-400" />
+              <button className="w-full flex items-center gap-3 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 text-heading-light dark:text-heading-dark transition-all text-left">
+                <Bell className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <span className="font-bold text-sm">Notifications</span>
               </button>
-              <button className="w-full flex items-center gap-3 p-4 rounded-2xl hover:bg-slate-50 text-stripe-dark transition-all text-left">
-                <Lock className="w-5 h-5 text-slate-400" />
+              <button className="w-full flex items-center gap-3 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 text-heading-light dark:text-heading-dark transition-all text-left">
+                <Lock className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <span className="font-bold text-sm">Security</span>
               </button>
             </motion.div>
@@ -95,20 +95,20 @@ const AccountPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100"
+              className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-slate-100 dark:border-slate-700"
             >
-              <h3 className="text-xl font-black text-stripe-dark mb-8">Account Details</h3>
+              <h3 className="text-xl font-black text-heading-light dark:text-heading-dark mb-8">Account Details</h3>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-stripe-slate uppercase tracking-widest px-2">Full Name</label>
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold text-stripe-dark">
+                    <label className="text-xs font-black text-stripe-slate dark:text-slate-400 uppercase tracking-widest px-2">Full Name</label>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 font-bold text-heading-light dark:text-heading-dark">
                       {user?.name}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-stripe-slate uppercase tracking-widest px-2">Email Address</label>
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold text-stripe-dark">
+                    <label className="text-xs font-black text-stripe-slate dark:text-slate-400 uppercase tracking-widest px-2">Email Address</label>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 font-bold text-heading-light dark:text-heading-dark">
                       {user?.email}
                     </div>
                   </div>
@@ -116,10 +116,10 @@ const AccountPage: React.FC = () => {
 
                 <div className="p-6 bg-stripe-blue/5 rounded-[2rem] border border-stripe-blue/10 flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-stripe-dark mb-1">Membership Plan</h4>
-                    <p className="text-sm text-stripe-slate font-medium">You are currently on the <span className="text-stripe-blue font-bold">Standard</span> tier.</p>
+                    <h4 className="font-bold text-heading-light dark:text-heading-dark mb-1">Membership Plan</h4>
+                    <p className="text-sm text-stripe-slate dark:text-slate-400 font-medium">You are currently on the <span className="text-stripe-blue font-bold">Standard</span> tier.</p>
                   </div>
-                  <button className="px-6 py-2 bg-white border border-stripe-blue text-stripe-blue rounded-full font-bold text-sm hover:bg-stripe-blue hover:text-white transition-all">
+                  <button className="px-6 py-2 bg-card-light dark:bg-card-dark border border-stripe-blue text-stripe-blue rounded-full font-bold text-sm hover:bg-stripe-blue hover:text-white transition-all">
                     Upgrade
                   </button>
                 </div>
@@ -130,10 +130,10 @@ const AccountPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-[3rem] p-10 shadow-sm border border-red-50"
+              className="bg-card-light dark:bg-card-dark rounded-[3rem] p-10 shadow-sm border border-red-50 dark:border-red-900/20"
             >
-              <h3 className="text-xl font-black text-stripe-dark mb-4">Danger Zone</h3>
-              <p className="text-stripe-slate font-medium mb-8">Once you sign out, you will need to re-authenticate to access your private portfolio data.</p>
+              <h3 className="text-xl font-black text-heading-light dark:text-heading-dark mb-4">Danger Zone</h3>
+              <p className="text-stripe-slate dark:text-slate-400 font-medium mb-8">Once you sign out, you will need to re-authenticate to access your private portfolio data.</p>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-8 py-4 bg-red-50 text-red-600 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all group"

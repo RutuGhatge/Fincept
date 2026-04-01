@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AnimatedBackground from "./components/AnimatedBackground";
 import MainLayout from "./components/MainLayout";
 import ScrollToTop from "./components/ScrollToTop";
+import { ThemeProvider } from "./context/ThemeContext";
 
 import Home from "./pages/Home";
 import PortfolioPage from "./pages/PortfolioPage";
@@ -30,46 +31,48 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 
 const App: React.FC = () => {
   return (
-    <Router>
-      {/* 🔥 BACKGROUND */}
-      <AnimatedBackground />
+    <ThemeProvider>
+      <Router>
+        {/* 🔥 BACKGROUND */}
+        <AnimatedBackground />
 
-      <ScrollToTop />
+        <ScrollToTop />
 
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/portfolio" element={<PortfolioPage />} />
-          <Route path="/broker-connect" element={<BrokerConnectPage />} />
-          <Route path="/my-portfolio" element={<MyPortfolioPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/analysis" element={<AIInsightPage />} />
-          <Route path="/analysis/audit" element={<PortfolioAuditPage />} />
-          <Route path="/coming-soon" element={<ComingSoonPage />} />
-          <Route path="/news" element={<MarketPulsePage />} />
-          <Route path="/geopolitics" element={<GeopoliticsPage />} />
-          <Route path="/jargon" element={<JargonDecoderPage />} />
-          <Route path="/allocate" element={<AllocatePage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-
-
-          <Route path="/benefits" element={<Benefits />} />
-          <Route path="/products-overview" element={<ProductsOverview />} />
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/portfolio" element={<PortfolioPage />} />
+            <Route path="/broker-connect" element={<BrokerConnectPage />} />
+            <Route path="/my-portfolio" element={<MyPortfolioPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/analysis" element={<AIInsightPage />} />
+            <Route path="/analysis/audit" element={<PortfolioAuditPage />} />
+            <Route path="/coming-soon" element={<ComingSoonPage />} />
+            <Route path="/news" element={<MarketPulsePage />} />
+            <Route path="/geopolitics" element={<GeopoliticsPage />} />
+            <Route path="/jargon" element={<JargonDecoderPage />} />
+            <Route path="/allocate" element={<AllocatePage />} />
+            <Route path="/pricing" element={<PricingPage />} />
 
 
-          <Route path="/developer/about" element={<AboutProject />} />
-          <Route path="/developer/docs" element={<Documentation />} />
-
-          <Route path="/auth/signin" element={<AuthPage />} />
-
-          <Route path="/legal/privacy" element={<PrivacyPolicy />} />
-          <Route path="/legal/terms" element={<TermsOfService />} />
-          <Route path="/legal/cookies" element={<Cookies />} />
+            <Route path="/benefits" element={<Benefits />} />
+            <Route path="/products-overview" element={<ProductsOverview />} />
 
 
-        </Routes>
-      </MainLayout>
-    </Router>
+            <Route path="/developer/about" element={<AboutProject />} />
+            <Route path="/developer/docs" element={<Documentation />} />
+
+            <Route path="/auth/signin" element={<AuthPage />} />
+
+            <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+            <Route path="/legal/terms" element={<TermsOfService />} />
+            <Route path="/legal/cookies" element={<Cookies />} />
+
+
+          </Routes>
+        </MainLayout>
+      </Router>
+    </ThemeProvider>
   );
 };
 

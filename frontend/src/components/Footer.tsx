@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
   return (
     <>
       {/* Pre-footer Tagline Pulse - Single Line Refinement */}
-      <section className="py-40 relative overflow-hidden bg-white border-t border-slate-100">
+      <section className="py-40 relative overflow-hidden bg-background-light dark:bg-background-dark border-t border-slate-100 dark:border-slate-800">
         <div className="container mx-auto px-6">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -66,7 +66,7 @@ const Footer: React.FC = () => {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="text-4xl md:text-6xl lg:text-7xl xl:text-[6rem] font-black text-stripe-dark tracking-tighter whitespace-nowrap"
+              className="text-4xl md:text-6xl lg:text-7xl xl:text-[6rem] font-black text-heading-light dark:text-heading-dark tracking-tighter whitespace-nowrap"
             >
               Less hype, <span className="cool-gradient-text text-glow-none">more insight.</span>
             </motion.h2>
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         </div>
       </section>
 
-      <footer className="bg-white border-t border-slate-100 pt-24 pb-12">
+      <footer className="bg-card-light dark:bg-card-dark border-t border-slate-100 dark:border-slate-700 pt-24 pb-12">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-12 mb-24">
             {/* Brand Column */}
@@ -88,20 +88,20 @@ const Footer: React.FC = () => {
               >
                 Fincept.
               </h2>
-              <p className="text-stripe-slate text-sm leading-relaxed max-w-[200px] font-medium">
+              <p className="text-stripe-slate dark:text-slate-400 text-sm leading-relaxed max-w-[200px] font-medium">
                 The most advanced financial intelligence platform for the modern investor. Connected. Smart. Human.
               </p>
               <div className="flex gap-6">
-                <Mail className="w-6 h-6 text-slate-300 hover:text-stripe-blue cursor-pointer transition-colors" />
-                <Globe className="w-6 h-6 text-slate-300 hover:text-stripe-blue cursor-pointer transition-colors" />
-                <Link className="w-6 h-6 text-slate-300 hover:text-stripe-blue cursor-pointer transition-colors" />
+                <Mail className="w-6 h-6 text-slate-300 dark:text-slate-500 hover:text-stripe-blue cursor-pointer transition-colors" />
+                <Globe className="w-6 h-6 text-slate-300 dark:text-slate-500 hover:text-stripe-blue cursor-pointer transition-colors" />
+                <Link className="w-6 h-6 text-slate-300 dark:text-slate-500 hover:text-stripe-blue cursor-pointer transition-colors" />
               </div>
             </div>
 
             {/* Footer Sections */}
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-8">
-                <h4 className="font-black text-slate-400 text-xs uppercase tracking-[0.2em]">
+                <h4 className="font-black text-slate-400 dark:text-slate-500 text-xs uppercase tracking-[0.2em]">
                   {section.title}
                 </h4>
                 <ul className="space-y-5">
@@ -109,7 +109,7 @@ const Footer: React.FC = () => {
                     <li key={link.label}>
                       <button 
                         onClick={() => handleNav(link)}
-                        className="text-stripe-slate hover:text-stripe-dark text-[15px] font-bold transition-all hover:translate-x-1"
+                        className="text-stripe-slate dark:text-slate-400 hover:text-heading-light dark:hover:text-heading-dark text-[15px] font-bold transition-all hover:translate-x-1"
                       >
                         {link.label}
                       </button>
@@ -120,14 +120,14 @@ const Footer: React.FC = () => {
             ))}
           </div>
 
-          <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-slate-400 text-sm font-bold">
+          <div className="pt-8 border-t border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-bold">
               © 2024 Fincept. Registered in Hyderabad.
             </p>
             <div className="flex gap-8">
-              <button onClick={() => navigate('/legal/privacy')} className="text-slate-400 hover:text-stripe-dark text-sm font-bold transition-colors">Privacy Policy</button>
-              <button onClick={() => navigate('/legal/terms')} className="text-slate-400 hover:text-stripe-dark text-sm font-bold transition-colors">Terms of Service</button>
-              <button onClick={() => navigate('/legal/cookies')} className="text-slate-400 hover:text-stripe-dark text-sm font-bold transition-colors">Cookies</button>
+              <button onClick={() => navigate('/legal/privacy')} className="text-slate-400 dark:text-slate-500 hover:text-heading-light dark:hover:text-heading-dark text-sm font-bold transition-colors">Privacy Policy</button>
+              <button onClick={() => navigate('/legal/terms')} className="text-slate-400 dark:text-slate-500 hover:text-heading-light dark:hover:text-heading-dark text-sm font-bold transition-colors">Terms of Service</button>
+              <button onClick={() => navigate('/legal/cookies')} className="text-slate-400 dark:text-slate-500 hover:text-heading-light dark:hover:text-heading-dark text-sm font-bold transition-colors">Cookies</button>
             </div>
           </div>
         </div>

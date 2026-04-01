@@ -44,7 +44,7 @@ const ImpactBadge: React.FC<{ impact: 'positive' | 'negative' | 'none'; isAlert?
     </span>
   );
   return (
-    <span className="flex items-center gap-1 px-3 py-1 bg-slate-50 text-slate-500 rounded-full text-xs font-black border border-slate-100">
+    <span className="flex items-center gap-1 px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-xs font-black border border-slate-100 dark:border-slate-700">
       <Minus className="w-3 h-3" /> Market
     </span>
   );
@@ -63,20 +63,20 @@ const NewsCard: React.FC<{ item: any; impact: 'positive' | 'negative' | 'none'; 
         isAlert ? 'bg-amber-50/30 border-amber-100 shadow-amber-500/5' : 
         impact === 'positive' ? 'bg-emerald-50/40 border-emerald-100 shadow-emerald-500/5' :
         impact === 'negative' ? 'bg-red-50/40 border-red-100 shadow-red-500/5' :
-        'bg-white border-slate-100 hover:shadow-xl hover:shadow-stripe-cyan/5'
+        'bg-card-light dark:bg-card-dark border-slate-100 dark:border-slate-700 hover:shadow-xl hover:shadow-stripe-cyan/5'
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${isAlert ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-slate-50 text-stripe-dark border-slate-100'}`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${isAlert ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-slate-50 dark:bg-slate-800 text-heading-light dark:text-heading-dark border-slate-100 dark:border-slate-700'}`}>
             {item.category || 'General'}
           </span>
-          <span className="text-xs text-slate-400 font-bold">{item.time || 'Just now'}</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-bold">{item.time || 'Just now'}</span>
         </div>
         <ImpactBadge impact={impact} isAlert={isAlert} />
       </div>
 
-      <h2 className={`text-2xl font-black mb-3 leading-snug transition-colors ${isAlert ? 'text-amber-900' : 'text-stripe-dark group-hover:text-stripe-cyan'}`}>
+      <h2 className={`text-2xl font-black mb-3 leading-snug transition-colors ${isAlert ? 'text-amber-900' : 'text-heading-light dark:text-heading-dark group-hover:text-stripe-cyan'}`}>
         {item.title}
       </h2>
 
@@ -86,7 +86,7 @@ const NewsCard: React.FC<{ item: any; impact: 'positive' | 'negative' | 'none'; 
 
       <button
         onClick={() => setExpanded(e => !e)}
-        className={`flex items-center gap-2 font-bold text-sm transition-colors ${isAlert ? 'text-amber-700 hover:text-amber-900' : 'text-stripe-cyan hover:text-stripe-dark'}`}
+        className={`flex items-center gap-2 font-bold text-sm transition-colors ${isAlert ? 'text-amber-700 hover:text-amber-900' : 'text-stripe-cyan hover:text-heading-light dark:hover:text-heading-dark'}`}
       >
         {expanded ? 'Show less' : 'Read more'}
         {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -276,12 +276,12 @@ const MarketPulsePage: React.FC = () => {
     : allNews.filter(item => !isRelatedToPortfolio(item, symbols));
 
   return (
-    <div className="pt-32 pb-24 bg-slate-50 min-h-screen">
+    <div className="pt-32 pb-24 bg-slate-50 dark:bg-slate-800 min-h-screen">
       <div className="max-w-[1100px] mx-auto px-6 lg:px-12">
         
         <div className="mb-12 flex justify-between items-end">
           <div>
-            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-5xl md:text-7xl font-black text-stripe-dark mb-4 tracking-tight">
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-5xl md:text-7xl font-black text-heading-light dark:text-heading-dark mb-4 tracking-tight">
               Market <br /><span className="text-stripe-cyan">Pulse.</span>
             </motion.h1>
             <p className="text-xl text-stripe-slate font-medium">
@@ -291,7 +291,7 @@ const MarketPulsePage: React.FC = () => {
           <button 
             onClick={() => fetchNews(true)}
             disabled={refreshing}
-            className={`p-5 rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-50 group`}
+            className={`p-5 rounded-3xl bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md transition-all active:scale-95 disabled:opacity-50 group`}
           >
             <RefreshCcw className={`w-6 h-6 text-stripe-cyan ${refreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
           </button>
@@ -316,12 +316,12 @@ const MarketPulsePage: React.FC = () => {
         </AnimatePresence>
 
         {portfolio && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-5 bg-card-light dark:bg-card-dark border border-slate-100 dark:border-slate-700 rounded-2xl flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-stripe-cyan/10 rounded-xl"><Wallet className="w-5 h-5 text-stripe-cyan" /></div>
               <div>
-                <p className="font-black text-stripe-dark text-sm">{portfolio.name}</p>
-                <p className="text-xs text-slate-400 font-medium">Personalized impact tags & AI Alpha Alerts active</p>
+                <p className="font-black text-heading-light dark:text-heading-dark text-sm">{portfolio.name}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Personalized impact tags & AI Alpha Alerts active</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -331,7 +331,7 @@ const MarketPulsePage: React.FC = () => {
           </motion.div>
         )}
 
-        <div className="flex gap-2 mb-8 bg-white border border-slate-100 rounded-2xl p-1.5 w-fit shadow-sm">
+        <div className="flex gap-2 mb-8 bg-card-light dark:bg-card-dark border border-slate-100 dark:border-slate-700 rounded-2xl p-1.5 w-fit shadow-sm">
           {(['all', 'portfolio'] as const).map(t => (
             <button
               key={t}
@@ -344,7 +344,7 @@ const MarketPulsePage: React.FC = () => {
                 }
                 setTab(t);
               }}
-              className={`px-8 py-3 rounded-xl text-sm font-black transition-all ${tab === t ? 'bg-stripe-cyan text-white shadow-lg' : 'text-stripe-slate hover:text-stripe-dark hover:bg-slate-50'}`}
+              className={`px-8 py-3 rounded-xl text-sm font-black transition-all ${tab === t ? 'bg-stripe-cyan text-white shadow-lg' : 'text-stripe-slate dark:text-slate-400 hover:text-heading-light dark:hover:text-heading-dark hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             >
               {t === 'all' ? 'All Market News' : `My Portfolio News${portfolioNews.length > 0 ? ` (${portfolioNews.length})` : ''}`}
             </button>
@@ -358,15 +358,15 @@ const MarketPulsePage: React.FC = () => {
               <p className="text-stripe-slate font-bold">Connecting to market intelligence server...</p>
             </motion.div>
           ) : displayedNews.length === 0 ? (
-            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center space-y-6 bg-white border border-slate-100 rounded-[3rem]">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
-                <Newspaper className="w-10 h-10 text-slate-200" />
+            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-24 text-center space-y-6 bg-card-light dark:bg-card-dark border border-slate-100 dark:border-slate-700 rounded-[3rem]">
+              <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto">
+                <Newspaper className="w-10 h-10 text-slate-200 dark:text-slate-600" />
               </div>
               <div>
-                <p className="text-2xl font-black text-stripe-dark">
+                <p className="text-2xl font-black text-heading-light dark:text-heading-dark">
                   {tab === 'portfolio' ? 'No intelligence for your holdings yet.' : 'The market is currently quiet.'}
                 </p>
-                <p className="text-slate-400 font-medium max-w-sm mx-auto mt-2">
+                <p className="text-slate-400 dark:text-slate-500 font-medium max-w-sm mx-auto mt-2">
                   {tab === 'portfolio' ? "We'll alert you the moment your holdings hit the headlines. Try checking the 'All Market News' tab." : "Hold tight, we're scanning global markets."}
                 </p>
               </div>
@@ -391,7 +391,7 @@ const MarketPulsePage: React.FC = () => {
               ))}
               
               <div className="pt-12 text-center">
-                <div className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-bold text-slate-400">
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-card-light dark:bg-card-dark border border-slate-100 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-400 dark:text-slate-500">
                   <Info className="w-4 h-4" />
                   News is sourced from ET Markets RSS and parsed by Gemini AI
                 </div>

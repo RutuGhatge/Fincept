@@ -93,7 +93,7 @@ const JargonDecoderPage: React.FC = () => {
   );
 
   return (
-    <div className="pt-32 pb-24 bg-white min-h-screen">
+    <div className="pt-32 pb-24 bg-background-light dark:bg-background-dark min-h-screen">
       <div className="container mx-auto px-6">
         <AnimatePresence mode="wait">
           {loading ? (
@@ -118,7 +118,7 @@ const JargonDecoderPage: React.FC = () => {
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-5xl md:text-7xl font-black text-stripe-dark mb-8 tracking-tight"
+                  className="text-5xl md:text-7xl font-black text-heading-light dark:text-heading-dark mb-8 tracking-tight"
                 >
                   Jargon <br />
                   <span className="text-orange-500">Decoder.</span>
@@ -129,17 +129,17 @@ const JargonDecoderPage: React.FC = () => {
 
                 {/* Search with AI Fallback */}
                 <div className="relative max-w-2xl mb-12">
-                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
+                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 dark:text-slate-500" />
                   <input
                     type="text"
                     placeholder="Search terms (e.g. EBITDA, P/E Ratio)..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && filteredJargons.length === 0 && handleSearchAI()}
-                    className="w-full pl-16 pr-6 py-6 bg-slate-50 border border-slate-100 rounded-[2rem] text-xl font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-inner"
+                    className="w-full pl-16 pr-6 py-6 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-[2rem] text-xl font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-inner"
                   />
                   {search && (
-                    <button onClick={() => setSearch('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-200 rounded-full">
+                    <button onClick={() => setSearch('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
                       <X className="w-5 h-5 text-slate-500" />
                     </button>
                   )}
@@ -152,10 +152,10 @@ const JargonDecoderPage: React.FC = () => {
                     className="p-8 bg-orange-50 rounded-[2rem] border border-orange-100 flex flex-col md:flex-row items-center justify-between gap-6"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white rounded-2xl shadow-sm">
+                      <div className="p-3 bg-card-light dark:bg-card-dark rounded-2xl shadow-sm">
                         <Lightbulb className="w-6 h-6 text-orange-500" />
                       </div>
-                      <p className="text-lg font-bold text-stripe-dark">
+                      <p className="text-lg font-bold text-heading-light dark:text-heading-dark">
                         Term not in library. Let the Jargon Agent find it?
                       </p>
                     </div>
@@ -173,14 +173,14 @@ const JargonDecoderPage: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-8 bg-slate-50 rounded-[2rem] border border-slate-200 flex items-center gap-4"
+                    className="p-8 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-600 flex items-center gap-4"
                   >
                     <div className="p-3 bg-white rounded-2xl shadow-sm">
-                      <X className="w-6 h-6 text-slate-400" />
+                      <X className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                     </div>
                     <div>
-                      <p className="text-lg font-black text-stripe-dark">Jargon Agent says:</p>
-                      <p className="text-stripe-slate font-medium">{notFinanceMsg}</p>
+                      <p className="text-lg font-black text-heading-light dark:text-heading-dark">Jargon Agent says:</p>
+                      <p className="text-stripe-slate dark:text-slate-400 font-medium">{notFinanceMsg}</p>
                     </div>
                   </motion.div>
                 )}
@@ -194,16 +194,16 @@ const JargonDecoderPage: React.FC = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05 }}
                     onClick={() => handleSelectJargon(j)}
-                    className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] hover:bg-white hover:shadow-2xl hover:shadow-orange-500/5 transition-all cursor-pointer group flex flex-col justify-between"
+                    className="p-8 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-[2.5rem] hover:bg-card-light dark:hover:bg-card-dark hover:shadow-2xl hover:shadow-orange-500/5 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
                       <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 inline-block">
                         {j.category || "General"}
                       </span>
-                      <h3 className="text-2xl font-black text-stripe-dark mb-4 group-hover:text-orange-500 transition-colors">
+                      <h3 className="text-2xl font-black text-heading-light dark:text-heading-dark mb-4 group-hover:text-orange-500 transition-colors">
                         {j.term}
                       </h3>
-                      <p className="text-stripe-slate leading-relaxed font-medium line-clamp-3">
+                      <p className="text-stripe-slate dark:text-slate-400 leading-relaxed font-medium line-clamp-3">
                         {j.short}
                       </p>
                     </div>
@@ -235,7 +235,7 @@ const JargonDecoderPage: React.FC = () => {
             >
               <button
                 onClick={() => setSelectedJargon(null)}
-                className="flex items-center gap-2 text-stripe-slate font-bold mb-12 hover:text-stripe-dark group"
+                className="flex items-center gap-2 text-stripe-slate dark:text-slate-400 font-bold mb-12 hover:text-heading-light dark:hover:text-heading-dark group"
               >
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Back to glossary
               </button>
@@ -245,9 +245,9 @@ const JargonDecoderPage: React.FC = () => {
                   <span className="px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black uppercase tracking-widest">
                     {selectedJargon.category || "General"}
                   </span>
-                  <h1 className="text-6xl font-black text-stripe-dark tracking-tight">{selectedJargon.term}</h1>
+                  <h1 className="text-6xl font-black text-heading-light dark:text-heading-dark tracking-tight">{selectedJargon.term}</h1>
                   {selectedJargon.full_form && selectedJargon.full_form !== selectedJargon.term && (
-                    <p className="text-xl text-slate-400 font-semibold tracking-wide">{selectedJargon.full_form}</p>
+                    <p className="text-xl text-slate-400 dark:text-slate-500 font-semibold tracking-wide">{selectedJargon.full_form}</p>
                   )}
                   <p className="text-3xl text-orange-500 font-bold leading-tight">
                     {selectedJargon.short}
@@ -258,9 +258,9 @@ const JargonDecoderPage: React.FC = () => {
                   <ReactMarkdown
                     components={{
                       p: ({ children }) => <p className="text-xl font-medium mb-4 leading-relaxed">{children}</p>,
-                      strong: ({ children }) => <strong className="font-black text-stripe-dark">{children}</strong>,
+                      strong: ({ children }) => <strong className="font-black text-heading-light dark:text-heading-dark">{children}</strong>,
                       ul: ({ children }) => <ul className="list-disc pl-6 space-y-2 my-4">{children}</ul>,
-                      li: ({ children }) => <li className="text-xl font-medium text-stripe-slate">{children}</li>,
+                      li: ({ children }) => <li className="text-xl font-medium text-stripe-slate dark:text-slate-400">{children}</li>,
                     }}
                   >
                     {selectedJargon.long || selectedJargon.definition || ''}
@@ -271,19 +271,19 @@ const JargonDecoderPage: React.FC = () => {
                   <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
                     <Lightbulb className="w-24 h-24 text-orange-500" />
                   </div>
-                  <h4 className="text-2xl font-black text-stripe-dark mb-6 flex items-center gap-3">
+                  <h4 className="text-2xl font-black text-heading-light dark:text-heading-dark mb-6 flex items-center gap-3">
                     <Lightbulb className="w-6 h-6 text-orange-500" /> Real-world Example
                   </h4>
-                  <p className="text-xl text-stripe-slate leading-relaxed font-medium">
+                  <p className="text-xl text-stripe-slate dark:text-slate-400 leading-relaxed font-medium">
                     {selectedJargon.example}
                   </p>
                 </div>
 
                 <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <p className="text-slate-400 font-medium italic">Was this explanation helpful?</p>
+                  <p className="text-slate-400 dark:text-slate-500 font-medium italic">Was this explanation helpful?</p>
                   <div className="flex gap-4">
-                    <button className="px-6 py-2 bg-slate-100 rounded-full font-bold hover:bg-emerald-100 hover:text-emerald-700 transition-all">Yes, thanks!</button>
-                    <button className="px-6 py-2 bg-slate-100 rounded-full font-bold hover:bg-orange-100 hover:text-orange-700 transition-all">Still confused</button>
+                    <button className="px-6 py-2 bg-slate-100 dark:bg-slate-800 rounded-full font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/20 hover:text-emerald-700 transition-all">Yes, thanks!</button>
+                    <button className="px-6 py-2 bg-slate-100 dark:bg-slate-800 rounded-full font-bold hover:bg-orange-100 dark:hover:bg-orange-900/20 hover:text-orange-700 transition-all">Still confused</button>
                   </div>
                 </div>
               </div>

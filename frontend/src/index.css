@@ -17,9 +17,13 @@
   }
 
   body {
-    @apply bg-background text-text font-sans antialiased overflow-x-hidden;
+    @apply bg-background-light text-text-light font-sans antialiased overflow-x-hidden;
     background: transparent !important;
     /* 🔥 important for Lottie */
+  }
+
+  .dark body {
+    @apply bg-background-dark text-text-dark;
   }
 
   h1,
@@ -28,7 +32,16 @@
   h4,
   h5,
   h6 {
-    @apply text-heading font-bold tracking-tight;
+    @apply text-heading-light font-bold tracking-tight;
+  }
+
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    @apply text-heading-dark;
   }
 }
 
@@ -43,15 +56,27 @@
   }
 
   .stripe-button-secondary {
-    @apply stripe-button bg-white text-stripe-dark shadow-stripe hover:shadow-stripe-hover;
+    @apply stripe-button bg-card-light text-stripe-dark shadow-stripe hover:shadow-stripe-hover;
+  }
+
+  .dark .stripe-button-secondary {
+    @apply bg-card-dark text-text-light shadow-dark-card hover:shadow-dark-card-hover;
   }
 
   .nav-item {
     @apply text-stripe-slate hover:text-stripe-dark font-medium transition-colors duration-200 cursor-pointer text-[15px];
   }
 
+  .dark .nav-item {
+    @apply text-text-dark hover:text-stripe-cyan;
+  }
+
   .stripe-card {
-    @apply bg-white rounded-lg shadow-stripe p-8 transition-all duration-300 hover:shadow-stripe-hover hover:-translate-y-1;
+    @apply bg-card-light rounded-lg shadow-stripe p-8 transition-all duration-300 hover:shadow-stripe-hover hover:-translate-y-1;
+  }
+
+  .dark .stripe-card {
+    @apply bg-card-dark shadow-dark-card hover:shadow-dark-card-hover;
   }
 
   /* 🔥 UPDATED: glass effect so background shows */
@@ -62,10 +87,25 @@
     @apply rounded-2xl shadow-2xl transition-all duration-500 hover:bg-white/30 hover:border-white/40;
   }
 
+  .dark .glass-card {
+    background: rgba(26, 31, 46, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .glass-card:hover {
+    background: rgba(26, 31, 46, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
   .glass-nav {
     background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(12px);
     @apply border-b border-white/20 sticky top-0 z-50;
+  }
+
+  .dark .glass-nav {
+    background: rgba(26, 31, 46, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .cool-gradient-text {
@@ -132,6 +172,10 @@
   background-color: #ffffff;
 }
 
+.dark .animated-bg {
+  background-color: #0a0e1a;
+}
+
 /* Gradient glow layer */
 .gradient-layer {
   position: absolute;
@@ -153,6 +197,10 @@
   animation: moveDots 30s linear infinite;
 }
 
+.dark .dots-layer {
+  background-image: radial-gradient(rgba(0, 212, 255, 0.06) 1.5px, transparent 1.5px);
+}
+
 /* Subtle secondary dots for depth */
 .dots-layer::after {
   content: '';
@@ -161,6 +209,10 @@
   background-image: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 30px 30px;
   transform: translate(15px, 15px);
+}
+
+.dark .dots-layer::after {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
 @keyframes moveGradient {
