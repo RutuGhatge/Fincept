@@ -846,6 +846,56 @@ async def force_recalculate_portfolio(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/{portfolio_id}/debug")
+async def debug_portfolio(
+    portfolio_id: str,
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Debug endpoint to show raw file data and calculations"""
+    try:
+        database = db.get_database()
+        portfolio = await database["portfolios"].find_one({"_id": ObjectId(portfolio_id), "user_id": user_id})
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        files = portfolio.get("files", [])
+        debug_info = {
+            "portfolio_id": portfolio_id,
+            "current_total_value": portfolio.get("total_value"),
+            "current_total_invested": portfolio.get("total_invested"),
+            "files_count": len(files),
+            "files_data": []
+        }
+        
+        for f in files:
+            file_info = {
+                "filename": f.get("filename"),
+                "upload_date": f.get("upload_date"),
+                "holdings_count": f.get("holdings_count"),
+                "holdings": []
+            }
+            
+            for h in f.get("holdings", []):
+                holding_debug = {
+                    "symbol": h.get("symbol"),
+                    "quantity": h.get("quantity"),
+                    "average_cost": h.get("average_cost"),
+                    "current_price": h.get("current_price"),
+                    "market_value": h.get("quantity", 0) * h.get("current_price", 0)
+                }
+                file_info["holdings"].append(holding_debug)
+            
+            debug_info["files_data"].append(file_info)
+        
+        return debug_info
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error debugging portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{portfolio_id}/track")
 async def track_portfolio(portfolio_id: str, user_id: str, db=Depends(get_db)):
     """Bridge for frontend's trackPortfolio call — returns refreshed portfolio data"""
