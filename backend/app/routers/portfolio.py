@@ -854,8 +854,7 @@ async def debug_portfolio(
 ):
     """Debug endpoint to show raw file data and calculations"""
     try:
-        database = db.get_database()
-        portfolio = await database["portfolios"].find_one({"_id": ObjectId(portfolio_id), "user_id": user_id})
+        portfolio = await db["portfolios"].find_one({"_id": ObjectId(portfolio_id), "user_id": user_id})
         if not portfolio:
             raise HTTPException(status_code=404, detail="Portfolio not found")
         
