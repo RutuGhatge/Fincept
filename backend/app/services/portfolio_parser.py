@@ -48,15 +48,16 @@ class PortfolioParser:
 
                 # Clean column names (lowercase, strip whitespace)
                 df.columns = [str(col).lower().strip() for col in df.columns]
+                logger.info(f"Detected columns in {sheet_name}: {list(df.columns)}")
                 
                 for _, row in df.iterrows():
                     row_dict = row.to_dict()
                     
                     # Match common column names dynamically across brokers
-                    symbol = PortfolioParser._find_val(["instrument", "symbol", "scrip", "stock name", "stock", "company", "company name", "scheme name"], row_dict)
-                    quantity = PortfolioParser._find_val(["qty", "qty.", "quantity", "quantity available", "holdings", "shares", "total qty", "net qty", "available qty", "units"], row_dict)
-                    average_cost = PortfolioParser._find_val(["avg. cost", "average price", "avg price", "avg. price", "average cost", "avgcost", "purchase price", "buy price"], row_dict)
-                    current_price = PortfolioParser._find_val(["previous closing price", "previous closing", "ltp", "close", "current price", "cmp", "prev closing", "last price", "market price"], row_dict)
+                    symbol = PortfolioParser._find_val(["instrument", "symbol", "scrip", "stock name", "stock", "company", "company name", "scheme name", "stock_name", "fund_name"], row_dict)
+                    quantity = PortfolioParser._find_val(["qty", "qty.", "quantity", "quantity available", "holdings", "shares", "total qty", "net qty", "available qty", "units", "quantity_available"], row_dict)
+                    average_cost = PortfolioParser._find_val(["avg. cost", "average price", "avg price", "avg. price", "average cost", "avgcost", "purchase price", "buy price", "average_price"], row_dict)
+                    current_price = PortfolioParser._find_val(["previous closing price", "previous closing", "ltp", "close", "current price", "cmp", "prev closing", "last price", "market price", "previous_closing_price"], row_dict)
                     
                     # Fallback for Mutual Fund Statements (e.g. Groww) where Average Cost isn't a column
                     if (average_cost is None or pd.isna(average_cost)) and quantity is not None and not pd.isna(quantity):
