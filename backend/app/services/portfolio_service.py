@@ -39,8 +39,8 @@ class PortfolioService:
                 "holdings_count": len(holdings)
             }]
 
-        # Re-calculate merged holdings from ALL files with live prices
-        final_holdings, total_value, total_invested = await self._recalculate_merged_holdings(files, force_refresh=True)
+        # Re-calculate merged holdings from ALL files WITHOUT live prices (use file prices only)
+        final_holdings, total_value, total_invested = await self._recalculate_merged_holdings(files, force_refresh=False)
 
         if existing:
             await database["portfolios"].update_one(
@@ -112,7 +112,13 @@ class PortfolioService:
                             h["current_price"] = h.get("average_cost", 0)
                             logger.info(f"[{symbol}] Live price failed, no file price, using avg cost: {h.get('average_cost', 0)}")
                 else:
-                    logger.info(f"[{symbol}] Using existing price: {h.get('current_price')} (last_updated: {h.get('last_updated')})")
+                    # NOT force_refresh: use file price directly without any live API calls
+                    if file_price and file_price > 0:
+                        h["current_price"] = file_price
+                        logger.info(f"[{symbol}] Using file price (no live API): {file_price}")
+                    else:
+                        h["current_price"] = h.get("average_cost", 0)
+                        logger.info(f"[{symbol}] No file price, using avg cost: {h.get('average_cost', 0)}")
 
                 if symbol in merged_dict:
                     ext = merged_dict[symbol]
