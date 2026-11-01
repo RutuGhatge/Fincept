@@ -778,11 +778,60 @@ Output strictly in JSON format:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/{portfolio_id}/refresh")
+async def refresh_portfolio_prices(
+    portfolio_id: str,
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Force refresh all holding prices from live market data"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.refresh_portfolio_prices(
+            portfolio_id=portfolio_id,
+            user_id=user_id
+        )
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        portfolio["id"] = str(portfolio.get("_id", portfolio.get("id", "")))
+        portfolio.pop("_id", None)
+        portfolio.setdefault("is_active", True)
+        portfolio.setdefault("metadata", {})
+        portfolio.setdefault("description", None)
+        portfolio.setdefault("total_return", None)
+        portfolio.setdefault("total_return_percent", None)
+        portfolio.setdefault("daily_change", None)
+        portfolio.setdefault("daily_change_percent", None)
+        
+        return portfolio
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error refreshing portfolio prices: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{portfolio_id}/track")
-async def track_portfolio(portfolio_id: str):
-    """Bridge for frontend's trackPortfolio call"""
-    task = {"type": "analyze_performance", "data": {"portfolio_id": portfolio_id}}
-    return await orchestrator.distribute_task("AnalysisAgent", task)
+async def track_portfolio(portfolio_id: str, user_id: str, db=Depends(get_db)):
+    """Bridge for frontend's trackPortfolio call — returns refreshed portfolio data"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.refresh_portfolio_prices(
+            portfolio_id=portfolio_id,
+            user_id=user_id
+        )
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        portfolio["id"] = str(portfolio.get("_id", portfolio.get("id", "")))
+        portfolio.pop("_id", None)
+        return portfolio
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error tracking portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/recommend")
 async def get_general_recommendations(data: dict):

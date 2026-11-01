@@ -83,19 +83,20 @@ class PortfolioService:
             portfolio_doc["id"] = str(res.inserted_id)
             return portfolio_doc
 
-    async def _recalculate_merged_holdings(self, files: List[Dict[str, Any]]):
+    async def _recalculate_merged_holdings(self, files: List[Dict[str, Any]], force_refresh: bool = False):
         merged_dict = {}
         for f in files:
             for h in f.get("holdings", []):
                 symbol = h["symbol"]
                 
-                # Ensure prices are up to date (simplified for now)
-                if h.get("current_price") is None:
+                # Always fetch live price on force_refresh, or if never fetched before
+                if force_refresh or h.get("current_price") is None:
                     live_price = MarketDataService.get_current_price(symbol)
-                    if live_price:
+                    if live_price and live_price > 0:
                         h["current_price"] = live_price
-                        h["last_updated"] = datetime.utcnow()
-                    else:
+                        h["last_updated"] = datetime.utcnow().isoformat()
+                    elif h.get("current_price") is None:
+                        # Only fall back to average_cost if we have no price at all
                         h["current_price"] = h.get("average_cost", 0)
 
                 if symbol in merged_dict:
@@ -108,11 +109,16 @@ class PortfolioService:
                     total_q = old_q + new_q
                     avg_cost = ((old_q * old_c) + (new_q * new_c)) / total_q if total_q > 0 else 0
                     
+                    # Use the freshest price available
+                    current_price = h.get("current_price") or ext.get("current_price") or avg_cost
                     ext["quantity"] = total_q
                     ext["average_cost"] = avg_cost
-                    ext["market_value"] = (ext.get("current_price") or avg_cost) * total_q
+                    ext["current_price"] = current_price
+                    ext["market_value"] = current_price * total_q
+                    ext["last_updated"] = h.get("last_updated", ext.get("last_updated"))
                 else:
-                    h["market_value"] = h.get("current_price", h["average_cost"]) * h["quantity"]
+                    current_price = h.get("current_price") or h.get("average_cost", 0)
+                    h["market_value"] = current_price * h["quantity"]
                     merged_dict[symbol] = h.copy()
 
         final_holdings = list(merged_dict.values())
@@ -147,6 +153,34 @@ class PortfolioService:
         )
         
         portfolio["files"] = new_files
+        portfolio["holdings"] = final_holdings
+        portfolio["total_value"] = total_value
+        portfolio["total_invested"] = total_invested
+        portfolio["id"] = str(portfolio["_id"])
+        return portfolio
+
+    async def refresh_portfolio_prices(self, portfolio_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Force refresh all holding prices from live market data and persist to DB"""
+        database = db.get_database()
+        portfolio = await database["portfolios"].find_one({"_id": ObjectId(portfolio_id), "user_id": user_id})
+        if not portfolio:
+            return None
+        
+        files = portfolio.get("files", [])
+        # Force refresh all prices
+        final_holdings, total_value, total_invested = await self._recalculate_merged_holdings(files, force_refresh=True)
+        
+        await database["portfolios"].update_one(
+            {"_id": portfolio["_id"]},
+            {"$set": {
+                "files": files,
+                "holdings": final_holdings,
+                "total_value": total_value,
+                "total_invested": total_invested,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
         portfolio["holdings"] = final_holdings
         portfolio["total_value"] = total_value
         portfolio["total_invested"] = total_invested

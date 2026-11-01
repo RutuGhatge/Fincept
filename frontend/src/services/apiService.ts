@@ -90,6 +90,10 @@ export const portfolioService = {
   deletePortfolioFile: async (portfolioId: string, fileId: string, userId: string) => {
     const response = await api.delete(`/portfolio/${portfolioId}/files/${fileId}`, { params: { user_id: userId } });
     return response.data;
+  },
+  refreshPrices: async (portfolioId: string, userId: string) => {
+    const response = await api.post(`/portfolio/${portfolioId}/refresh`, null, { params: { user_id: userId } });
+    return response.data;
   }
 };
 

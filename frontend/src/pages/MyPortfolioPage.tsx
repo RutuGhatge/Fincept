@@ -98,6 +98,7 @@ const EmptyState: React.FC<{ onNavigate: () => void }> = ({ onNavigate }) => (
 const MyPortfolioPage: React.FC = () => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -126,6 +127,22 @@ const MyPortfolioPage: React.FC = () => {
       setLoading(false);
     }
   }, [navigate]);
+
+  const handleRefreshPrices = async () => {
+    if (!portfolio?.id || refreshing) return;
+    const userId = localStorage.getItem('user_id') || '';
+    setRefreshing(true);
+    try {
+      const updated = await portfolioService.refreshPrices(portfolio.id, userId);
+      setPortfolio(updated);
+    } catch (err) {
+      console.error('Failed to refresh prices:', err);
+      // Fallback: just reload from DB
+      await fetchPortfolio();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!portfolio || !portfolio.id) return;
@@ -296,10 +313,12 @@ const MyPortfolioPage: React.FC = () => {
               <Trash2 className="w-5 h-5" />
             </button>
             <button
-              onClick={fetchPortfolio}
-              className="p-3 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-600 rounded-2xl text-heading-light dark:text-heading-dark hover:bg-slate-50 dark:hover:bg-slate-700 transition-all group shadow-sm"
+              onClick={handleRefreshPrices}
+              disabled={refreshing}
+              className="p-3 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-600 rounded-2xl text-heading-light dark:text-heading-dark hover:bg-slate-50 dark:hover:bg-slate-700 transition-all group shadow-sm disabled:opacity-50"
+              title="Refresh live prices"
             >
-              <RefreshCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+              <RefreshCcw className={`w-5 h-5 ${refreshing ? 'animate-spin text-stripe-blue' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
             </button>
           </div>
         </div>
