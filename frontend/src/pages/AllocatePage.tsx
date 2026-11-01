@@ -96,7 +96,7 @@ const AllocatePage: React.FC = () => {
     };
 
     try {
-      const response = await portfolioService.allocateWithGemini(portfolio.id, payload);
+      const response = await portfolioService.allocateWith(portfolio.id, payload);
       if (response.success) {
         setAllocation(response.data);
       }

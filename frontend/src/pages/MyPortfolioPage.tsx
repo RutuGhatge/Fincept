@@ -145,11 +145,14 @@ const MyPortfolioPage: React.FC = () => {
   };
 
   const handleForceRecalculate = async () => {
+    console.log('Force recalculate clicked', { portfolioId: portfolio?.id, refreshing });
     if (!portfolio?.id || refreshing) return;
     const userId = localStorage.getItem('user_id') || '';
+    console.log('Calling force recalculate with', { portfolioId: portfolio.id, userId });
     setRefreshing(true);
     try {
       const updated = await portfolioService.forceRecalculate(portfolio.id, userId);
+      console.log('Force recalculate response:', updated);
       setPortfolio(updated);
     } catch (err) {
       console.error('Failed to force recalculate:', err);
