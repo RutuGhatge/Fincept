@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: fincept-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: MONGODB_URL
+        sync: false
+      - key: DATABASE_NAME
+        value: investment_intelligence
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: ALLOWED_ORIGINS
+        value: '["*", "https://fincept.vercel.app"]'
+      - key: LOG_LEVEL
+        value: INFO
+      - key: CACHE_TTL_SECONDS
+        value: 300
