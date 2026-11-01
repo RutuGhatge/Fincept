@@ -36,8 +36,8 @@ class PortfolioService:
                 "holdings_count": len(holdings)
             }]
 
-        # Re-calculate merged holdings from ALL files
-        final_holdings, total_value, total_invested = await self._recalculate_merged_holdings(files)
+        # Re-calculate merged holdings from ALL files with live prices
+        final_holdings, total_value, total_invested = await self._recalculate_merged_holdings(files, force_refresh=True)
 
         if existing:
             await database["portfolios"].update_one(
@@ -90,7 +90,8 @@ class PortfolioService:
                 symbol = h["symbol"]
                 
                 # Always fetch live price on force_refresh, or if never fetched before
-                if force_refresh or h.get("current_price") is None:
+                # Also fetch if the current_price came from the file (not live data)
+                if force_refresh or h.get("current_price") is None or not h.get("last_updated"):
                     live_price = MarketDataService.get_current_price(symbol)
                     if live_price and live_price > 0:
                         h["current_price"] = live_price
