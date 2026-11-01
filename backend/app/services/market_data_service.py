@@ -2,48 +2,53 @@ import yfinance as yf
 from typing import Dict, Any, Optional
 import logging
 import requests
+import time
 
 logger = logging.getLogger(__name__)
 
 class MarketDataService:
     @staticmethod
-    def get_current_price(symbol: str) -> Optional[float]:
-        try:
-            # 1. Instantly route Mutual Funds to MFAPI to bypass Yahoo Finance slowness
-            is_mutual_fund = "FUND" in symbol.upper() or " " in symbol or len(symbol) > 15
-            
-            if is_mutual_fund:
-                price = MarketDataService._fetch_from_mfapi(symbol)
-                if price is not None:
-                    return price
+    def get_current_price(symbol: str, max_retries: int = 2) -> Optional[float]:
+        for attempt in range(max_retries + 1):
+            try:
+                # 1. Instantly route Mutual Funds to MFAPI to bypass Yahoo Finance slowness
+                is_mutual_fund = "FUND" in symbol.upper() or " " in symbol or len(symbol) > 15
+                
+                if is_mutual_fund:
+                    price = MarketDataService._fetch_from_mfapi(symbol)
+                    if price is not None:
+                        return price
+                        
+                # 2. Heuristic for Indian stocks (useful for Zerodha/Groww) via yfinance
+                fetch_symbol = symbol
+                if not fetch_symbol.endswith('.NS') and not fetch_symbol.endswith('.BO'):
+                    fetch_symbol = f"{symbol}.NS"
                     
-            # 2. Heuristic for Indian stocks (useful for Zerodha/Groww) via yfinance
-            fetch_symbol = symbol
-            if not fetch_symbol.endswith('.NS') and not fetch_symbol.endswith('.BO'):
-                fetch_symbol = f"{symbol}.NS"
+                ticker = yf.Ticker(fetch_symbol)
+                todays_data = ticker.history(period='1d')
                 
-            ticker = yf.Ticker(fetch_symbol)
-            todays_data = ticker.history(period='1d')
-            
-            if not todays_data.empty:
-                return float(todays_data['Close'].iloc[0])
-            
-            # 3. Fallback to exact symbol in yfinance
-            ticker_fallback = yf.Ticker(symbol)
-            fb_data = ticker_fallback.history(period='1d')
-            if not fb_data.empty:
-                return float(fb_data['Close'].iloc[0])
+                if not todays_data.empty:
+                    return float(todays_data['Close'].iloc[0])
                 
-            # 4. Final safety net: if yfinance failed on a stock, maybe it was a weirdly named Mutual Fund
-            if not is_mutual_fund:
-                price = MarketDataService._fetch_from_mfapi(symbol)
-                if price is not None:
-                    return price
+                # 3. Fallback to exact symbol in yfinance
+                ticker_fallback = yf.Ticker(symbol)
+                fb_data = ticker_fallback.history(period='1d')
+                if not fb_data.empty:
+                    return float(fb_data['Close'].iloc[0])
+                    
+                # 4. Final safety net: if yfinance failed on a stock, maybe it was a weirdly named Mutual Fund
+                if not is_mutual_fund:
+                    price = MarketDataService._fetch_from_mfapi(symbol)
+                    if price is not None:
+                        return price
                 
-            return None
-        except Exception as e:
-            logger.warning(f"Could not fetch price for {symbol}: {e}")
-            return None
+                return None
+            except Exception as e:
+                logger.warning(f"Attempt {attempt + 1}/{max_retries + 1}: Could not fetch price for {symbol}: {e}")
+                if attempt < max_retries:
+                    time.sleep(1)  # Wait before retry
+                else:
+                    return None
 
     @staticmethod
     def _fetch_from_mfapi(symbol: str) -> Optional[float]:

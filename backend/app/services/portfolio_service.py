@@ -103,10 +103,11 @@ class PortfolioService:
                         h["last_updated"] = datetime.utcnow().isoformat()
                         logger.info(f"[{symbol}] Using live price: {live_price}")
                     else:
-                        # If live price fetch failed, use file price if available, else average_cost
+                        # CRITICAL: Always use file price if live API fails - file prices are from Zerodha and are accurate
                         if file_price and file_price > 0:
                             h["current_price"] = file_price
-                            logger.info(f"[{symbol}] Live price failed, using file price: {file_price}")
+                            # Don't set last_updated so we know it's from file, not live API
+                            logger.info(f"[{symbol}] Live price fetch failed/rate-limited, using file price: {file_price}")
                         else:
                             h["current_price"] = h.get("average_cost", 0)
                             logger.info(f"[{symbol}] Live price failed, no file price, using avg cost: {h.get('average_cost', 0)}")
