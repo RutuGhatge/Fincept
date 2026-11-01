@@ -79,12 +79,19 @@ class PortfolioParser:
                     if average_cost is None or pd.isna(average_cost) or float(average_cost) <= 0:
                         continue
                     
-                    metadata = {}
+                    # Use the file's current price directly — it's accurate (e.g. Zerodha previous closing)
+                    file_current_price = None
                     if current_price is not None and not pd.isna(current_price):
                         try:
-                            metadata["excel_current_price"] = float(current_price)
-                        except ValueError:
+                            file_current_price = float(current_price)
+                        except (ValueError, TypeError):
                             pass
+
+                    # If no current price in file, fall back to average_cost (0 P&L shown)
+                    if file_current_price is None or file_current_price <= 0:
+                        file_current_price = float(average_cost)
+
+                    logger.info(f"Parsed holding: {symbol}, qty={quantity}, avg_cost={average_cost}, file_current_price={file_current_price}")
 
                     holdings.append(HoldingCreate(
                         symbol=str(symbol).strip().upper(),
@@ -92,8 +99,9 @@ class PortfolioParser:
                         asset_type=asset_type,
                         quantity=float(quantity),
                         average_cost=float(average_cost),
+                        current_price=file_current_price,
                         currency="INR",
-                        metadata=metadata
+                        metadata={}
                     ))
             
             return holdings

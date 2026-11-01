@@ -3,6 +3,9 @@ from app.services.market_data_service import MarketDataService
 from bson import ObjectId
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PortfolioService:
     async def create_portfolio(self, user_id: str, name: str, holdings: List[Dict[str, Any]], currency: str = "USD", file_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -88,17 +91,27 @@ class PortfolioService:
         for f in files:
             for h in f.get("holdings", []):
                 symbol = h["symbol"]
+                file_price = h.get("current_price")
                 
                 # Always fetch live price on force_refresh, or if never fetched before
                 # Also fetch if the current_price came from the file (not live data)
                 if force_refresh or h.get("current_price") is None or not h.get("last_updated"):
                     live_price = MarketDataService.get_current_price(symbol)
+                    logger.info(f"[{symbol}] File price: {file_price}, Live price: {live_price}, Force refresh: {force_refresh}")
                     if live_price and live_price > 0:
                         h["current_price"] = live_price
                         h["last_updated"] = datetime.utcnow().isoformat()
-                    elif h.get("current_price") is None:
-                        # Only fall back to average_cost if we have no price at all
-                        h["current_price"] = h.get("average_cost", 0)
+                        logger.info(f"[{symbol}] Using live price: {live_price}")
+                    else:
+                        # If live price fetch failed, use file price if available, else average_cost
+                        if file_price and file_price > 0:
+                            h["current_price"] = file_price
+                            logger.info(f"[{symbol}] Live price failed, using file price: {file_price}")
+                        else:
+                            h["current_price"] = h.get("average_cost", 0)
+                            logger.info(f"[{symbol}] Live price failed, no file price, using avg cost: {h.get('average_cost', 0)}")
+                else:
+                    logger.info(f"[{symbol}] Using existing price: {h.get('current_price')} (last_updated: {h.get('last_updated')})")
 
                 if symbol in merged_dict:
                     ext = merged_dict[symbol]
@@ -125,6 +138,10 @@ class PortfolioService:
         final_holdings = list(merged_dict.values())
         total_value = sum(h.get("market_value", 0) for h in final_holdings)
         total_invested = sum(h["average_cost"] * h["quantity"] for h in final_holdings)
+        
+        logger.info(f"Total calculated - Value: {total_value}, Invested: {total_invested}, Holdings count: {len(final_holdings)}")
+        for h in final_holdings:
+            logger.info(f"  {h['symbol']}: qty={h['quantity']}, avg_cost={h['average_cost']}, current_price={h['current_price']}, market_value={h.get('market_value')}")
         
         return final_holdings, total_value, total_invested
 
