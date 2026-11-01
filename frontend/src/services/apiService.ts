@@ -63,7 +63,7 @@ export const portfolioService = {
     const response = await api.post(`/portfolio/${id}/allocate`, data);
     return response.data;
   },
-  allocateWithGemini: async (id: string, data: any) => {
+  allocateWith: async (id: string, data: any) => {
     const response = await api.post(`/portfolio/${id}/allocate-ai`, data, { params: { user_id: localStorage.getItem('user_id') } });
     return response.data;
   },
@@ -93,6 +93,10 @@ export const portfolioService = {
   },
   refreshPrices: async (portfolioId: string, userId: string) => {
     const response = await api.post(`/portfolio/${portfolioId}/refresh`, null, { params: { user_id: userId } });
+    return response.data;
+  },
+  forceRecalculate: async (portfolioId: string, userId: string) => {
+    const response = await api.post(`/portfolio/${portfolioId}/recalculate`, null, { params: { user_id: userId } });
     return response.data;
   }
 };

@@ -812,6 +812,40 @@ async def refresh_portfolio_prices(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/{portfolio_id}/recalculate")
+async def force_recalculate_portfolio(
+    portfolio_id: str,
+    user_id: str,
+    db=Depends(get_db)
+):
+    """Force recalculate portfolio using file prices (bypasses live API)"""
+    try:
+        portfolio_service = PortfolioService()
+        portfolio = await portfolio_service.force_recalculate_from_files(
+            portfolio_id=portfolio_id,
+            user_id=user_id
+        )
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        portfolio["id"] = str(portfolio.get("_id", portfolio.get("id", "")))
+        portfolio.pop("_id", None)
+        portfolio.setdefault("is_active", True)
+        portfolio.setdefault("metadata", {})
+        portfolio.setdefault("description", None)
+        portfolio.setdefault("total_return", None)
+        portfolio.setdefault("total_return_percent", None)
+        portfolio.setdefault("daily_change", None)
+        portfolio.setdefault("daily_change_percent", None)
+        
+        return portfolio
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error recalculating portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{portfolio_id}/track")
 async def track_portfolio(portfolio_id: str, user_id: str, db=Depends(get_db)):
     """Bridge for frontend's trackPortfolio call — returns refreshed portfolio data"""

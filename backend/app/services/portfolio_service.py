@@ -206,6 +206,72 @@ class PortfolioService:
         portfolio["id"] = str(portfolio["_id"])
         return portfolio
 
+    async def force_recalculate_from_files(self, portfolio_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """Force recalculate portfolio using ONLY file prices (bypasses live API completely)"""
+        database = db.get_database()
+        portfolio = await database["portfolios"].find_one({"_id": ObjectId(portfolio_id), "user_id": user_id})
+        if not portfolio:
+            return None
+        
+        files = portfolio.get("files", [])
+        merged_dict = {}
+        
+        for f in files:
+            for h in f.get("holdings", []):
+                symbol = h["symbol"]
+                file_price = h.get("current_price")
+                
+                # Use file price directly without any live API calls
+                if file_price and file_price > 0:
+                    h["current_price"] = file_price
+                    logger.info(f"[{symbol}] Using file price (force recalc): {file_price}")
+                else:
+                    h["current_price"] = h.get("average_cost", 0)
+                    logger.info(f"[{symbol}] No file price, using avg cost (force recalc): {h.get('average_cost', 0)}")
+                
+                if symbol in merged_dict:
+                    ext = merged_dict[symbol]
+                    old_q = ext.get("quantity", 0)
+                    old_c = ext.get("average_cost", 0)
+                    new_q = h["quantity"]
+                    new_c = h["average_cost"]
+                    
+                    total_q = old_q + new_q
+                    avg_cost = ((old_q * old_c) + (new_q * new_c)) / total_q if total_q > 0 else 0
+                    
+                    current_price = h.get("current_price") or ext.get("current_price") or avg_cost
+                    ext["quantity"] = total_q
+                    ext["average_cost"] = avg_cost
+                    ext["current_price"] = current_price
+                    ext["market_value"] = current_price * total_q
+                else:
+                    current_price = h.get("current_price") or h.get("average_cost", 0)
+                    h["market_value"] = current_price * h["quantity"]
+                    merged_dict[symbol] = h.copy()
+        
+        final_holdings = list(merged_dict.values())
+        total_value = sum(h.get("market_value", 0) for h in final_holdings)
+        total_invested = sum(h["average_cost"] * h["quantity"] for h in final_holdings)
+        
+        logger.info(f"Force recalc - Value: {total_value}, Invested: {total_invested}, Holdings: {len(final_holdings)}")
+        
+        await database["portfolios"].update_one(
+            {"_id": portfolio["_id"]},
+            {"$set": {
+                "files": files,
+                "holdings": final_holdings,
+                "total_value": total_value,
+                "total_invested": total_invested,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        portfolio["holdings"] = final_holdings
+        portfolio["total_value"] = total_value
+        portfolio["total_invested"] = total_invested
+        portfolio["id"] = str(portfolio["_id"])
+        return portfolio
+
     async def get_user_portfolios(self, user_id: str, skip: int = 0, limit: int = 10) -> List[Dict[str, Any]]:
         database = db.get_database()
         cursor = database["portfolios"].find({"user_id": user_id}).skip(skip).limit(limit)
